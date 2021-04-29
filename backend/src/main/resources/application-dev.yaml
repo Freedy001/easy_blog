@@ -1,0 +1,26 @@
+server:
+  port: 1000
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
+    username: root
+    password: Kz99596589
+  redis:
+    host: 192.168.169.2
+
+jwt:
+  header: Authorization
+  base64-secret: sanbayan
+  token-validity-in-seconds: 14400000
+
+
+# Logger Config
+logging:
+  level:
+    com.freedy.backend: debug
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml

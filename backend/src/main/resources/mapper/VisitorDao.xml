@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freedy.backend.dao.VisitorDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.freedy.backend.entity.VisitorEntity" id="visitorMap">
+        <result property="id" column="id"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="region" column="region"/>
+        <result property="visitTime" column="visit_time"/>
+        <result property="visitDuration" column="visit_duration"/>
+    </resultMap>
+
+
+</mapper>
