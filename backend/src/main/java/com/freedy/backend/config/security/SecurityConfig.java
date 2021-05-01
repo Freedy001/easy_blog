@@ -104,7 +104,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(authenticationTokenFilterBean(),
                 UsernamePasswordAuthenticationFilter.class);
 
-        http.logout().addLogoutHandler(myLogoutHandler).logoutSuccessHandler(myLogoutSuccessHandler);
+        http.logout().logoutUrl("/logout")
+                .addLogoutHandler(myLogoutHandler)
+                .logoutSuccessHandler(myLogoutSuccessHandler);
 
         // disable page caching
         http.headers().cacheControl();

@@ -1,54 +1,67 @@
-<template style="background-color: #42b983">
-		<img class="background" src="../assets/img.png" alt="."/>
-	<div class="form">
-		<h2>Welcome Home!</h2>
-		<div class="form-item">
-			<div class="ipt user">
-				<input type="text" placeholder="Name" v-model="username">
-				<img src="../assets/login-1.png">
+<template>
+	<div class="outer">
+		<div class="form">
+			<h2>Welcome Home!</h2>
+			<div class="form-item">
+				<div class="ipt user">
+					<input type="text" placeholder="Name" v-model="username">
+					<img src="../assets/login-1.png" alt="">
+				</div>
+				<div class="ipt pass">
+					<input type="password" placeholder="Password" v-model="password">
+					<img src="../assets/login-2.png" alt="">
+				</div>
+				<img src="../assets/login-0.png" alt="">
+				<el-button type="primary" @click="loginBtn">sign in</el-button>
+				<p class="options">
+					<span>- SignIn</span>
+					or
+					<span>Password -</span>
+				</p>
 			</div>
-			<div class="ipt pass">
-				<input type="password" placeholder="Password" v-model="password">
-				<img src="../assets/login-2.png">
-			</div>
-			<img src="../assets/login-0.png" alt="">
-			<el-button type="primary">sign in</el-button>
-			<p class="options">
-				<span>- SignUp</span>
-				or
-				<span>Password -</span>
-			</p>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
 import {defineComponent, getCurrentInstance, ref} from 'vue'
+import {login} from "../http"
+import {useRouter} from "vue-router";
 
 export default defineComponent({
 	name: "Login.vue",
 	setup() {
-		const username = ref()
-		const password = ref()
-		const {proxy}=getCurrentInstance()
-		let {data} = proxy.$http.get('/app');
-		console.log(data)
+		const username = ref<string>("")
+		const password = ref<string>("")
+		const router = useRouter()
+		const loginBtn=async ()=>{
+			const boolean = await login({
+				"username":username.value,
+				"password":password.value
+			});
+			if (boolean){
+				await router.push("/index")
+			}else {
+				alert("error")
+			}
+		}
+
 
 		return {
 			username,
-			password
+			password,
+			loginBtn
 		}
 	}
 })
 </script>
 
 <style scoped lang="scss">
-.background{
-	height: 100%;
+.outer{
 	position: absolute;
-	overflow: hidden;
+	width: 100%;
+	height: 100%;
 }
-
 .form{
 	position: absolute;
 	left: 50%;

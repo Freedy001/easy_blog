@@ -10,6 +10,19 @@ spring:
     password: Kz99596589
   redis:
     host: 192.168.169.2
+  rabbitmq:
+    addresses: 192.168.169.2
+    port: 5672
+    virtual-host: /
+    publisher-confirm-type: correlated #开启发送端确认
+    publisher-returns: true # 开启发送端消息抵达队列的确认
+    template:
+      mandatory: true #只要抵达队列,以异步的方式优先回调returnConfirm
+    listener:
+      simple:
+        acknowledge-mode: manual #手动确认消息
+
+
 
 jwt:
   header: Authorization
