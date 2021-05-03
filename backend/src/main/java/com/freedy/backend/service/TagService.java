@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.TagEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +17,11 @@ import java.util.Map;
 public interface TagService extends IService<TagEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 根据标签名称列表 创建标签
+     */
+    void createTagsByName(List<TagEntity> notExistedTag);
+
 }
 

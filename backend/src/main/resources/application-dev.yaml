@@ -23,6 +23,11 @@ spring:
         acknowledge-mode: manual #手动确认消息
 
 
+easy:
+  thread:
+    core-size: 50
+    max-size: 200
+    keep-alive-time: 10
 
 jwt:
   header: Authorization

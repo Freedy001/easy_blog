@@ -1,10 +1,8 @@
 package com.freedy.backend.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.JwtTokenUtil;
-import com.freedy.backend.config.security.JwtProperties;
 import com.freedy.backend.constant.RedisConstant;
-import com.freedy.backend.dto.UserTokenInfo;
+import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.enumerate.ResultCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,10 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

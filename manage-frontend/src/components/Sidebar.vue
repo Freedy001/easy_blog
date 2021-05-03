@@ -9,7 +9,7 @@
 			</div>
 			<el-menu
 					mode="horizontal"
-					:default-active="rPath"
+					:default-active="$router.currentRoute.value.path"
 					router
 			>
 				<el-menu-item index="/index">
@@ -56,9 +56,8 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import router from "../router";
 const scale = ref(false)
-const rPath=router.currentRoute.value.path
+
 
 
 </script>

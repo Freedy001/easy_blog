@@ -1,5 +1,6 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -23,11 +24,14 @@ public class CategoryEntity implements Serializable {
 
 
 	@ApiModelProperty("主键")
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Integer id;
 
 	@ApiModelProperty("分类名称")
 	private String categoryName;
+
+	@ApiModelProperty("图片url")
+	private String categoryImgUrl;
 
 	@ApiModelProperty("优先级 越小越大")
 	private Integer priority;

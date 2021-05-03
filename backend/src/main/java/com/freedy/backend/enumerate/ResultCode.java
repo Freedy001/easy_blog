@@ -11,8 +11,9 @@ public enum ResultCode {
     SUCCESS(200, "成功"),
     LOGIN_SUCCESS(201, "登录成功"),
 
-    /* 默认失败 */
+    /* 失败 */
     COMMON_FAIL(999, "失败"),
+    UNKNOWN_EXCEPTION(500, "发生异常！"),
 
     /* 参数错误：1000～1999 */
     PARAM_NOT_VALID(1001, "参数无效"),
@@ -31,9 +32,10 @@ public enum ResultCode {
     USER_ACCOUNT_NOT_EXIST(2007, "账号不存在"),
     USER_ACCOUNT_ALREADY_EXIST(2008, "账号已存在"),
     USER_ACCOUNT_USE_BY_OTHERS(2009, "账号下线"),
-
+    USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED(2010, "无凭证信息或账号已过期"),
 
     /* 业务错误 */
+    TAG_HAS_BEEN_USED(3000,"该标签已经被其他文章所引用！"),
     NO_PERMISSION(3001, "没有权限");
     private final Integer code;
     private final String message;

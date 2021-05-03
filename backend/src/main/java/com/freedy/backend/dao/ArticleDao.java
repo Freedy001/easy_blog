@@ -1,8 +1,14 @@
 package com.freedy.backend.dao;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.freedy.backend.entity.vo.ArticleInfoVo;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * 文章表
@@ -13,5 +19,15 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ArticleDao extends BaseMapper<ArticleEntity> {
-	
+
+    /**
+     * 文章列表
+     */
+    List<ArticleInfoVo> queryArticleList(PageUtils page);
+
+    /**
+     * 获取数据库条目
+     */
+    Long getCount();
+
 }

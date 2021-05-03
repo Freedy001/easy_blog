@@ -1,13 +1,11 @@
 package com.freedy.backend.common.utils;
 
 import com.freedy.backend.config.security.JwtProperties;
-import com.freedy.backend.dto.UserTokenInfo;
-import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.entity.dto.UserTokenInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -96,7 +94,7 @@ public class JwtTokenUtil {
 
     //设置过期时间
     private Date generateExpirationDate() {
-        return new Date(System.currentTimeMillis() + jwtProperties.getTokenValidityInSeconds());
+        return new Date(System.currentTimeMillis() + jwtProperties.getTokenValidityInSeconds()*1000);
     }
 
     private Boolean isTokenExpired(String token) {

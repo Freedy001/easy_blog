@@ -20,7 +20,7 @@ public class JwtProperties {
     /** Base64对该令牌进行编码 */
     private String base64Secret;
 
-    /** 令牌过期时间 此处单位/毫秒 */
+    /** 令牌过期时间 此处单位 秒*/
     private Long tokenValidityInSeconds;
 
 }

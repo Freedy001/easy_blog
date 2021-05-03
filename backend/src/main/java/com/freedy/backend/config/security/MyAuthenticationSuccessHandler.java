@@ -4,17 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.freedy.backend.common.utils.JwtTokenUtil;
 import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
-import com.freedy.backend.dto.UserTokenInfo;
+import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.enumerate.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 

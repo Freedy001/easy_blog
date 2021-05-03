@@ -1,5 +1,6 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -23,7 +24,7 @@ public class CommentEntity implements Serializable {
 
 
 	@ApiModelProperty("主键")
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Long id;
 
 	@ApiModelProperty("文章id")

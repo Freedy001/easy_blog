@@ -70,7 +70,7 @@ public class TagController {
      * 删除
      */
     @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids){
+    public Result delete(Integer[] ids){
 		tagService.removeByIds(Arrays.asList(ids));
 
         return Result.ok();

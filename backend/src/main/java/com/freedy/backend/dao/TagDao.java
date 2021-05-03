@@ -4,6 +4,8 @@ import com.freedy.backend.entity.TagEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 文章标签
  * 
@@ -13,5 +15,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface TagDao extends BaseMapper<TagEntity> {
-	
+
+    void createTagsByName(List<TagEntity> notExistedTag);
+
 }

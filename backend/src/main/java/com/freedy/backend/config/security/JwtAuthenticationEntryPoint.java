@@ -26,7 +26,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
         log.debug("访问无凭证");
         Result r;
-        r = Result.error(ResultCode.USER_NO_CERTIFICATE.getCode(),ResultCode.USER_NO_CERTIFICATE.getMessage());
+        r = Result.error(ResultCode.USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED.getCode()
+                ,ResultCode.USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED.getMessage());
         // 使用fastjson
         String json =  JSON.toJSONString(r);
         // 指定响应格式是json

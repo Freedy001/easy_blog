@@ -1,13 +1,17 @@
 package com.freedy.backend.entity;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 /**
  * 文章表
  * 
@@ -18,12 +22,12 @@ import io.swagger.annotations.ApiModelProperty;
 @Data
 @ApiModel("Article实体类")
 @TableName("blog_article")
+@Document(indexName = "article")
 public class ArticleEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-
 	@ApiModelProperty("主键")
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Long id;
 
 	@ApiModelProperty("文章标题")
@@ -45,13 +49,16 @@ public class ArticleEntity implements Serializable {
 	private Long visitNum;
 
 	@ApiModelProperty("评论数量")
-	private Integer commentNum;
+	private Long commentNum;
 
 	@ApiModelProperty("点赞数量")
-	private Integer likeNum;
+	private Long likeNum;
 
 	@ApiModelProperty("文章状态 0:未发布 1:已发布 2:顶置 3:推荐 4:回收站")
 	private Integer articleStatus;
+
+	@ApiModelProperty("文章顶置 0:可以评论 1:不能评论")
+	private Integer articleComment;
 
 	@ApiModelProperty("分类id")
 	private Integer articleCategoryId;
@@ -61,5 +68,9 @@ public class ArticleEntity implements Serializable {
 
 	@ApiModelProperty("文章更改时间")
 	private Long updateTime;
+
+	@ApiModelProperty("发布时间")
+	private Long publishTime;
+
 
 }

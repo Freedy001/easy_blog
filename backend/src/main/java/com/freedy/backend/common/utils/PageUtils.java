@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分页工具类
@@ -28,10 +29,7 @@ public class PageUtils implements Serializable {
 	 * 每页记录数
 	 */
 	private int pageSize;
-	/**
-	 * 总页数
-	 */
-	private int totalPage;
+
 	/**
 	 * 当前页数
 	 */
@@ -53,7 +51,6 @@ public class PageUtils implements Serializable {
 		this.totalCount = totalCount;
 		this.pageSize = pageSize;
 		this.currPage = currPage;
-		this.totalPage = (int)Math.ceil((double)totalCount/pageSize);
 	}
 
 	/**
@@ -64,7 +61,15 @@ public class PageUtils implements Serializable {
 		this.totalCount = (int)page.getTotal();
 		this.pageSize = (int)page.getSize();
 		this.currPage = (int)page.getCurrent();
-		this.totalPage = (int)page.getPages();
+	}
+
+	public PageUtils(Map<String, Object> params) {
+		if(params.get(Constant.PAGE) != null){
+			currPage = Integer.parseInt((String)params.get(Constant.PAGE));
+		}
+		if(params.get(Constant.LIMIT) != null){
+			pageSize = Integer.parseInt((String)params.get(Constant.LIMIT));
+		}
 	}
 
 	public int getTotalCount() {
@@ -84,11 +89,7 @@ public class PageUtils implements Serializable {
 	}
 
 	public int getTotalPage() {
-		return totalPage;
-	}
-
-	public void setTotalPage(int totalPage) {
-		this.totalPage = totalPage;
+		return (int)Math.ceil((double)totalCount/pageSize);
 	}
 
 	public int getCurrPage() {

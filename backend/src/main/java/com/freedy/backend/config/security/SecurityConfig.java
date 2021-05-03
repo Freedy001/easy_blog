@@ -79,7 +79,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 自定义失败拦截器
                 .failureHandler(authenticationFailureHandler)
                 // 自定义登录拦截URI
-                .loginProcessingUrl("/login")
+                .loginProcessingUrl("/backend/login")
                 .and()
                 //token的验证方式不需要开启csrf的防护
                 .csrf().disable()
@@ -92,9 +92,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/login").permitAll()
+                .antMatchers("/backend/login").permitAll()
+                .antMatchers("/v2/api-docs",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-resources",
+                        "/swagger-resources/configuration/security",
+                        "/swagger-ui.html").permitAll()
+                //允许根路径url的访问
+                .antMatchers("/").permitAll()
+                .antMatchers("/webjars/**").permitAll()
+                //允许swagger-ui.html访问
                 .antMatchers("/swagger-ui.html").permitAll()
-
                 //配置允许匿名访问的路径
                 .anyRequest().authenticated();
         // 解决跨域问题（重要）  只有在前端请求接口时才发现需要这个

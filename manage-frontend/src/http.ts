@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL=import.meta.env.DEV?"http://localhost:1000":""
+const baseURL=import.meta.env.DEV?"http://localhost:1000/backend":""
 
 export interface ILogin {
     username:string,

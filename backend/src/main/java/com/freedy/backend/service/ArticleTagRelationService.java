@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleTagRelationEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +17,11 @@ import java.util.Map;
 public interface ArticleTagRelationService extends IService<ArticleTagRelationEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 根究文章id删除关联 数据
+     */
+    void removeRelationByArticleIds(List<Long> articleId);
+
 }
 

@@ -10,5 +10,13 @@
         <result property="priority" column="priority"/>
     </resultMap>
 
+    <insert id="createTagsByName" parameterType="list" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into blog_tag(tag_name,priority) values
+        <foreach item="item" collection="list" separator=",">
+            (#{item.tagName},#{item.priority})
+        </foreach>
+    </insert>
+
 
 </mapper>

@@ -1,5 +1,6 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -29,7 +30,7 @@ public class ManagerEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@ApiModelProperty("主键")
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Integer id;
 
 	@ApiModelProperty("名称")

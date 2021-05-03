@@ -35,7 +35,7 @@ public class JWTTest {
             //解析token
             Claims claims = Jwts.parser()
                     .setSigningKey("sanbayan")
-                    .parseClaimsJws("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmcmVlZHkiLCJjcmVhdGVkIjoxNjE5NjE4NjQ4MDI1LCJleHAiOjE2MTk2MzMwNDh9.9Xv2NtvxNFw6wpBuYLRTzAdIitZkrGiZVp4_Mq9IyJKsBIT7a2M95uDwPDv0tD_snV-dI7RKpH6zkBQY8V5clw")
+                    .parseClaimsJws("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmcmVlZHkiLCJjcmVhdGVkIjoxNjE5ODc3MTMxNTA1LCJleHAiOjE2MTk4OTE1MzF9.a-zDaW7b5PpMaHtlKENrsQEvFeD-L8Tka2K-Y9k-QHNb2N3gsIvJdw_bHALrNrdWX-f5K3L_Lbo3VcApBVlf2A")
                     .getBody();
 
             System.out.println(claims);
@@ -46,8 +46,10 @@ public class JWTTest {
             String authority = claims.get("authorities").toString();
             System.out.println("权限："+authority);
         } catch (ExpiredJwtException e) {
+            e.printStackTrace();
             System.out.println("jwt异常");
         } catch (Exception e){
+            e.printStackTrace();
             System.out.println("异常");
         }
     }

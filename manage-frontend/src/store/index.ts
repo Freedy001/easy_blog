@@ -1,12 +1,13 @@
 import {createStore} from 'vuex'
 
+// @ts-ignore
 export default createStore({
-    state:{
-        counter:0
+    state: {
+        articleTitle:''
     },
-    mutations:{
-        add(state){
-            state.counter++;
+    mutations: {
+        setTitle(state,title){
+            state.articleTitle=title;
         }
     }
 

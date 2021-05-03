@@ -70,9 +70,8 @@ public class CategoryController {
      * 删除
      */
     @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids){
+    public Result delete(Integer[] ids){
 		categoryService.removeByIds(Arrays.asList(ids));
-
         return Result.ok();
     }
 

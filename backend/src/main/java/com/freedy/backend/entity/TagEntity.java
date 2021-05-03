@@ -1,10 +1,10 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,11 +23,14 @@ public class TagEntity implements Serializable {
 
 
 	@ApiModelProperty("主键")
-	@TableId
+	@TableId(type = IdType.AUTO)
 	private Integer id;
 
 	@ApiModelProperty("标签名称")
 	private String tagName;
+
+	@ApiModelProperty("标签图片---可为空")
+	private String tagImgUrl;
 
 	@ApiModelProperty("越小优先级越高")
 	private Integer priority;

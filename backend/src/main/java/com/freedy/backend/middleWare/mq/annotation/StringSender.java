@@ -9,9 +9,8 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RefreshEsMqSender {
-    String sender();
-
-    String msg() default "send refresh msg to ElasticSearch";
-
+public @interface StringSender {
+    String exchange() default "";
+    String queue() default "";
+    String msg();
 }

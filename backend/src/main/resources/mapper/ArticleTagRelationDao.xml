@@ -3,12 +3,21 @@
 
 <mapper namespace="com.freedy.backend.dao.ArticleTagRelationDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.freedy.backend.entity.ArticleTagRelationEntity" id="articleTagRelationMap">
         <result property="id" column="id"/>
         <result property="tagId" column="tag_id"/>
         <result property="articleId" column="article_id"/>
     </resultMap>
+
+    <delete id="removeRelationByArticleIds">
+        delete from blog_article_tag_relation where article_id in
+        (
+        <foreach collection="list" separator="," item="item">
+            #{item}
+        </foreach>
+        )
+    </delete>
 
 
 </mapper>

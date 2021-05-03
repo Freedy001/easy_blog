@@ -1,12 +1,15 @@
 package com.freedy.backend.middleWare.mq.aspect;
 
-import com.freedy.backend.middleWare.mq.annotation.RefreshEsMqSender;
+import com.freedy.backend.constant.RabbitConstant;
+import com.freedy.backend.middleWare.mq.annotation.StringSender;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,7 +20,11 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Slf4j
 public class RefreshEsMqAspect {
-    @Pointcut("@annotation(com.freedy.backend.middleWare.mq.annotation.RefreshEsMqSender)")
+
+    @Autowired
+    private RabbitTemplate template;
+
+    @Pointcut("@annotation(com.freedy.backend.middleWare.mq.annotation.StringSender)")
     public void pointCut() {
 
     }
@@ -25,17 +32,20 @@ public class RefreshEsMqAspect {
     @Around("pointCut()")
     public Object around(ProceedingJoinPoint pjp) throws Throwable{
         try {
-            log.info("starting..........");
+            log.debug("starting..........");
             Object result = pjp.proceed();
             MethodSignature signature = (MethodSignature) pjp.getSignature();
-            RefreshEsMqSender annotation = signature.getMethod().getAnnotation(RefreshEsMqSender.class);
-
-            return pjp.proceed();
+            StringSender annotation = signature.getMethod().getAnnotation(StringSender.class);
+            log.debug(annotation.msg());
+            template.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                    RabbitConstant.ES_ROUTE_KEY+".refresh",
+                    annotation.msg());
+            return result;
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
         } finally {
-            System.out.println("ending..........");
+            log.debug("ending..........");
         }
     }
 
