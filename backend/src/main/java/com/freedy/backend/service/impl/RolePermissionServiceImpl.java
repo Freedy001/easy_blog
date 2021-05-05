@@ -26,4 +26,9 @@ public class RolePermissionServiceImpl extends ServiceImpl<RolePermissionDao, Ro
         return new PageUtils(page);
     }
 
+    @Override
+    public String getPermissionsByManagerId(Integer id) {
+        return baseMapper.getPermissionsByManagerId(id);
+    }
+
 }

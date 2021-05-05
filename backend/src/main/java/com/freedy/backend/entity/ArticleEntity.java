@@ -36,8 +36,8 @@ public class ArticleEntity implements Serializable {
 	@ApiModelProperty("文章描述")
 	private String articleDesc;
 
-	@ApiModelProperty("文章作者")
-	private String authorName;
+	@ApiModelProperty("文章作者的id")
+	private Integer authorId;
 
 	@ApiModelProperty("文章封面")
 	private String articlePoster;

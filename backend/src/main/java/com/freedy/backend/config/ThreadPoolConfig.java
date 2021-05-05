@@ -1,5 +1,6 @@
 package com.freedy.backend.config;
 
+import com.freedy.backend.properties.ThreadPoolConfigProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

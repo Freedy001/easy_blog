@@ -14,6 +14,7 @@ public enum ResultCode {
     /* 失败 */
     COMMON_FAIL(999, "失败"),
     UNKNOWN_EXCEPTION(500, "发生异常！"),
+    LOGOUT_ERROR(501, "退出登录失败！"),
 
     /* 参数错误：1000～1999 */
     PARAM_NOT_VALID(1001, "参数无效"),
@@ -22,17 +23,10 @@ public enum ResultCode {
     PARAM_NOT_COMPLETE(1004, "参数缺失"),
 
     /* 用户错误 */
-    USER_NO_CERTIFICATE(2000, "无凭证信息"),
-    USER_NOT_LOGIN(2001, "用户未登录"),
-    USER_ACCOUNT_EXPIRED(2002, "账号已过期"),
-    USER_CREDENTIALS_ERROR(2003, "密码错误"),
-    USER_CREDENTIALS_EXPIRED(2004, "密码过期"),
-    USER_ACCOUNT_DISABLE(2005, "账号不可用"),
-    USER_ACCOUNT_LOCKED(2006, "账号被锁定"),
-    USER_ACCOUNT_NOT_EXIST(2007, "账号不存在"),
-    USER_ACCOUNT_ALREADY_EXIST(2008, "账号已存在"),
-    USER_ACCOUNT_USE_BY_OTHERS(2009, "账号下线"),
-    USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED(2010, "无凭证信息或账号已过期"),
+    USER_ACCOUNT_NOT_EXIST(2000, "账号不存在"),
+    USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED(2001, "无凭证信息或账号已过期！"),
+    USER_CERTIFICATE_HAS_BEEN_CHANGED(2002, "用户凭证已被修改，请重新登录！"),
+    OLD_PASSWORD_NOT_CORRECT(2003, "旧密码不正确！"),
 
     /* 业务错误 */
     TAG_HAS_BEEN_USED(3000,"该标签已经被其他文章所引用！"),

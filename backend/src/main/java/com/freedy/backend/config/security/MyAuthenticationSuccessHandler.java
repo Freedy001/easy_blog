@@ -6,6 +6,7 @@ import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.enumerate.ResultCode;
+import com.freedy.backend.properties.JwtProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;

@@ -2,9 +2,22 @@ package com.freedy.backend.controller;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import com.alibaba.fastjson.JSON;
+import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.constant.RabbitConstant;
+import com.freedy.backend.constant.RedisConstant;
+import com.freedy.backend.entity.dto.UserTokenInfo;
+import com.freedy.backend.entity.vo.NewUserVo;
+import com.freedy.backend.entity.vo.UserInfoVo;
+import com.freedy.backend.entity.vo.UserPasswordVo;
+import com.freedy.backend.enumerate.ResultCode;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.ManagerEntity;
@@ -24,14 +37,18 @@ import com.freedy.backend.common.utils.PageUtils;
 public class ManagerController {
     @Autowired
     private ManagerService managerService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     /**
      * 列表
      */
     @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
+    public Result list(@RequestParam Map<String, Object> params) {
         PageUtils page = managerService.queryPage(params);
-
         return Result.ok().put("page", page);
     }
 
@@ -39,39 +56,82 @@ public class ManagerController {
     /**
      * 信息
      */
-    @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Integer id){
-		ManagerEntity manager = managerService.getById(id);
-
-        return Result.ok().put("manager", manager);
+    @GetMapping("/getUserInfo")
+    public Result info() throws ExecutionException, InterruptedException {
+        UserInfoVo infoVo = managerService.getUserInfo();
+        return Result.ok().setData(infoVo);
     }
 
     /**
-     * 保存
+     * 创建新管理员
      */
-    @PostMapping("/save")
-    public Result save(@RequestBody ManagerEntity manager){
-		managerService.save(manager);
-
+    @PostMapping("/createManager")
+    public Result createManager(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
+        managerService.createManager(manager);
         return Result.ok();
     }
 
     /**
-     * 修改
+     * 修改用户信息
      */
-    @PostMapping("/update")
-    public Result update(@RequestBody ManagerEntity manager){
-		managerService.updateById(manager);
+    @PostMapping("/updateUserInfo")
+    public Result updateUserInfo(@RequestBody ManagerEntity manager) {
+        ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
+        String originUsername = oldUserEntity.getUsername();
+        manager.setId(oldUserEntity.getId());
+        Result result;
+        if (!originUsername.equals(manager.getUsername())) {
+            //用户修改了用户名需要下线
+            redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + originUsername);
+            managerService.updateById(manager);
+            result = Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
+                    ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
+        } else {
+            //用户名一致 不需要下线
+            managerService.updateById(manager);
+            try {
+                //修改缓存中的数据
+                String userInfoJson = redisTemplate.opsForValue().get(RedisConstant.USER_TOKEN_HEADER + originUsername);
+                UserTokenInfo tokenInfo = JSON.parseObject(userInfoJson, UserTokenInfo.class);
+                ManagerEntity managerEntity = managerService.getById(oldUserEntity.getId());
+                assert tokenInfo != null;
+                tokenInfo.setManager(managerEntity);
+                redisTemplate.opsForValue().set(RedisConstant.USER_TOKEN_HEADER + originUsername,
+                        JSON.toJSONString(tokenInfo));
+                result = Result.ok();
+            } catch (Exception e) {
+                //发生异常直接下线 说明序列化的UserTokenInfo已被破坏
+                redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + originUsername);
+                result = Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
+                        ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
+            }
+        }
+        return result;
+    }
 
-        return Result.ok();
+    @PostMapping("/updateUserPassword")
+    public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {
+        ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
+        if (passwordEncoder.matches(passwordVo.getOldPassword(), oldUserEntity.getPassword())) {
+            //旧密码匹配成功 用户名需要下线
+            redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + oldUserEntity.getUsername());
+            ManagerEntity entity = new ManagerEntity();
+            entity.setId(oldUserEntity.getId());
+            entity.setPassword(passwordEncoder.encode(passwordVo.getNewPassword()));
+            managerService.updateById(entity);
+            return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
+                    ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
+        }
+        return Result.error(ResultCode.OLD_PASSWORD_NOT_CORRECT.getCode(),
+                ResultCode.OLD_PASSWORD_NOT_CORRECT.getMessage());
     }
 
     /**
      * 删除
      */
     @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids){
-		managerService.removeByIds(Arrays.asList(ids));
+    public Result delete(@RequestBody Integer[] ids) {
+        managerService.removeByIds(Arrays.asList(ids));
 
         return Result.ok();
     }

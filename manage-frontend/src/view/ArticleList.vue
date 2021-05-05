@@ -121,23 +121,23 @@ async function getData(pageNum){
 		arr.forEach((value, index) => {
 			//文章状态 0:未发布 1:已发布 2:顶置 3:推荐 4:回收站
 			switch (value.articleStatus) {
-				case 0:
+				case '0':
 					value.dotColor = '#fdf000'
 					value.articleStatus = '未发布'
 					break;
-				case 1:
+				case '1':
 					value.dotColor = '#52c41a'
 					value.articleStatus = '已发布'
 					break;
-				case 2:
+				case '2':
 					value.dotColor = '#125ee3'
 					value.articleStatus = '顶置'
 					break;
-				case 3:
+				case '3':
 					value.dotColor = '#10fcf5'
 					value.articleStatus = '推荐'
 					break;
-				case 4:
+				case '4':
 					value.dotColor = '#f6074e'
 					value.articleStatus = '回收站'
 					break;
@@ -147,7 +147,7 @@ async function getData(pageNum){
 	} else {
 		proxy.$notify.error({
 			title: '错误',
-			message: `添加失败！ reason-->${response.msg}`
+			message: response.msg
 		})
 	}
 }

@@ -3,11 +3,9 @@
 
 <mapper namespace="com.freedy.backend.dao.RolePermissionDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.freedy.backend.entity.RolePermissionEntity" id="rolePermissionMap">
-        <result property="id" column="id"/>
-        <result property="permissionName" column="permission_name"/>
-    </resultMap>
+    <select id="getPermissionsByManagerId" resultType="java.lang.String">
+        select group_concat(permission_value) from blog_role_permission where manager_id=#{id}
+    </select>
 
 
 </mapper>

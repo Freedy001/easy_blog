@@ -1,37 +1,39 @@
+<!--suppress JSUnresolvedVariable -->
 <template>
 	<div class="index-container">
 		<el-card class="box-card left">
 			<div class="info">
 				<div class="photo">
-					<img src="src/assets/login-0.png" alt="">
+					<img :src="userInfoDetail.headImg" alt="">
 				</div>
-				<p class="name">Admin-Freedy</p>
+				<p v-if="userInfoDetail.rootAdmin" class="name">Admin</p>
+				<p class="name">{{ userInfoDetail.nickname }}</p>
 			</div>
 			<div class="introduce">
 				<div class="item">
 					<i class="el-icon-ice-cream-round"></i>
-					<a href="#" style="color: #0b9aff;text-decoration: none">http://localhost:8090</a>
+					<a href="#" style="color: #0b9aff;text-decoration: none">http://localhost:3000{{ userInfoDetail.pageUrl }}</a>
 				</div>
 				<div class="item">
 					<i class="el-icon-ice-cream-square"></i>
-					<p>985948228@qq.com</p>
+					<p>{{ userInfoDetail.email }}</p>
 				</div>
 				<div class="item">
 					<i class="el-icon-lollipop"></i>
-					<p>62 天</p>
+					<p>{{ userInfoDetail.createDuration }}</p>
 				</div>
 			</div>
 			<el-divider><i class="el-icon-edit"></i></el-divider>
 			<div class="statistics">
-				<p>累计发表了 1 篇文章。</p>
+				<p>累计发表了 {{ userInfoDetail.totalArticle }} 篇文章。</p>
 				<el-divider></el-divider>
-				<p>累计创建了 3 个分类。</p>
+				<p>累计创建了 {{ userInfoDetail.totalCategory }} 个分类。</p>
 				<el-divider></el-divider>
-				<p>累计创建了 9 个标签。</p>
+				<p>累计创建了 {{ userInfoDetail.totalTags }} 个标签。</p>
 				<el-divider></el-divider>
-				<p>累计获得了 1 条评论。</p>
+				<p>累计获得了 {{ userInfoDetail.totalComment }} 条评论。</p>
 				<el-divider></el-divider>
-				<p>文章总阅读 8 次。</p>
+				<p>文章总阅读 {{ userInfoDetail.totalVisit }} 次。</p>
 				<el-divider></el-divider>
 
 			</div>
@@ -42,23 +44,22 @@
 			<el-tabs v-model="activeName" @tab-click="handleClick">
 				<el-tab-pane label="基本资料" name="first">
 					<el-form ref="form"
-					         :model="form"
+					         :model="userInfoDetail"
 					>
 						<el-form-item label="登录用户名">
-							<el-input v-model="form.name"></el-input>
+							<el-input v-model="userInfoDetail.username"></el-input>
 						</el-form-item>
 						<el-form-item label="昵称">
-							<el-input v-model="form.name"></el-input>
+							<el-input v-model="userInfoDetail.nickname"></el-input>
 						</el-form-item>
 						<el-form-item label="电子邮件">
-							<el-input v-model="form.name"></el-input>
+							<el-input v-model="userInfoDetail.email"></el-input>
 						</el-form-item>
 						<el-form-item label="个人说明">
-							<el-input type="textarea" v-model="form.desc"></el-input>
+							<el-input type="textarea" v-model="userInfoDetail.introduce"></el-input>
 						</el-form-item>
 						<el-form-item>
-							<el-button type="primary" @click="onSubmit">立即创建</el-button>
-							<el-button>取消</el-button>
+							<el-button type="primary" @click="saveInfo">保存</el-button>
 						</el-form-item>
 					</el-form>
 				</el-tab-pane>
@@ -77,47 +78,209 @@
 							<el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
 						</el-form-item>
 						<el-form-item>
-							<el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
+							<el-button type="primary" @click="changePassword">提交</el-button>
 							<el-button @click="resetForm">重置</el-button>
 						</el-form-item>
 					</el-form>
 				</el-tab-pane>
 				<el-tab-pane label="用户管理" name="third">
-
+					<div style="text-align: right;cursor: pointer" @click="openNewUserWindow">
+						<i class="el-icon-circle-plus-outline" style="margin-right: 5px"></i>
+						<span>添加一个</span>
+					</div>
+					<el-table
+							:data="userManagement"
+							style="width: 100%">
+						<el-table-column type="expand">
+							<template #default="props">
+								<el-card>
+									<div class="expand">
+										<div class="info">
+											<div class="photo">
+												<img :src="props.row.headImg" alt="">
+											</div>
+											<p class="name">{{ props.row.nickname }}</p>
+										</div>
+										<div class="introduce">
+											<div class="item email">
+												<div>
+													<i class="el-icon-ice-cream-square"></i>
+													<p>{{ props.row.createDuration }}</p>
+												</div>
+											</div>
+											<div class="item email">
+												<div>
+													<i class="el-icon-ice-cream-square"></i>
+													<p>{{ props.row.email }}</p>
+												</div>
+											</div>
+											<div class="item text">
+												<span>个人介绍</span>
+												<p>{{ props.row.introduce }}</p>
+											</div>
+										</div>
+									</div>
+								</el-card>
+							</template>
+						</el-table-column>
+						<el-table-column
+								width="150px"
+								prop="username"
+								label="用户名">
+						</el-table-column>
+						<el-table-column
+								prop="status"
+								label="状态">
+						</el-table-column>
+						<el-table-column
+								label="操作">
+							<template #default>
+								<el-tooltip content="设置" placement="top">
+									<i class="el-icon-setting" style="margin-right: 10px"></i>
+								</el-tooltip>
+								<el-tooltip content="删除" placement="top">
+									<i class="el-icon-milk-tea"></i>
+								</el-tooltip>
+							</template>
+						</el-table-column>
+					</el-table>
 				</el-tab-pane>
 			</el-tabs>
 		</el-card>
 	</div>
+	<teleport to="body">
+		<div class="full-screen" v-if="showCard" @click="showCard=false">
+			<el-card class="box-card" @click.stop="">
+				<div class="newUserForm">
+					<div class="item">
+						<span>用户名:</span>
+						<el-input placeholder="请输入用户名" v-model="newUser.username"></el-input>
+					</div>
+					<div class="item">
+						<span>密码:</span>
+						<el-input placeholder="请输入密码" show-password v-model="newUser.password"></el-input>
+					</div>
+					<div class="item">
+						<span>邮箱:</span>
+						<el-input placeholder="请输入邮箱" v-model="newUser.email"></el-input>
+					</div>
+					<el-divider class="outer-divider"></el-divider>
+					<div class="permission item">
+						<div style="width: 100%"><p style="margin-left: 10px">权限:</p></div>
+						<div class="permissionContainer">
+							<span>文章:</span>
+							<div class="article line">
+								<div style="display: flex;justify-content: space-between">
+									<el-switch v-model="articleEnable" active-text="启用" inactive-text="关闭">
+									</el-switch>
+									<el-checkbox style="margin-bottom: 10px"
+									             :disabled="!articleEnable"
+									             :indeterminate="selectAll.articleIsIndeterminate"
+									             v-model="selectAll.articleCheckAll"
+									             @change="handleArticleCheckAllChange">全选
+									</el-checkbox>
+								</div>
+								<el-checkbox-group
+										v-model="newUser.articlePermission"
+										@change="handleArticleCheckedCitiesChange"
+										:disabled="!articleEnable">
+									<el-checkbox v-for="(item,i) in PermissionItem.articlePermission" :key="i"
+									             :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</div>
+							<el-divider></el-divider>
+							<span>分类与标签:</span>
+							<div class="tagOrCategory line">
+								<div style="display: flex;justify-content: space-between">
+									<el-switch v-model="tagEnable" active-text="启用" inactive-text="关闭">
+									</el-switch>
+									<el-checkbox style="margin-bottom: 10px"
+									             :disabled="!tagEnable"
+									             :indeterminate="selectAll.tagIsIndeterminate"
+									             v-model="selectAll.tagCheckAll"
+									             @change="handleTagCheckAllChange">
+										全选
+									</el-checkbox>
+								</div>
+								<el-checkbox-group
+										v-model="newUser.tagPermission"
+										@change="handleTagCheckedCitiesChange"
+										:disabled="!tagEnable">
+									<el-checkbox v-for="(item,i) in PermissionItem.tagPermission" :key="i" :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</div>
+							<el-divider></el-divider>
+							<span>评论:</span>
+							<div class="user line">
+								<div style="display: flex;justify-content: space-between">
+									<el-switch v-model="commentEnable" active-text="启用" inactive-text="关闭">
+									</el-switch>
+									<el-checkbox style="margin-bottom: 10px"
+									             :disabled="!commentEnable"
+									             :indeterminate="selectAll.commentIsIndeterminate"
+									             v-model="selectAll.commentCheckAll"
+									             @change="handleCommentCheckAllChange">全选
+									</el-checkbox>
+								</div>
+								<el-checkbox-group
+										v-model="newUser.commentPermission"
+										@change="handleCommentCheckedCitiesChange"
+										:disabled="!commentEnable">
+									<el-checkbox v-for="(item,i) in PermissionItem.commentPermission" :key="i"
+									             :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</div>
+							<el-divider></el-divider>
+							<span>设置:</span>
+							<div class="setting line">
+								<div style="display: flex;justify-content: space-between">
+									<el-switch v-model="settingEnable" active-text="启用" inactive-text="关闭">
+									</el-switch>
+									<el-checkbox style="margin-bottom: 10px"
+									             :disabled="!settingEnable"
+									             :indeterminate="selectAll.settingIsIndeterminate"
+									             v-model="selectAll.settingCheckAll"
+									             @change="handleSettingCheckAllChange">全选
+									</el-checkbox>
+								</div>
+								<el-checkbox-group
+										v-model="newUser.settingPermission"
+										@change="handleSettingCheckedCitiesChange"
+										:disabled="!settingEnable">
+									<el-checkbox v-for="(item,i) in PermissionItem.settingPermission" :key="i"
+									             :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</div>
+						</div>
+					</div>
+					<el-divider class="outer-divider"></el-divider>
+					<div class="item">
+						<el-button type="primary" @click="createNewUser">立即创建</el-button>
+						<el-button @click="showCard=false">取消</el-button>
+					</div>
+				</div>
+			</el-card>
+		</div>
+	</teleport>
 </template>
 
 <script setup lang="ts">
-import {reactive, ref, watch} from "vue";
+import {getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
+import {get, post} from "../http";
+import {useRouter} from "vue-router";
 
+const router = useRouter();
 let activeName = ref('first')
-
-function handleClick(tab, event) {
-	console.log(tab, event);
-}
-
-let form = reactive(
-		{
-			name: '',
-			region: '',
-			date1: '',
-			date2: '',
-			delivery: false,
-			type: [],
-			resource: '',
-			desc: ''
-		})
-//************************密码验证表单************************
+const {proxy} = getCurrentInstance();
+//密码验证表单
 let ruleForm = reactive({
-	oldPass:'',
+	oldPass: '',
 	pass: '',
 	checkPass: ''
 })
+//密码校验
 let rules = reactive({
-	oldPass:[
+	oldPass: [
 		{validator: validatePass, trigger: 'blur'}
 	],
 	pass: [
@@ -128,24 +291,335 @@ let rules = reactive({
 	]
 })
 
-function validatePass(rule, value, callback) {
+function validatePass(rule: any, value: string, callback: any) {
 	if (value != '') {
 		callback()
-	}else {
+	} else {
 		callback(new Error("请输入密码！"))
 	}
 }
 
-function validatePass2(rule, value, callback) {
+function validatePass2(rule: any, value: any, callback: any) {
 	if (ruleForm.pass == ruleForm.checkPass) {
 		callback();
 	} else {
 		callback(new Error('两次输入密码不一致!'));
 	}
 }
+
+//重置密码表单
 function resetForm() {
-	ruleForm.pass='';
-	ruleForm.checkPass='';
+	ruleForm.pass = '';
+	ruleForm.checkPass = '';
+}
+
+interface userInfo {
+	username: string,
+	nickname: string,
+	email: string,
+	introduce: string,
+	headImg: string,
+	rootAdmin: boolean,
+	pageUrl: string,
+	createDuration: string
+	totalArticle: number,
+	totalCategory: number,
+	totalTags: number,
+	totalComment: number
+	totalVisit: number
+}
+
+let userInfoDetail: userInfo = reactive<userInfo>({
+	username: '',
+	nickname: '',
+	email: '',
+	introduce: '',
+	headImg: '',
+	rootAdmin: false,
+	pageUrl: '',
+	createDuration: '',
+	totalArticle: 0,
+	totalCategory: 0,
+	totalTags: 0,
+	totalComment: 0,
+	totalVisit: 0,
+})
+//数据回显
+onMounted(async () => {
+	initData().then();
+})
+
+async function initData() {
+	const response = await get('/manager/getUserInfo');
+	if (response.code == 200) {
+		const resData: userInfo = response.data
+		userInfoDetail.username = resData.username
+		userInfoDetail.nickname = resData.nickname
+		userInfoDetail.email = resData.email
+		userInfoDetail.introduce = resData.introduce
+		userInfoDetail.headImg = resData.headImg
+		userInfoDetail.rootAdmin = resData.rootAdmin
+		userInfoDetail.pageUrl = resData.pageUrl
+		userInfoDetail.createDuration = resData.createDuration
+		userInfoDetail.totalArticle = resData.totalArticle
+		userInfoDetail.totalCategory = resData.totalCategory
+		userInfoDetail.totalTags = resData.totalTags
+		userInfoDetail.totalComment = resData.totalComment
+		userInfoDetail.totalVisit = resData.totalVisit
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+async function saveInfo() {
+	const response = await post('/manager/updateUserInfo', {
+		username: userInfoDetail.username,
+		nickname: userInfoDetail.nickname,
+		email: userInfoDetail.email,
+		introduce: userInfoDetail.introduce,
+	});
+	if (response.code == 2002) {
+		proxy.$notify({
+			title: '成功',
+			message: '修改成功，请重新登录!',
+			type: 'success'
+		})
+		await router.push('/login');
+	} else if (response.code == 200) {
+		proxy.$notify({
+			title: '成功',
+			message: '修改成功!',
+			type: 'success'
+		})
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+async function changePassword() {
+	const response = await post('/manager/updateUserPassword', {
+		oldPassword: ruleForm.oldPass,
+		newPassword: ruleForm.checkPass
+	})
+	if (response.code == 2002) {
+		proxy.$notify({
+			title: '成功',
+			message: '修改成功，请重新登录!',
+			type: 'success'
+		})
+		await router.push('/login');
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+interface IUserManagement{
+	username: string
+	nickname: string
+	headImg: string
+	email: string
+	createDuration:string
+	introduce: string
+	status: string
+}
+let userManagement = reactive<Array<IUserManagement>>([])
+let page=1
+function handleClick() {
+	if (activeName.value == 'third') {
+		userManagement.length=0
+		loadUserList()
+	}
+}
+
+async function loadUserList() {
+	const response = await get(`/manager/list??page=${page}&limit=20`);
+	if(response.code==200){
+		const data:Array<IUserManagement>=response.page.list
+		data.forEach((value, index) => {
+			userManagement.push({
+				username: value.username,
+				nickname: value.nickname,
+				headImg: value.headImg,
+				email: value.email,
+				createDuration:value.createDuration,
+				introduce: value.introduce,
+				status: value.status,
+			})
+		})
+	}else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+//下面是添加用户
+let showCard = ref(false)
+
+interface IPermissionItem {
+	articlePermission: Array<string>
+	tagPermission: Array<string>
+	commentPermission: Array<string>
+	settingPermission: Array<string>
+}
+
+async function openNewUserWindow() {
+	const response = await get('/rolePermission/getPermissionItem');
+	if (response.code == 200) {
+		showCard.value = true;
+		const item: IPermissionItem = response.data
+		PermissionItem.articlePermission = item.articlePermission
+		PermissionItem.tagPermission = item.tagPermission
+		PermissionItem.commentPermission = item.commentPermission
+		PermissionItem.settingPermission = item.settingPermission
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+//所有权限的列表
+let PermissionItem: IPermissionItem = reactive<IPermissionItem>({
+	articlePermission: [],
+	tagPermission: [],
+	commentPermission: [],
+	settingPermission: [],
+});
+
+interface INewUser extends IPermissionItem {
+	username: string
+	password: string
+	email: string
+}
+
+//创建用户的表单
+let newUser = reactive<INewUser>({
+	username: '',
+	password: '',
+	email: '',
+	articlePermission: [],
+	tagPermission: [],
+	commentPermission: [],
+	settingPermission: [],
+})
+
+let articleEnable = ref(false)
+let tagEnable = ref(false)
+let commentEnable = ref(false)
+let settingEnable = ref(false)
+//当没有启用时要将数组清空
+watch(articleEnable, (val) => {
+	if (!val) {
+		newUser.articlePermission = [];
+		selectAll.articleCheckAll = false
+	}
+})
+watch(tagEnable, (val) => {
+	if (!val) {
+		newUser.tagPermission = [];
+		selectAll.tagCheckAll = false
+	}
+})
+watch(commentEnable, (val) => {
+	if (!val) {
+		newUser.commentPermission = [];
+		selectAll.commentCheckAll = false
+	}
+})
+watch(settingEnable, (val) => {
+	if (!val) {
+		newUser.settingPermission = [];
+		selectAll.settingCheckAll = false
+	}
+})
+//下面是全选功能
+let selectAll = reactive({
+	articleCheckAll: false,
+	tagCheckAll: false,
+	commentCheckAll: false,
+	settingCheckAll: false,
+	articleIsIndeterminate: false,
+	tagIsIndeterminate: false,
+	commentIsIndeterminate: false,
+	settingIsIndeterminate: false,
+})
+
+function handleArticleCheckAllChange(val: any) {
+	newUser.articlePermission = val ? PermissionItem.articlePermission : []
+	selectAll.articleIsIndeterminate = false;
+}
+
+function handleTagCheckAllChange(val: any) {
+	newUser.tagPermission = val ? PermissionItem.tagPermission : []
+	selectAll.tagIsIndeterminate = false;
+}
+
+function handleCommentCheckAllChange(val: any) {
+	newUser.commentPermission = val ? PermissionItem.commentPermission : []
+	selectAll.commentIsIndeterminate = false;
+}
+
+function handleSettingCheckAllChange(val: any) {
+	newUser.settingPermission = val ? PermissionItem.settingPermission : []
+	selectAll.settingIsIndeterminate = false;
+}
+
+function handleArticleCheckedCitiesChange(value: any) {
+	let checkedCount = value.length;
+	selectAll.articleCheckAll = checkedCount === PermissionItem.articlePermission.length;
+	selectAll.articleIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.articlePermission.length
+}
+
+function handleTagCheckedCitiesChange(value: any) {
+	let checkedCount = value.length;
+	selectAll.tagCheckAll = checkedCount === PermissionItem.tagPermission.length;
+	selectAll.tagIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.tagPermission.length
+}
+
+function handleCommentCheckedCitiesChange(value: any) {
+	let checkedCount = value.length;
+	selectAll.commentCheckAll = checkedCount === PermissionItem.commentPermission.length;
+	selectAll.commentIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.commentPermission.length
+}
+
+function handleSettingCheckedCitiesChange(value: any) {
+	let checkedCount = value.length;
+	selectAll.settingCheckAll = checkedCount === PermissionItem.settingPermission.length;
+	selectAll.settingIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.settingPermission.length
+}
+
+watch(newUser, (val) => {
+	console.log(val)
+})
+
+async function createNewUser() {
+	const response = await post('/manager/createManager', newUser)
+	if (response.code == 200) {
+		proxy.$notify({
+			title: '成功',
+			message: '用户创建成功！',
+			type: 'success'
+		})
+		userManagement.length=0
+		loadUserList().then();
+		showCard.value = false;
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
 }
 
 </script>
@@ -227,7 +701,147 @@ function resetForm() {
 			height: 180px;
 		}
 
+		::v-deep(.el-table__expanded-cell) {
+			padding: 20px;
+		}
+
+		.expand {
+			margin: auto 0;
+			width: 100%;
+			height: 80%;
+
+			.info {
+				.photo {
+					width: 70px;
+					height: 70px;
+					margin: auto;
+					border-radius: 50%;
+					background: #fff;
+					overflow: hidden;
+					transition: all .3s;
+
+					img {
+						width: 100%;
+						height: 100%;
+					}
+
+				}
+
+				.name {
+					margin-top: 5px;
+					color: #000000;
+					text-align: center;
+					font-size: 18px;
+				}
+			}
+
+			.introduce {
+				margin: 10px;
+
+				.item {
+					margin: 10px;
+
+					p {
+						display: inline;
+						text-align: center;
+					}
+				}
+
+				.email {
+					display: flex;
+					justify-content: center;
+					margin: 10px;
+				}
+
+				.text {
+					span {
+						display: block;
+						text-align: center;
+						margin-bottom: 10px;
+						margin-top: 5px;
+					}
+
+				}
+
+
+			}
+
+		}
+
 
 	}
 }
+
+.full-screen {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+
+	.box-card {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 50%;
+		overflow: auto;
+		height: 85%;
+
+		.newUserForm {
+			.item {
+				margin: 10px;
+				display: flex;
+				justify-content: left;
+				align-items: center;
+
+				span {
+					width: 80px;
+					text-align: left;
+				}
+
+				.el-input {
+					margin-left: 20px;
+
+				}
+
+				.el-select {
+					width: 100%;
+				}
+			}
+
+			.permission.item {
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+
+				.permissionContainer {
+					margin: 10px;
+					width: 80%;
+
+					.line {
+						margin: 20px;
+
+						.el-switch {
+							margin-bottom: 15px;
+						}
+
+
+					}
+				}
+			}
+
+
+		}
+
+	}
+
+	background-color: rgba(0, 0, 0, 0.9);
+}
+
+.el-divider {
+	margin: 15px;
+}
+
 </style>

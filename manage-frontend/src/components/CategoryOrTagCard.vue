@@ -9,7 +9,6 @@
 						<el-input type="text"
 						          v-model="form.name"
 						          placeholder="请输入标签名称"
-						          maxlength="10"
 						          show-word-limit
 						></el-input>
 					</el-form-item>
@@ -135,7 +134,7 @@ async function insertOrUpdate(){
 		}else {
 			proxy.$notify.error({
 				title: '错误',
-				message: `更新失败！ reason-->${response.msg}`
+				message: `更新失败！\n${response.msg}`
 			})
 		}
 	}else {
@@ -153,7 +152,7 @@ async function insertOrUpdate(){
 		}else {
 			proxy.$notify.error({
 				title: '错误',
-				message: `保存失败！ reason-->${response.msg}`
+				message: `保存失败！\n${response.msg}`
 			})
 		}
 	}
@@ -165,14 +164,14 @@ async function deleteItem() {
 	if(response.code==200){
 		loadTag().then()
 		proxy.$notify({
-			title: '成功',
+			title: '成功！',
 			message: `删除成功!`,
 			type: 'success'
 		})
 	}else {
 		proxy.$notify.error({
-			title: '错误',
-			message: `删除失败！ reason-->${response.msg}`
+			title: '删除失败！',
+			message: `${response.msg}`
 		})
 	}
 	cleanForm()
@@ -225,7 +224,7 @@ async function loadTag() {
 	} else {
 		ElMessage({
 			showClose: true,
-			message: `网络异常！${data.msg}`,
+			message: `网络异常！\n ${data.msg}`,
 			type: 'error'
 		});
 	}

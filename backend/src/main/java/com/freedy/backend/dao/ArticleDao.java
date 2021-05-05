@@ -1,12 +1,11 @@
 package com.freedy.backend.dao;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -30,4 +29,7 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      */
     Long getCount();
 
+    Long getTotalVisit(@Param("authorId") Integer authorId);
+
+    Long getTotalComment(@Param("authorId") Integer authorId);
 }

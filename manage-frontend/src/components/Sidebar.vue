@@ -2,9 +2,17 @@
 	<div>
 		<div class="sidebar" :class="{hide:scale, show:show}">
 			<div class="info">
-				<div class="photo">
-					<img src="src/assets/login-0.png">
-				</div>
+				<el-dropdown>
+					<div class="photo" style="cursor:pointer;">
+						<img src="src/assets/login-0.png">
+					</div>
+					<template #dropdown>
+						<el-dropdown-menu>
+							<el-dropdown-item @click="$router.push('/index/user')"><i class="el-icon-user-solid" style="margin-right: 10px"></i>个人资料</el-dropdown-item>
+							<el-dropdown-item @click="lg"><i class="el-icon-more-outline" style="margin-right: 10px"></i>退出登录</el-dropdown-item>
+						</el-dropdown-menu>
+					</template>
+				</el-dropdown>
 				<p class="name">Freedy</p>
 			</div>
 			<el-menu
@@ -56,9 +64,17 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
+import {logout} from'../http'
+import {useRouter} from "vue-router";
+import {ElMessage} from "element-plus";
 const scale = ref(false)
+const router = useRouter();
 
-
+async function lg() {
+	if (await logout()){
+		await router.push('/login')
+	}
+}
 
 </script>
 
@@ -92,28 +108,28 @@ const scale = ref(false)
 		background: none;
 		padding-left: 8px;
 
-		.divide-line{
+		.divide-line {
 			height: 2px;
 			width: 100%;
 			margin-top: 10px;
 			margin-bottom: 10px;
 			background: linear-gradient(30deg, #f8f8f8, #00b9ff, #3a9ff5, #ffff00);
 			//background: linear-gradient(30deg, #00ffc4, #01defa, #ecfd00, #ff00e5);
-			background-size:1400% 300%;
-			animation:mymove 3s ease-in-out infinite alternate;
+			background-size: 1400% 300%;
+			animation: mymove 3s ease-in-out infinite alternate;
 		}
+
 		@keyframes mymove {
-			0%{
+			0% {
 				background-position: 0% 0%;
 			}
-			50%{
+			50% {
 				background-position: 50% 100%;
 			}
-			100%{
+			100% {
 				background-position: 100% 0%;
 			}
 		}
-
 
 
 		.el-menu-item {

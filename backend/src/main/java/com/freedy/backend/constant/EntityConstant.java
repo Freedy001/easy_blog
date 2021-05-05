@@ -23,6 +23,10 @@ public class EntityConstant {
     public static final Integer PRIORITY_LOW=4;
     public static final Integer PRIORITY_LOWEST=5;
 
+    //用户状态 1主管理员 2启用 3启用
+    public static final Integer ROOT_ADMIN=1;
+    public static final Integer USER_ENABLED=2;
+    public static final Integer USER_DISABLED=3;
 
 
 

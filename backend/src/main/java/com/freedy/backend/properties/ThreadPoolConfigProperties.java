@@ -1,4 +1,4 @@
-package com.freedy.backend.config;
+package com.freedy.backend.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @date 2021/5/2 20:58
  */
 @Data
-@ConfigurationProperties("easy.thread")
+@ConfigurationProperties(prefix = "easy.thread")
 public class ThreadPoolConfigProperties {
     private Integer coreSize;
     private Integer maxSize;

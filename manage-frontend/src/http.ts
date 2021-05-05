@@ -1,7 +1,6 @@
 import axios from 'axios'
-
+import {ElMessage} from "element-plus";
 const baseURL=import.meta.env.DEV?"http://localhost:1000/backend":""
-
 export interface ILogin {
     username:string,
     password:string
@@ -25,9 +24,18 @@ export async function logout(){
     });
     if (data.code==200){
         localStorage.removeItem("Authorization")
-        return true;
+        ElMessage({
+            showClose: true,
+            message: data.msg,
+        });
+        return true
     }else {
-        return false;
+        ElMessage({
+            showClose: true,
+            message: data.msg,
+            type: 'error'
+        });
+        return false
     }
 }
 

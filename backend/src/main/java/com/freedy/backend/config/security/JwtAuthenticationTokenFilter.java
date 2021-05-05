@@ -3,15 +3,20 @@ package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.common.utils.JwtTokenUtil;
+import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
+import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.enumerate.ResultCode;
+import com.freedy.backend.properties.JwtProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +30,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,7 +69,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String username = jwtTokenUtil.getUsernameFromToken(authToken);
         if (StringUtils.hasText(authToken)&& !StringUtils.hasText(username)){
             log.debug("用户凭证过期");
-            Result result = Result.error(ResultCode.USER_ACCOUNT_EXPIRED.getCode(), ResultCode.USER_ACCOUNT_EXPIRED.getMessage());
+            Result result = Result.error(ResultCode.USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED.getCode(),
+                    ResultCode.USER_NO_CERTIFICATE_OR_ACCOUNT_EXPIRED.getMessage());
             httpServletResponse.setContentType("text/json;charset=utf-8");
             httpServletResponse.getWriter().write(JSON.toJSONString(result));
             return;
@@ -81,7 +88,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                     jwtProperties.getTokenValidityInSeconds(),
                     TimeUnit.SECONDS);
             UserTokenInfo tokenInfo = JSON.parseObject(userToken, UserTokenInfo.class);
-            if (tokenInfo!=null&jwtTokenUtil.validateToken(authToken, tokenInfo)) {
+            if (tokenInfo!=null&&jwtTokenUtil.validateToken(authToken, tokenInfo)) {
                 //如username不为空，并且能够在数据库中查到
                 /**
                  * UsernamePasswordAuthenticationToken继承
@@ -94,7 +101,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                  * 以UsernamePasswordAuthenticationToken实现的带用户名和密码以及权限的
                  * Authentication
                  */
-                User user = tokenInfo.getUser();
+                ManagerEntity manager = tokenInfo.getManager();
+                String permission = tokenInfo.getPermission();
+                List<GrantedAuthority> role = AuthorityUtils.
+                        commaSeparatedStringToAuthorityList(permission);
+                //根据UserTokenInfo生成User就不用再去验证密码了
+                User user = new User(manager.getUsername(),manager.getPassword(),role);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(user,
                                 null, user.getAuthorities());
@@ -102,6 +114,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                         .buildDetails(httpServletRequest));
                 //将authentication放入SecurityContextHolder中
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("token认证成功!");
+                for (GrantedAuthority authority : authentication.getAuthorities()) {
+                    log.debug("用户拥有{}权限",authority.getAuthority());
+                }
+                //将用户消息保存到threadLocal
+                Local.MANAGER_LOCAL.set(tokenInfo.getManager());
             }
 
         }

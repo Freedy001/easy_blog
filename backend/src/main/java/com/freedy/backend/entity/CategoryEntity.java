@@ -33,6 +33,9 @@ public class CategoryEntity implements Serializable {
 	@ApiModelProperty("图片url")
 	private String categoryImgUrl;
 
+	@ApiModelProperty("创建者")
+	private Integer creatorId;
+
 	@ApiModelProperty("优先级 越小越大")
 	private Integer priority;
 

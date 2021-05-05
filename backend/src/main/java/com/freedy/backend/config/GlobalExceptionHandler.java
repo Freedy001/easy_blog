@@ -24,7 +24,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     public Result exceptionHandler(SQLIntegrityConstraintViolationException e) {
-        e.printStackTrace();
         log.error(e.getMessage());
         return Result.error(ResultCode.TAG_HAS_BEEN_USED.getCode(),ResultCode.TAG_HAS_BEEN_USED.getMessage())
                 .put("reason",e.getMessage());

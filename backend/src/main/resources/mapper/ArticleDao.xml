@@ -8,7 +8,7 @@
         <result property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="articleDesc" column="article_desc"/>
-        <result property="authorName" column="author_name"/>
+        <result property="authorName" column="author_id"/>
         <result property="articlePoster" column="article_poster"/>
         <result property="content" column="content"/>
         <result property="visitNum" column="visit_num"/>
@@ -42,7 +42,7 @@
         <bind name="key_offset" value="(currPage-1)*pageSize"></bind>
         select article.id,article.title,article.article_status,category.category_name,
                article.article_desc,article.comment_num,article.visit_num,article.like_num,
-               article.author_name,article.publish_time,article.update_time,tag.tag_name
+               article.author_id,article.publish_time,article.update_time,tag.tag_name
         from (select * from blog_article limit #{key_offset},#{pageSize} )as article
                  left join blog_category as category on article.article_category_id=category.id
                  left join blog_article_tag_relation relation on article.id = relation.article_id
@@ -51,6 +51,12 @@
 
     <select id="getCount" resultType="java.lang.Long">
         select count(*) from blog_article;
+    </select>
+    <select id="getTotalVisit" resultType="java.lang.Long">
+        select sum(visit_num) from blog_article where author_id=#{authorId}
+    </select>
+    <select id="getTotalComment" resultType="java.lang.Long">
+        select sum(comment_num) from blog_article where author_id=#{authorId}
     </select>
 
 

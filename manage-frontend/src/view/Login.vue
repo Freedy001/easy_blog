@@ -8,7 +8,7 @@
 					<img src="../assets/login-1.png" alt="">
 				</div>
 				<div class="ipt pass">
-					<input type="password" placeholder="Password" v-model="password">
+					<input type="password" placeholder="Password" @keydown.enter="loginBtn" v-model="password">
 					<img src="../assets/login-2.png" alt="">
 				</div>
 				<img src="../assets/login-0.png" alt="">
@@ -27,10 +27,12 @@
 import {defineComponent, getCurrentInstance, ref} from 'vue'
 import {login} from "../http"
 import {useRouter} from "vue-router";
+import {ElMessage} from "element-plus";
 
 export default defineComponent({
 	name: "Login.vue",
 	setup() {
+		const {proxy}=getCurrentInstance()
 		const username = ref<string>("")
 		const password = ref<string>("")
 		const router = useRouter()
@@ -42,10 +44,27 @@ export default defineComponent({
 			if (boolean){
 				await router.push("/index")
 			}else {
-				alert("error")
+				const id=setInterval(()=>{
+					ElMessage({
+						showClose: true,
+						message: '亲，密码错了哦！',
+						type: 'error'
+					});
+					proxy.$notify.error({
+						title: '错误',
+						message: '亲，密码错了哦！',
+					});
+					proxy.$notify.error({
+						title: '错误',
+						message: '亲，密码错了哦！',
+						position: 'top-left'
+					});
+				},50)
+				setTimeout(()=>{
+					clearInterval(id)
+				},1000)
 			}
 		}
-
 
 		return {
 			username,

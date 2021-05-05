@@ -1,10 +1,13 @@
 package com.freedy.backend;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.freedy.backend.common.utils.Query;
 import com.freedy.backend.dao.ArticleDao;
+import com.freedy.backend.dao.ManagerDao;
 import com.freedy.backend.dao.TagDao;
 import com.freedy.backend.entity.ArticleEntity;
+import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +26,11 @@ public class DaoTest {
     private TagDao tagDao;
     @Autowired
     private ArticleDao articleDao;
+    @Autowired
+    private ManagerDao managerDao;
     @Test
     public void test(){
-
+        ManagerEntity userEntity = managerDao.selectOne(new QueryWrapper<ManagerEntity>().eq("username", "username"));
+        System.out.println(userEntity);
     }
 }

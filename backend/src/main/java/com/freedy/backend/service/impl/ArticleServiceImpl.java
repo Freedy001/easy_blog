@@ -1,9 +1,7 @@
 package com.freedy.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.freedy.backend.common.utils.*;
-import com.freedy.backend.config.security.JwtProperties;
 import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.ArticleTagRelationEntity;
@@ -25,15 +23,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.freedy.backend.dao.ArticleDao;
 import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.service.ArticleService;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 @Service("articleService")
@@ -54,6 +49,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         PageUtils page = new PageUtils(params);
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             List<ArticleInfoVo> articleList = baseMapper.queryArticleList(page);
+
             articleList.forEach(item -> {
                 //设置日期
                 Date date = new Date();
@@ -76,10 +72,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Transactional
     public void saveArticle(ArticleVo article) throws ExecutionException, InterruptedException {
         log.debug(article.toString());
+        Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
         //获取作者消息
-        entity.setAuthorName(AuthorInfoUtil.getCurrentUsername());
+        entity.setAuthorId(authorId);
         entity.setArticleStatus(article.getIsOverhead() ?
                 EntityConstant.ARTICLE_Overhead : EntityConstant.ARTICLE_PUBLISHED);
         entity.setArticleComment(article.getIsComment() ?
@@ -114,6 +111,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                     TagEntity tagEntity = new TagEntity();
                     tagEntity.setTagName(item);
                     tagEntity.setPriority(EntityConstant.PRIORITY_NORMAL);
+                    tagEntity.setCreatorId(authorId);
                     newTags.add(tagEntity);
                 });
                 tagService.createTagsByName(newTags);
@@ -171,7 +169,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             entity.setCreateTime(new Date().getTime());
             entity.setUpdateTime(new Date().getTime());
             //获取作者名称
-            entity.setAuthorName(AuthorInfoUtil.getCurrentUsername());
+            entity.setAuthorId(Local.MANAGER_LOCAL.get().getId());
             baseMapper.insert(entity);
         }
     }
@@ -180,6 +178,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     public void deleteArticle(List<Long> articleId) {
         relationService.removeRelationByArticleIds(articleId);
         baseMapper.deleteBatchIds(articleId);
+    }
+
+    @Override
+    public Long getTotalVisit() {
+        return baseMapper.getTotalVisit(Local.MANAGER_LOCAL.get().getId());
+    }
+
+    @Override
+    public Long getTotalComment() {
+        return baseMapper.getTotalComment(Local.MANAGER_LOCAL.get().getId());
     }
 
 }

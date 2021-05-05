@@ -3,6 +3,7 @@ package com.freedy.backend.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.common.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,8 +52,8 @@ public class CategoryController {
      */
     @PostMapping("/save")
     public Result save(@RequestBody CategoryEntity category){
+        category.setCreatorId(Local.MANAGER_LOCAL.get().getId());
 		categoryService.save(category);
-
         return Result.ok();
     }
 

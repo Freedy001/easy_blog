@@ -22,12 +22,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class RolePermissionEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-
 	@ApiModelProperty("主键")
 	@TableId(type = IdType.AUTO)
 	private Integer id;
 
-	@ApiModelProperty("权限名称")
-	private String permissionName;
+	@ApiModelProperty("管理员id")
+	private Integer managerId;
+
+	@ApiModelProperty("权限值")
+	private String permissionValue;
 
 }

@@ -1,9 +1,10 @@
-package com.freedy.backend.config.security;
+package com.freedy.backend.properties;
 
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -11,8 +12,8 @@ import org.springframework.context.annotation.Configuration;
  * @date 2021/4/28 15:36
  */
 @Data
-@Configuration
-@ConfigurationProperties(prefix = "jwt")
+@Component
+@ConfigurationProperties(prefix = "easy.jwt")
 public class JwtProperties {
     /** Request Headers ： Authorization */
     private String header;

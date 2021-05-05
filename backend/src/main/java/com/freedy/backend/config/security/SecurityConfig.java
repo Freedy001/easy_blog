@@ -29,12 +29,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true,securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private Environment environment;
-
-    @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
@@ -112,7 +106,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(authenticationTokenFilterBean(),
                 UsernamePasswordAuthenticationFilter.class);
 
-        http.logout().logoutUrl("/logout")
+        http.logout().logoutUrl("/backend/logout")
                 .addLogoutHandler(myLogoutHandler)
                 .logoutSuccessHandler(myLogoutSuccessHandler);
 

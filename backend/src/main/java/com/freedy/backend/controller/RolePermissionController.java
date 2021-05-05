@@ -1,9 +1,13 @@
 package com.freedy.backend.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.entity.vo.NewUserVo;
+import com.freedy.backend.properties.PermissionItemProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,16 +29,21 @@ public class RolePermissionController {
     @Autowired
     private RolePermissionService rolePermissionService;
 
+    @Autowired
+    private PermissionItemProperties permissionItem;
+
     /**
-     * 列表
+     * 返回权限 列表
      */
-    @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
-        PageUtils page = rolePermissionService.queryPage(params);
-
-        return Result.ok().put("page", page);
+    @GetMapping("/getPermissionItem")
+    public Result getPermissionItem(){
+        NewUserVo userVo = new NewUserVo();
+        userVo.setArticlePermission(new ArrayList<>(permissionItem.getArticlePermission().values()));
+        userVo.setTagPermission(new ArrayList<>(permissionItem.getTagPermission().values()));
+        userVo.setCommentPermission(new ArrayList<>(permissionItem.getCommentPermission().values()));
+        userVo.setSettingPermission(new ArrayList<>(permissionItem.getSettingPermission().values()));
+        return Result.ok().setData(userVo);
     }
-
 
     /**
      * 信息

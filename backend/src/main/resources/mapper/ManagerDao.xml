@@ -6,7 +6,7 @@
 	<!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="com.freedy.backend.entity.ManagerEntity" id="managerMap">
         <result property="id" column="id"/>
-        <result property="name" column="name"/>
+        <result property="name" column="nickname"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
         <result property="headImg" column="head_img"/>

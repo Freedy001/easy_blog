@@ -1,6 +1,11 @@
 package com.freedy.backend.config.security;
 
+import com.alibaba.fastjson.JSON;
 import com.freedy.backend.common.utils.JwtTokenUtil;
+import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.constant.RedisConstant;
+import com.freedy.backend.enumerate.ResultCode;
+import com.freedy.backend.properties.JwtProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author Freedy
@@ -21,9 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @Component
 public class MyLogoutHandler implements LogoutHandler {
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
     @Autowired
     private JwtProperties jwtProperties;
 
@@ -36,13 +39,6 @@ public class MyLogoutHandler implements LogoutHandler {
                        Authentication authentication) {
         String token = request.getHeader(jwtProperties.getHeader());
         String username = util.getUsernameFromToken(token);
-        if(redisTemplate.delete(username)){
-            log.debug("logout header Token {}",token);
-            log.debug("logout request method{}",request.getMethod());
-            if (StringUtils.hasText(token)) {
-                log.debug("authentication {}",authentication);
-                SecurityContextHolder.clearContext();
-            }
-        }
+        log.info("用户{}准备退出登录！",username);
     }
 }

@@ -2,6 +2,10 @@ import { RouteRecordRaw, createRouter,createWebHashHistory } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
     {
+        path: "/",
+        redirect:'/login',
+    },
+    {
         path: "/login",
         component:()=>import('../view/Login.vue'),
         meta:{
@@ -51,16 +55,16 @@ const router= createRouter({
 })
 
 
-// router.beforeEach((to, from, next) => {
-//     if (!to.meta.requireAuth) {
-//         if (localStorage.getItem("Authorization")) {  // 是否已登录
-//             next()
-//         } else {
-//             next({ path: '/login' })
-//         }
-//     } else {
-//         next()
-//     }
-// })
+router.beforeEach((to, from, next) => {
+    if (!to.meta.requireAuth) {
+        if (localStorage.getItem("Authorization")) {  // 是否已登录
+            next()
+        } else {
+            next({ path: '/login' })
+        }
+    } else {
+        next()
+    }
+})
 
 export default router

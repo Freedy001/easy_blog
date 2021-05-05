@@ -44,5 +44,15 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 根绝id批量删除
      */
     void deleteArticle(List<Long> singletonList);
+
+    /**
+     * 获取该用户的总访问量
+     */
+    Long getTotalVisit();
+
+    /**
+     * 获取该用户的文章的总评论数
+     */
+    Long getTotalComment();
 }
 

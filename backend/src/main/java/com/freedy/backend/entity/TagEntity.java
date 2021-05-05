@@ -32,6 +32,9 @@ public class TagEntity implements Serializable {
 	@ApiModelProperty("标签图片---可为空")
 	private String tagImgUrl;
 
+	@ApiModelProperty("创建者")
+	private Integer creatorId;
+
 	@ApiModelProperty("越小优先级越高")
 	private Integer priority;
 

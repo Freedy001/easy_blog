@@ -3,6 +3,7 @@ package com.freedy.backend.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.RolePermissionEntity;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
 
@@ -16,5 +17,10 @@ import java.util.Map;
 public interface RolePermissionService extends IService<RolePermissionEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 根据管理员id查询权限 返回结果以逗号分割
+     */
+    String getPermissionsByManagerId(Integer id);
 }
 

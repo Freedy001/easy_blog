@@ -28,29 +28,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 @TableName("blog_manager")
 public class ManagerEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
-
 	@ApiModelProperty("主键")
 	@TableId(type = IdType.AUTO)
 	private Integer id;
-
-	@ApiModelProperty("名称")
-	private String name;
-
+	@ApiModelProperty("昵称")
+	private String nickname;
 	@ApiModelProperty("用户名")
 	private String username;
-
 	@ApiModelProperty("密码")
 	private String password;
-
+	@ApiModelProperty("邮箱")
+	private String email;
+	@ApiModelProperty("个人说明")
+	private String introduce;
 	@ApiModelProperty("头像")
 	private String headImg;
-
 	@ApiModelProperty("创建时间")
 	private Long createTime;
-
 	@ApiModelProperty("更新时间")
 	private Long updateTime;
-
+	//状态 1主管理员 2启用 3启用
 	@ApiModelProperty("状态")
 	private Integer status;
 }
