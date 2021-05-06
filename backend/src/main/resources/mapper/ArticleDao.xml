@@ -29,7 +29,7 @@
         <result property="visitNum" column="visit_num"/>
         <result property="commentNum" column="comment_num"/>
         <result property="likeNum" column="like_num"/>
-        <result property="authorName" column="author_name"/>
+        <result property="authorName" column="author_id"/>
         <result property="updateTime" column="update_time"/>
         <collection property="articleTags" javaType="list" ofType="string">
             <result column="tag_name"/>
@@ -48,6 +48,19 @@
                  left join blog_article_tag_relation relation on article.id = relation.article_id
                  left join blog_tag tag on tag.id = relation.tag_id
     </select>
+
+    <select id="queryArticleListByAuthorId"  resultMap="ArticleInfoMap">
+        <bind name="key_offset" value="(page.currPage-1)*page.pageSize"></bind>
+        select article.id,article.title,article.article_status,category.category_name,
+        article.article_desc,article.comment_num,article.visit_num,article.like_num,
+        article.author_id,article.publish_time,article.update_time,tag.tag_name
+        from (select * from blog_article where author_id=#{id} limit #{key_offset},#{page.pageSize} )as article
+        left join blog_category as category on article.article_category_id=category.id
+        left join blog_article_tag_relation relation on article.id = relation.article_id
+        left join blog_tag tag on tag.id = relation.tag_id
+    </select>
+
+
 
     <select id="getCount" resultType="java.lang.Long">
         select count(*) from blog_article;

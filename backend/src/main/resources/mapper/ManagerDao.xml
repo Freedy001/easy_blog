@@ -2,17 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.freedy.backend.dao.ManagerDao">
-
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.freedy.backend.entity.ManagerEntity" id="managerMap">
-        <result property="id" column="id"/>
-        <result property="name" column="nickname"/>
-        <result property="username" column="username"/>
-        <result property="password" column="password"/>
-        <result property="headImg" column="head_img"/>
-        <result property="createTime" column="create_time"/>
-        <result property="status" column="status"/>
-    </resultMap>
-
+    <select id="getUsernamesByIds" resultType="java.lang.String">
+        select username from blog_manager where id in
+        (
+        <foreach collection="list" separator="," item="item">
+            #{item}
+        </foreach>
+        )
+    </select>
 
 </mapper>

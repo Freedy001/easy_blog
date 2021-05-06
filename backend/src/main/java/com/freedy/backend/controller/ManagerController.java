@@ -14,9 +14,11 @@ import com.freedy.backend.entity.vo.NewUserVo;
 import com.freedy.backend.entity.vo.UserInfoVo;
 import com.freedy.backend.entity.vo.UserPasswordVo;
 import com.freedy.backend.enumerate.ResultCode;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,37 +45,31 @@ public class ManagerController {
     private PasswordEncoder passwordEncoder;
 
 
-    /**
-     * 列表
-     */
-    @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params) {
-        PageUtils page = managerService.queryPage(params);
-        return Result.ok().put("page", page);
-    }
-
-
-    /**
-     * 信息
-     */
+    @ApiOperation("查询当前用户消息")
     @GetMapping("/getUserInfo")
     public Result info() throws ExecutionException, InterruptedException {
         UserInfoVo infoVo = managerService.getUserInfo();
         return Result.ok().setData(infoVo);
     }
-
-    /**
-     * 创建新管理员
-     */
-    @PostMapping("/createManager")
-    public Result createManager(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
-        managerService.createManager(manager);
-        return Result.ok();
+    @ApiOperation("修改个人用户密码")
+    @PostMapping("/updateUserPassword")
+    public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {
+        ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
+        if (passwordEncoder.matches(passwordVo.getOldPassword(), oldUserEntity.getPassword())) {
+            //旧密码匹配成功 用户名需要下线
+            redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + oldUserEntity.getUsername());
+            ManagerEntity entity = new ManagerEntity();
+            entity.setId(oldUserEntity.getId());
+            entity.setPassword(passwordEncoder.encode(passwordVo.getNewPassword()));
+            managerService.updateById(entity);
+            return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
+                    ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
+        }
+        return Result.error(ResultCode.OLD_PASSWORD_NOT_CORRECT.getCode(),
+                ResultCode.OLD_PASSWORD_NOT_CORRECT.getMessage());
     }
 
-    /**
-     * 修改用户信息
-     */
+    @ApiOperation("修改用户个人信息")
     @PostMapping("/updateUserInfo")
     public Result updateUserInfo(@RequestBody ManagerEntity manager) {
         ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
@@ -109,30 +105,36 @@ public class ManagerController {
         return result;
     }
 
-    @PostMapping("/updateUserPassword")
-    public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {
-        ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
-        if (passwordEncoder.matches(passwordVo.getOldPassword(), oldUserEntity.getPassword())) {
-            //旧密码匹配成功 用户名需要下线
-            redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + oldUserEntity.getUsername());
-            ManagerEntity entity = new ManagerEntity();
-            entity.setId(oldUserEntity.getId());
-            entity.setPassword(passwordEncoder.encode(passwordVo.getNewPassword()));
-            managerService.updateById(entity);
-            return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
-                    ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
-        }
-        return Result.error(ResultCode.OLD_PASSWORD_NOT_CORRECT.getCode(),
-                ResultCode.OLD_PASSWORD_NOT_CORRECT.getMessage());
+    @ApiOperation("列出所有用户")
+    @PreAuthorize("hasAuthority('user-manager')")
+    @GetMapping("/list")
+    public Result list(@RequestParam Map<String, Object> params) {
+        PageUtils page = managerService.queryPage(params);
+        return Result.ok().put("page", page);
     }
 
-    /**
-     * 删除
-     */
-    @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids) {
-        managerService.removeByIds(Arrays.asList(ids));
+    @PreAuthorize("hasAuthority('user-manager')")
+    @ApiOperation("回显用户的权限等账号信息")
+    @GetMapping("/getUserImportantInfo")
+    public Result getUserImportantInfo(@RequestParam("id") Integer id) throws Exception {
+        NewUserVo userVo=managerService.getUserImportantInfo(id);
+        return Result.ok().setData(userVo);
+    }
 
+    @ApiOperation("创建新管理员")
+    @PreAuthorize("hasAuthority('user-manager')")
+    @PostMapping("/createOrUpdateManager")
+    public Result createOrUpdateManager(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
+        managerService.createOrUpdateManager(manager);
+        return Result.ok();
+    }
+
+
+    @ApiOperation("删除用户")
+    @PreAuthorize("hasAuthority('user-permission-manager')")
+    @GetMapping("/delete")
+    public Result delete(@RequestParam Integer[] ids) {
+        managerService.deleteUserByIds(Arrays.asList(ids));
         return Result.ok();
     }
 

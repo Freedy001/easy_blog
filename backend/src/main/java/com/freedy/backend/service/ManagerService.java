@@ -6,6 +6,7 @@ import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.entity.vo.NewUserVo;
 import com.freedy.backend.entity.vo.UserInfoVo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -28,7 +29,16 @@ public interface ManagerService extends IService<ManagerEntity> {
     /**
      * 创建用户
      */
-    void createManager(NewUserVo manager) throws ExecutionException, InterruptedException;
+    void createOrUpdateManager(NewUserVo manager) throws ExecutionException, InterruptedException;
 
+    /**
+     * 根据id删除用户
+     */
+    void deleteUserByIds(List<Integer> ids);
+
+    /**
+     * 获取用户 重要的消息 如账号邮箱权限等等
+     */
+    NewUserVo getUserImportantInfo(Integer id) throws Exception;
 }
 

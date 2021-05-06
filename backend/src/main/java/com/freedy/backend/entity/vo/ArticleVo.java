@@ -27,6 +27,9 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("发布时间")
     private long publishTime;
 
+    @ApiModelProperty("文章作者的id")
+    private Integer authorId;
+
     @ApiModelProperty("是否开启评论")
     private Boolean isComment;//这里一定要使用包装类 不然传值时会发生数据错误
 

@@ -5,6 +5,7 @@ import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.RolePermissionEntity;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,5 +23,11 @@ public interface RolePermissionService extends IService<RolePermissionEntity> {
      * 根据管理员id查询权限 返回结果以逗号分割
      */
     String getPermissionsByManagerId(Integer id);
+
+    /**
+     * 根据用户id删除与该用户绑定的权限
+     */
+    void deletePermissionByUserIds(List<Integer> ids);
+
 }
 

@@ -28,8 +28,11 @@ public enum ResultCode {
     USER_CERTIFICATE_HAS_BEEN_CHANGED(2002, "用户凭证已被修改，请重新登录！"),
     OLD_PASSWORD_NOT_CORRECT(2003, "旧密码不正确！"),
 
+    /* 文件错误 */
+    FILE_IS_EMPTY(4000,"文件为空"),
+
     /* 业务错误 */
-    TAG_HAS_BEEN_USED(3000,"该标签已经被其他文章所引用！"),
+    TAG_HAS_BEEN_USED(3000,"该值被其他地方所引用！"),
     NO_PERMISSION(3001, "没有权限");
     private final Integer code;
     private final String message;

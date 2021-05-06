@@ -4,6 +4,8 @@ import com.freedy.backend.entity.ManagerEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 管理员表
  * 
@@ -13,5 +15,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ManagerDao extends BaseMapper<ManagerEntity> {
-	
+
+    List<String>  getUsernamesByIds(List<Integer> ids);
 }

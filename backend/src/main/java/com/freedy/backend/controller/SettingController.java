@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.freedy.backend.common.utils.Result;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +26,7 @@ public class SettingController {
     @Autowired
     private SettingService settingService;
 
-    /**
-     * 列表
-     */
+    @ApiOperation("返回权限列表")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params){
         PageUtils page = settingService.queryPage(params);
@@ -36,9 +35,7 @@ public class SettingController {
     }
 
 
-    /**
-     * 信息
-     */
+    @ApiOperation("返回权限列表")
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Integer id){
 		SettingEntity setting = settingService.getById(id);
@@ -46,9 +43,7 @@ public class SettingController {
         return Result.ok().put("setting", setting);
     }
 
-    /**
-     * 保存
-     */
+    @ApiOperation("返回权限列表")
     @PostMapping("/save")
     public Result save(@RequestBody SettingEntity setting){
 		settingService.save(setting);
@@ -56,9 +51,7 @@ public class SettingController {
         return Result.ok();
     }
 
-    /**
-     * 修改
-     */
+    @ApiOperation("返回权限列表")
     @PostMapping("/update")
     public Result update(@RequestBody SettingEntity setting){
 		settingService.updateById(setting);
@@ -66,9 +59,7 @@ public class SettingController {
         return Result.ok();
     }
 
-    /**
-     * 删除
-     */
+    @ApiOperation("返回权限列表")
     @GetMapping("/delete")
     public Result delete(@RequestBody Integer[] ids){
 		settingService.removeByIds(Arrays.asList(ids));

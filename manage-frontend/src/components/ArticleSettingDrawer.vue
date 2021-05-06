@@ -95,13 +95,13 @@
 				<el-button @click="drawer=false">取消</el-button>
 			</div>
 		</div>
-		<el-drawer
-				:size="400"
-				title="选择图片"
-				:append-to-body="true"
-				v-model="innerDrawer">
-			<p>_(:зゝ∠)_</p>
-		</el-drawer>
+<!--		<el-drawer-->
+<!--				:size="400"-->
+<!--				title="选择图片"-->
+<!--				:append-to-body="true"-->
+<!--				v-model="innerDrawer">-->
+<!--			<p>_(:зゝ∠)_</p>-->
+<!--		</el-drawer>-->
 	</el-drawer>
 	<teleport to="body">
 		<div class="full-screen" v-if="showCard" @click="showCard=false">
@@ -139,6 +139,7 @@ interface originalForm {
 	isComment: boolean,
 	isOverhead: boolean,
 	category: number,
+	authorId: number,
 	desc: string,
 	tagValue: Array<any>,
 	url: string
@@ -149,6 +150,7 @@ let form = reactive<originalForm>({
 	publishTime: new Date(),
 	isComment: true,
 	isOverhead: false,
+	authorId: 0,
 	category: 0,
 	desc: '',
 	tagValue: [],
@@ -235,11 +237,12 @@ async function onSave() {
 	proxy.$emit('saveCallback',form);
 	drawer.value=false//关闭抽屉！
 }
-
+//后台传来的数据接口
 interface formData{
 	title: string,
 	content: string,
 	publishTime: Date,
+	authorId: number,
 	isComment: boolean,
 	isOverhead: boolean,
 	articleCategoryId: number,
@@ -310,6 +313,7 @@ async function initDate(){
 		form.desc=info.articleDesc
 		form.tagValue=info.existedTags
 		form.url=info.articlePoster
+		form.authorId=info.authorId
 		proxy.$emit('content',info.content);
 	}
 }

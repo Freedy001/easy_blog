@@ -21,7 +21,10 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual #手动确认消息
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 easy:
   thread:
@@ -30,25 +33,17 @@ easy:
     keep-alive-time: 10
   PermissionItem:
     article-permission:
-      article-self: 可操作自己
-      article-visible-to-others: 可见他人
       article-operation-to-others: 可操作他人
-    tag-permission:
-      tag-self: 可操作自己
-      tag-operation-to-others: 可操作他人
     comment-permission:
-      comment-self: 可操作自己
-      comment-visible-to-others: 可见他人
       comment-operation-to-others: 可操作他人
+    user-permission:
+      user-manager: 可管理用户(非权限)
+      user-permission-manager: 可管理用户权限
     setting-permission:
       setting-normal: 常规设置
       setting-comment: 评论设置
       setting-smtp: SMTP设置
       setting-attachment : 附件设置
-
-
-
-
   jwt:
     header: Authorization
     base64-secret: sanbayan

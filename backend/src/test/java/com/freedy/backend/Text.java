@@ -15,12 +15,9 @@ import java.util.Set;
  */
 public class Text {
     public static void main(String[] args) {
-        HashSet<Integer> set1 = new HashSet<>(Arrays.asList(1, 2, 3, 455, 6));
-        System.out.println(set1);
-        Set<Object> set = Collections.unmodifiableSet(set1);
-        System.out.println(set);
-        set.add(2);
-        System.out.println(set);
+        HashSet<String> set1 = new HashSet<>(Arrays.asList("1", "2", "3", "455", "6"));
+        System.out.println(set1.contains("1"));
+
     }
 }
 

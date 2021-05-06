@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.freedy.backend.common.utils.Result;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +26,7 @@ public class VisitorController {
     @Autowired
     private VisitorService visitorService;
 
-    /**
-     * 列表
-     */
+    @ApiOperation("列出所有标签")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params){
         PageUtils page = visitorService.queryPage(params);
@@ -36,9 +35,7 @@ public class VisitorController {
     }
 
 
-    /**
-     * 信息
-     */
+    @ApiOperation("列出所有标签")
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long id){
 		VisitorEntity visitor = visitorService.getById(id);
@@ -46,9 +43,7 @@ public class VisitorController {
         return Result.ok().put("visitor", visitor);
     }
 
-    /**
-     * 保存
-     */
+    @ApiOperation("列出所有标签")
     @PostMapping("/save")
     public Result save(@RequestBody VisitorEntity visitor){
 		visitorService.save(visitor);
@@ -56,9 +51,7 @@ public class VisitorController {
         return Result.ok();
     }
 
-    /**
-     * 修改
-     */
+    @ApiOperation("列出所有标签")
     @PostMapping("/update")
     public Result update(@RequestBody VisitorEntity visitor){
 		visitorService.updateById(visitor);
@@ -66,9 +59,7 @@ public class VisitorController {
         return Result.ok();
     }
 
-    /**
-     * 删除
-     */
+    @ApiOperation("列出所有标签")
     @GetMapping("/delete")
     public Result delete(@RequestBody Long[] ids){
 		visitorService.removeByIds(Arrays.asList(ids));

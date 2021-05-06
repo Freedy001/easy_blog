@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * 角色权限表
  * 
@@ -16,4 +18,7 @@ import org.apache.ibatis.annotations.Param;
 public interface RolePermissionDao extends BaseMapper<RolePermissionEntity> {
 
     String getPermissionsByManagerId(@Param("id") Integer id);
+
+    void deletePermissionByUserIds(List<Integer> ids);
+
 }

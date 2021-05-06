@@ -28,14 +28,12 @@ export async function logout(){
             showClose: true,
             message: data.msg,
         });
-        return true
     }else {
         ElMessage({
             showClose: true,
             message: data.msg,
             type: 'error'
         });
-        return false
     }
 }
 
@@ -45,6 +43,10 @@ export async function get(uri:string) {
     const {data} =await axios.get(baseURL+uri,{
         headers: {'Authorization': authorization}
     });
+    if (data.code==2001){
+        localStorage.removeItem("Authorization")
+        location.href="/"
+    }
     return data
 }
 
@@ -53,6 +55,10 @@ export async function post(uri:string,dataFiled:any) {
     const {data} =await axios.post(baseURL+uri,dataFiled,{
         headers: {'Authorization': authorization}
     });
+    if (data.code==2001){
+        localStorage.removeItem("Authorization")
+        location.href="/"
+    }
     return data
 }
 

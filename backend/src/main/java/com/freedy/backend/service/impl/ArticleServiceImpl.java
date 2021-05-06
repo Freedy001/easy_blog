@@ -5,16 +5,21 @@ import com.freedy.backend.common.utils.*;
 import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.ArticleTagRelationEntity;
+import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.entity.TagEntity;
 import com.freedy.backend.entity.dto.EsTypeDto;
 import com.freedy.backend.entity.vo.ArticleDraftVo;
 import com.freedy.backend.entity.vo.ArticleVo;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
+import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.service.ArticleTagRelationService;
 import com.freedy.backend.service.TagService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,14 +47,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-
-
     @Override
     public PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils page = new PageUtils(params);
+        String permission = Local.PERMISSION_LOCAL.get();
+        ManagerEntity entity = Local.MANAGER_LOCAL.get();
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
-            List<ArticleInfoVo> articleList = baseMapper.queryArticleList(page);
-
+            List<ArticleInfoVo> articleList;
+            if (AuthorityUtils.hasAuthority("article-operation-to-others",permission)){
+                articleList = baseMapper.queryArticleList(page);
+            }else {
+                articleList = baseMapper.queryArticleListByAuthorId(page,entity.getId());
+            }
             articleList.forEach(item -> {
                 //设置日期
                 Date date = new Date();
@@ -68,15 +77,24 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         return page;
     }
 
+
+
     @Override
     @Transactional
     public void saveArticle(ArticleVo article) throws ExecutionException, InterruptedException {
+        if (article.getId()!=null&&
+                !article.getAuthorId().equals(Local.MANAGER_LOCAL.get().getId())&&
+                !AuthorityUtils.hasAuthority("article-operation-to-others")
+        ) throw new NoPermissionsException("没有权限修改");
+
         log.debug(article.toString());
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
         //获取作者消息
-        entity.setAuthorId(authorId);
+        if (article.getId() == null) {
+            entity.setAuthorId(authorId);
+        }
         entity.setArticleStatus(article.getIsOverhead() ?
                 EntityConstant.ARTICLE_Overhead : EntityConstant.ARTICLE_PUBLISHED);
         entity.setArticleComment(article.getIsComment() ?

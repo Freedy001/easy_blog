@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +23,8 @@ public class PermissionItemProperties implements Serializable {
      * settingPermission : ["常规设置","评论设置","SMTP设置","附件设置"]
      */
     private Map<String, String> articlePermission;
-    private Map<String, String> tagPermission;
     private Map<String, String> commentPermission;
+    private Map<String, String> userPermission;
     private Map<String, String> settingPermission;
+
 }

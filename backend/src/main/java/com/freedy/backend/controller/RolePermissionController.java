@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.entity.vo.NewUserVo;
 import com.freedy.backend.properties.PermissionItemProperties;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,22 +33,18 @@ public class RolePermissionController {
     @Autowired
     private PermissionItemProperties permissionItem;
 
-    /**
-     * 返回权限 列表
-     */
+    @ApiOperation("返回权限列表")
     @GetMapping("/getPermissionItem")
     public Result getPermissionItem(){
         NewUserVo userVo = new NewUserVo();
         userVo.setArticlePermission(new ArrayList<>(permissionItem.getArticlePermission().values()));
-        userVo.setTagPermission(new ArrayList<>(permissionItem.getTagPermission().values()));
         userVo.setCommentPermission(new ArrayList<>(permissionItem.getCommentPermission().values()));
+        userVo.setUserPermission(new ArrayList<>(permissionItem.getUserPermission().values()));
         userVo.setSettingPermission(new ArrayList<>(permissionItem.getSettingPermission().values()));
         return Result.ok().setData(userVo);
     }
 
-    /**
-     * 信息
-     */
+    @ApiOperation("列出")
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Integer id){
 		RolePermissionEntity rolePermission = rolePermissionService.getById(id);
@@ -55,9 +52,7 @@ public class RolePermissionController {
         return Result.ok().put("rolePermission", rolePermission);
     }
 
-    /**
-     * 保存
-     */
+    @ApiOperation("保存")
     @PostMapping("/save")
     public Result save(@RequestBody RolePermissionEntity rolePermission){
 		rolePermissionService.save(rolePermission);
@@ -65,9 +60,7 @@ public class RolePermissionController {
         return Result.ok();
     }
 
-    /**
-     * 修改
-     */
+    @ApiOperation("修改")
     @PostMapping("/update")
     public Result update(@RequestBody RolePermissionEntity rolePermission){
 		rolePermissionService.updateById(rolePermission);
@@ -75,9 +68,7 @@ public class RolePermissionController {
         return Result.ok();
     }
 
-    /**
-     * 删除
-     */
+    @ApiOperation("删除")
     @GetMapping("/delete")
     public Result delete(@RequestBody Integer[] ids){
 		rolePermissionService.removeByIds(Arrays.asList(ids));

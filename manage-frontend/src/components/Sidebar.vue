@@ -71,9 +71,8 @@ const scale = ref(false)
 const router = useRouter();
 
 async function lg() {
-	if (await logout()){
-		await router.push('/login')
-	}
+	await logout()
+	await router.push('/login')
 }
 
 </script>

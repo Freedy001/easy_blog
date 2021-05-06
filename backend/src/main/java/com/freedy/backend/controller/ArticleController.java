@@ -32,7 +32,6 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @PreAuthorize("hasAuthority('article-self')")
     @ApiOperation("列出所有文章")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -40,14 +39,12 @@ public class ArticleController {
         return Result.ok().setData(page);
     }
 
-    @PreAuthorize("hasAuthority('article-self')")
     @ApiOperation("查出文章详细详细")
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long id){
         return Result.ok().setData(articleService.getArticle(id));
     }
 
-    @PreAuthorize("hasAuthority('article-self')")
     @ApiOperation("保存或修改文章")
     @PostMapping("/saveOrUpdate")
     public Result saveOrUpdate(@RequestBody ArticleVo article) throws ExecutionException, InterruptedException {
@@ -57,7 +54,6 @@ public class ArticleController {
         return Result.ok();
     }
 
-    @PreAuthorize("hasAuthority('article-self')")
     @ApiOperation("保存文章为草稿")
     @PostMapping("/saveDraft")
     public Result saveDraft(@RequestBody ArticleDraftVo draftVo){
@@ -65,7 +61,6 @@ public class ArticleController {
         return Result.ok();
     }
 
-    @PreAuthorize("hasAuthority('article-self')")
     @ApiOperation("删除文章")
     @GetMapping("/delete")
     public Result delete(@RequestParam Long[] ids){

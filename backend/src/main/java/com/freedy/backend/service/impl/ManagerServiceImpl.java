@@ -1,16 +1,20 @@
 package com.freedy.backend.service.impl;
 
+import com.freedy.backend.common.utils.AuthorityUtils;
 import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.constant.EntityConstant;
+import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.*;
 import com.freedy.backend.entity.vo.NewUserVo;
 import com.freedy.backend.entity.vo.UserInfoVo;
 import com.freedy.backend.enumerate.SettingEnum;
+import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.properties.PermissionItemProperties;
 import com.freedy.backend.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,10 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -58,13 +59,15 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     private RolePermissionService permissionService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<ManagerEntity> page = this.page(
                 new Query<ManagerEntity>().getPage(params),
-                new QueryWrapper<ManagerEntity>()
+                new QueryWrapper<>()
         );
         List<UserInfoVo> userInfoVos = page.getRecords().stream().map(item -> {
             UserInfoVo infoVo = new UserInfoVo();
@@ -94,7 +97,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         //获取创建时长
         long timeLong = System.currentTimeMillis() - userEntity.getCreateTime();
         infoVo.setCreateDuration((timeLong / (1000 * 60 * 60 * 24)) + "天");
-        if (userEntity.getStatus().equals(EntityConstant.ROOT_ADMIN)){
+        if (userEntity.getStatus().equals(EntityConstant.ROOT_ADMIN)) {
             infoVo.setRootAdmin(true);
         }
         //获取主页uri
@@ -123,11 +126,11 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             //让子线程也能获取到MANAGER_LOCAL里面的值
             Local.MANAGER_LOCAL.set(userEntity);
             Long totalComment = articleService.getTotalComment();
-            infoVo.setTotalComment(totalComment==null?0:totalComment);
+            infoVo.setTotalComment(totalComment == null ? 0 : totalComment);
         }, executor);
         //获取访问总数
         Long totalVisit = articleService.getTotalVisit();
-        infoVo.setTotalVisit(totalVisit==null?0:totalVisit);
+        infoVo.setTotalVisit(totalVisit == null ? 0 : totalVisit);
         CompletableFuture.allOf(f2, f3, f4, f5, f6).get();
         return infoVo;
     }
@@ -135,48 +138,147 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     @SuppressWarnings("unchecked")
     @Override
     @Transactional
-    public void createManager(NewUserVo manager) throws ExecutionException, InterruptedException {
-        long time = System.currentTimeMillis();
-        ManagerEntity entity = new ManagerEntity();
-        String encodedPassword = passwordEncoder.encode(manager.getPassword());
-        manager.setPassword(encodedPassword);
-        BeanUtils.copyProperties(manager, entity);
-        entity.setCreateTime(time);
-        entity.setUpdateTime(time);
-        baseMapper.insert(entity);
-        long middleTime = System.currentTimeMillis();
-        log.debug("baseMapper.insert(entity)耗时{}", middleTime- time);
-        ArrayList<RolePermissionEntity> userPermissionList = new ArrayList<>();
-        for (Field field : manager.getClass().getDeclaredFields()) {
-            if(field.getType().getSimpleName().equals("List")){
-                try {
-                    //中文权限列表
-                    field.setAccessible(true);
-                    List<String> cnPermission = (List<String>) field.get(manager);
-                    Field translateFiled = permissionItem.getClass().getDeclaredField(field.getName());
-                    translateFiled.setAccessible(true);
-                    //获取翻译map
-                    Map<String, String> translateMap = (Map<String, String>) translateFiled.get(permissionItem);
-                    translateMap.forEach((k,v)->{
-                        for (String cName : cnPermission) {
-                            if (v.equals(cName)){
-                                //匹配成功 将权限信息放入list中
-                                RolePermissionEntity permissionEntity = new RolePermissionEntity();
-                                permissionEntity.setManagerId(entity.getId());
-                                permissionEntity.setPermissionValue(k);
-                                userPermissionList.add(permissionEntity);
-                                break;
+    public void createOrUpdateManager(NewUserVo manager) throws ExecutionException, InterruptedException {
+        if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
+            //没有管理用户权限的的权限
+            try {
+                for (Field field : manager.getClass().getDeclaredFields()) {
+                    if (field.getType().getSimpleName().equals("List")) {
+                        field.setAccessible(true);
+                        List<String> list = (List<String>) field.get(manager);
+                        try {
+                            if (list.size() > 0) {
+                                throw new NoPermissionsException();
                             }
+                        } catch (NullPointerException ignore) {
                         }
-                    });
-                } catch (IllegalAccessException | NoSuchFieldException e) {
-                    e.printStackTrace();
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        log.debug("userPermissionList构建时长{}", System.currentTimeMillis() - middleTime);
-        permissionService.saveBatch(userPermissionList);
-        log.debug("createManager总耗时{}", System.currentTimeMillis()-time);
+        long time = System.currentTimeMillis();
+        ManagerEntity entity = new ManagerEntity();
+        if (manager.getId() == null) {
+            String encodedPassword = passwordEncoder.encode(manager.getPassword());
+            manager.setPassword(encodedPassword);
+            entity.setCreateTime(time);
+        }
+        BeanUtils.copyProperties(manager, entity);
+        entity.setUpdateTime(time);
+        CompletableFuture<Void> f1 = null;
+        CompletableFuture<Void> f2 = null;
+        if (manager.getId() == null) {
+            baseMapper.insert(entity);
+        } else {
+            if (entity.getPassword() != null) {
+                entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+            }
+            f1 = CompletableFuture.runAsync(() -> baseMapper.updateById(entity), executor);
+            if (AuthorityUtils.hasAuthority("user-permission-manager")) {
+                f2 = CompletableFuture.runAsync(() -> permissionService.deletePermissionByUserIds(Collections.singletonList(entity.getId())));
+            }
+        }
+        if (AuthorityUtils.hasAuthority("user-permission-manager")) {
+            long middleTime = System.currentTimeMillis();
+            log.debug("baseMapper.insert(entity)耗时{}", middleTime - time);
+            ArrayList<RolePermissionEntity> userPermissionList = new ArrayList<>();
+            for (Field field : manager.getClass().getDeclaredFields()) {
+                if (field.getType().getSimpleName().equals("List")) {
+                    try {
+                        //中文权限列表
+                        field.setAccessible(true);
+                        List<String> cnPermission = (List<String>) field.get(manager);
+                        Field translateFiled = permissionItem.getClass().getDeclaredField(field.getName());
+                        translateFiled.setAccessible(true);
+                        //获取翻译map
+                        Map<String, String> translateMap = (Map<String, String>) translateFiled.get(permissionItem);
+                        translateMap.forEach((k, v) -> {
+                            for (String cName : cnPermission) {
+                                if (v.equals(cName)) {
+                                    //匹配成功 将权限信息放入list中
+                                    RolePermissionEntity permissionEntity = new RolePermissionEntity();
+                                    permissionEntity.setManagerId(entity.getId());
+                                    permissionEntity.setPermissionValue(k);
+                                    userPermissionList.add(permissionEntity);
+                                    break;
+                                }
+                            }
+                        });
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            log.debug("userPermissionList构建时长{}", System.currentTimeMillis() - middleTime);
+            if (f2!=null){
+                f2.get();//忽略空指针异常
+            }
+            permissionService.saveBatch(userPermissionList);
+            if (manager.getId() != null) {
+                //如果时修改的话 要让该用户下线
+                redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + entity.getUsername());
+            }
+            log.debug("createManager总耗时{}", System.currentTimeMillis() - time);
+            if (f1!=null){
+                f1.get();//忽略空指针异常
+            }
+        }
+    }
+
+    @Override
+    public void deleteUserByIds(List<Integer> ids) {
+        List<Integer> list = ids.stream().filter(i -> i != 1).collect(Collectors.toList());
+        List<String> usernames=baseMapper.getUsernamesByIds(list);
+        for (String username : usernames) {
+            //退出登录
+            AuthorityUtils.logout(username);
+        }
+        permissionService.deletePermissionByUserIds(list);
+        baseMapper.deleteBatchIds(list);
+    }
+
+    @Override
+    public NewUserVo getUserImportantInfo(Integer id) throws Exception {
+        NewUserVo userVo = new NewUserVo();
+        String permissionStr;
+        CompletableFuture<Void> f1=null;
+        if (id.equals(Local.MANAGER_LOCAL.get().getId())) {
+            ManagerEntity entity = Local.MANAGER_LOCAL.get();
+            permissionStr = Local.PERMISSION_LOCAL.get();
+            BeanUtils.copyProperties(entity, userVo);
+        } else {
+             f1 = CompletableFuture.runAsync(() -> {
+                ManagerEntity entity = baseMapper.selectOne(new QueryWrapper<ManagerEntity>().eq("id", id));
+                BeanUtils.copyProperties(entity, userVo);
+            });
+            permissionStr = permissionService.getPermissionsByManagerId(id);
+        }
+        //回显权限消息
+        for (Field field : userVo.getClass().getDeclaredFields()) {
+            if (field.getType().getSimpleName().equals("List")) {
+                field.setAccessible(true);
+                ArrayList<String> permissionNameList = new ArrayList<>();
+                String typeName = field.getName().replace("Permission", "");
+                for (String permission : permissionStr.split(",")) {
+                    if (permission.startsWith(typeName)) {
+                        //首字母大写
+                        String upperType = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
+                        //noinspection unchecked
+                        Map<String, String> invoke = (Map<String, String>) permissionItem.getClass().getDeclaredMethod("get" + upperType + "Permission").invoke(permissionItem);
+                        String permissionName = invoke.get(permission);
+                        permissionNameList.add(permissionName);
+                    }
+                }
+                field.set(userVo, permissionNameList);
+            }
+        }
+        userVo.setPassword("");
+        if (f1!=null){
+            f1.get();
+        }
+        return userVo;
     }
 
 

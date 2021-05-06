@@ -1,5 +1,7 @@
 package com.freedy.backend.entity.vo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,6 +13,8 @@ import lombok.Data;
 @Data
 @ApiModel("用户信息回显实体类")
 public class UserInfoVo {
+    @ApiModelProperty("主键")
+    private Integer id;
     @ApiModelProperty("用户名")
     private String username;
     @ApiModelProperty("昵称")

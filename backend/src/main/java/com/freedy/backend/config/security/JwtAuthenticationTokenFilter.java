@@ -120,6 +120,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 }
                 //将用户消息保存到threadLocal
                 Local.MANAGER_LOCAL.set(tokenInfo.getManager());
+                Local.PERMISSION_LOCAL.set(permission);
             }
 
         }

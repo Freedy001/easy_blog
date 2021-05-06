@@ -70,26 +70,26 @@ const {proxy} = getCurrentInstance();
 //按钮显示
 let showBtn = ref(false)
 //点击标签事件
-let checked = reactive([])
+let checked = reactive<Array<boolean>>([])
+interface tag{
+	id: number|string,
+	name: string,
+	url: string,
+	priority: number|string,
+}
 //表单数据
-let form = reactive({
+let form = reactive<tag>({
 	id:'',
 	name: '',
 	url: '',
 	priority: '',
 })
 //标签集合---服务器返回的数据
-interface tag{
-	id: number,
-	name: string,
-	url: string,
-	priority: number,
-}
 let tagList = reactive<Array<tag>>([{
-	id: 0,
+	id: '',
 	name: '',
 	url: '',
-	priority: 5,
+	priority: '',
 }])
 //*************form*****************
 function returnBtn() {
@@ -101,7 +101,7 @@ function returnBtn() {
 }
 
 /**
- * 添加标签或者删除标签
+ * 添加标签或者更新标签
  */
 async function insertOrUpdate(){
 	let data;
@@ -182,14 +182,14 @@ function cleanForm() {
 	form.id=''
 	form.name = ''
 	form.url = ''
-	form.priority = ''
+	form.priority =''
 }
 
 /**
  * 点击某个标签时
  * 对表单进行回显
  */
-function onChange(index) {
+function onChange(index:number) {
 	for (let i = 0; i < checked.length; i++) {
 		checked[i] = false
 	}

@@ -134,12 +134,12 @@
 						</el-table-column>
 						<el-table-column
 								label="操作">
-							<template #default>
+							<template #default="prop">
 								<el-tooltip content="设置" placement="top">
-									<i class="el-icon-setting" style="margin-right: 10px"></i>
+									<i class="el-icon-setting" style="margin-right: 10px" @click="userSetting(prop.row.id)"></i>
 								</el-tooltip>
 								<el-tooltip content="删除" placement="top">
-									<i class="el-icon-milk-tea"></i>
+									<i class="el-icon-milk-tea"  @click="userDelete(prop.row.id)"></i>
 								</el-tooltip>
 							</template>
 						</el-table-column>
@@ -171,10 +171,7 @@
 							<span>文章:</span>
 							<div class="article line">
 								<div style="display: flex;justify-content: space-between">
-									<el-switch v-model="articleEnable" active-text="启用" inactive-text="关闭">
-									</el-switch>
 									<el-checkbox style="margin-bottom: 10px"
-									             :disabled="!articleEnable"
 									             :indeterminate="selectAll.articleIsIndeterminate"
 									             v-model="selectAll.articleCheckAll"
 									             @change="handleArticleCheckAllChange">全选
@@ -182,41 +179,16 @@
 								</div>
 								<el-checkbox-group
 										v-model="newUser.articlePermission"
-										@change="handleArticleCheckedCitiesChange"
-										:disabled="!articleEnable">
+										@change="handleArticleCheckedCitiesChange">
 									<el-checkbox v-for="(item,i) in PermissionItem.articlePermission" :key="i"
 									             :label="item"></el-checkbox>
-								</el-checkbox-group>
-							</div>
-							<el-divider></el-divider>
-							<span>分类与标签:</span>
-							<div class="tagOrCategory line">
-								<div style="display: flex;justify-content: space-between">
-									<el-switch v-model="tagEnable" active-text="启用" inactive-text="关闭">
-									</el-switch>
-									<el-checkbox style="margin-bottom: 10px"
-									             :disabled="!tagEnable"
-									             :indeterminate="selectAll.tagIsIndeterminate"
-									             v-model="selectAll.tagCheckAll"
-									             @change="handleTagCheckAllChange">
-										全选
-									</el-checkbox>
-								</div>
-								<el-checkbox-group
-										v-model="newUser.tagPermission"
-										@change="handleTagCheckedCitiesChange"
-										:disabled="!tagEnable">
-									<el-checkbox v-for="(item,i) in PermissionItem.tagPermission" :key="i" :label="item"></el-checkbox>
 								</el-checkbox-group>
 							</div>
 							<el-divider></el-divider>
 							<span>评论:</span>
 							<div class="user line">
 								<div style="display: flex;justify-content: space-between">
-									<el-switch v-model="commentEnable" active-text="启用" inactive-text="关闭">
-									</el-switch>
 									<el-checkbox style="margin-bottom: 10px"
-									             :disabled="!commentEnable"
 									             :indeterminate="selectAll.commentIsIndeterminate"
 									             v-model="selectAll.commentCheckAll"
 									             @change="handleCommentCheckAllChange">全选
@@ -224,9 +196,25 @@
 								</div>
 								<el-checkbox-group
 										v-model="newUser.commentPermission"
-										@change="handleCommentCheckedCitiesChange"
-										:disabled="!commentEnable">
+										@change="handleCommentCheckedCitiesChange">
 									<el-checkbox v-for="(item,i) in PermissionItem.commentPermission" :key="i"
+									             :label="item"></el-checkbox>
+								</el-checkbox-group>
+							</div>
+							<el-divider></el-divider>
+							<span>用户:</span>
+							<div class="user line">
+								<div style="display: flex;justify-content: space-between">
+									<el-checkbox style="margin-bottom: 10px"
+									             :indeterminate="selectAll.userIsIndeterminate"
+									             v-model="selectAll.userCheckAll"
+									             @change="handleUserCheckAllChange">全选
+									</el-checkbox>
+								</div>
+								<el-checkbox-group
+										v-model="newUser.userPermission"
+										@change="handleUserCheckedCitiesChange">
+									<el-checkbox v-for="(item,i) in PermissionItem.userPermission" :key="i"
 									             :label="item"></el-checkbox>
 								</el-checkbox-group>
 							</div>
@@ -234,10 +222,7 @@
 							<span>设置:</span>
 							<div class="setting line">
 								<div style="display: flex;justify-content: space-between">
-									<el-switch v-model="settingEnable" active-text="启用" inactive-text="关闭">
-									</el-switch>
 									<el-checkbox style="margin-bottom: 10px"
-									             :disabled="!settingEnable"
 									             :indeterminate="selectAll.settingIsIndeterminate"
 									             v-model="selectAll.settingCheckAll"
 									             @change="handleSettingCheckAllChange">全选
@@ -245,8 +230,7 @@
 								</div>
 								<el-checkbox-group
 										v-model="newUser.settingPermission"
-										@change="handleSettingCheckedCitiesChange"
-										:disabled="!settingEnable">
+										@change="handleSettingCheckedCitiesChange">
 									<el-checkbox v-for="(item,i) in PermissionItem.settingPermission" :key="i"
 									             :label="item"></el-checkbox>
 								</el-checkbox-group>
@@ -255,7 +239,7 @@
 					</div>
 					<el-divider class="outer-divider"></el-divider>
 					<div class="item">
-						<el-button type="primary" @click="createNewUser">立即创建</el-button>
+						<el-button type="primary" @click="createOrUpdateNewUser">保存</el-button>
 						<el-button @click="showCard=false">取消</el-button>
 					</div>
 				</div>
@@ -348,7 +332,9 @@ let userInfoDetail: userInfo = reactive<userInfo>({
 onMounted(async () => {
 	initData().then();
 })
-
+/**
+ * 获取个人用户消息
+ */
 async function initData() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
@@ -421,7 +407,9 @@ async function changePassword() {
 		})
 	}
 }
+
 interface IUserManagement{
+	id: number
 	username: string
 	nickname: string
 	headImg: string
@@ -445,6 +433,7 @@ async function loadUserList() {
 		const data:Array<IUserManagement>=response.page.list
 		data.forEach((value, index) => {
 			userManagement.push({
+				id: value.id,
 				username: value.username,
 				nickname: value.nickname,
 				headImg: value.headImg,
@@ -467,19 +456,26 @@ let showCard = ref(false)
 
 interface IPermissionItem {
 	articlePermission: Array<string>
-	tagPermission: Array<string>
 	commentPermission: Array<string>
+	userPermission: Array<string>
 	settingPermission: Array<string>
 }
-
+//所有权限的列表
+let PermissionItem: IPermissionItem = reactive<IPermissionItem>({
+	articlePermission: [],
+	commentPermission: [],
+	userPermission: [],
+	settingPermission: [],
+});
+//打开创建新用户窗口
 async function openNewUserWindow() {
 	const response = await get('/rolePermission/getPermissionItem');
 	if (response.code == 200) {
 		showCard.value = true;
 		const item: IPermissionItem = response.data
 		PermissionItem.articlePermission = item.articlePermission
-		PermissionItem.tagPermission = item.tagPermission
 		PermissionItem.commentPermission = item.commentPermission
+		PermissionItem.userPermission = item.userPermission
 		PermissionItem.settingPermission = item.settingPermission
 	} else {
 		proxy.$notify.error({
@@ -489,69 +485,34 @@ async function openNewUserWindow() {
 	}
 }
 
-//所有权限的列表
-let PermissionItem: IPermissionItem = reactive<IPermissionItem>({
-	articlePermission: [],
-	tagPermission: [],
-	commentPermission: [],
-	settingPermission: [],
-});
-
 interface INewUser extends IPermissionItem {
-	username: string
-	password: string
-	email: string
+	id: null|number
+	username: null|number
+	password: null|number
+	email: null|number
 }
 
 //创建用户的表单
 let newUser = reactive<INewUser>({
-	username: '',
-	password: '',
-	email: '',
+	id: null,
+	username: null,
+	password: null,
+	email: null,
 	articlePermission: [],
-	tagPermission: [],
 	commentPermission: [],
+	userPermission: [],
 	settingPermission: [],
 })
 
-let articleEnable = ref(false)
-let tagEnable = ref(false)
-let commentEnable = ref(false)
-let settingEnable = ref(false)
-//当没有启用时要将数组清空
-watch(articleEnable, (val) => {
-	if (!val) {
-		newUser.articlePermission = [];
-		selectAll.articleCheckAll = false
-	}
-})
-watch(tagEnable, (val) => {
-	if (!val) {
-		newUser.tagPermission = [];
-		selectAll.tagCheckAll = false
-	}
-})
-watch(commentEnable, (val) => {
-	if (!val) {
-		newUser.commentPermission = [];
-		selectAll.commentCheckAll = false
-	}
-})
-watch(settingEnable, (val) => {
-	if (!val) {
-		newUser.settingPermission = [];
-		selectAll.settingCheckAll = false
-	}
-})
 //下面是全选功能
 let selectAll = reactive({
 	articleCheckAll: false,
-	tagCheckAll: false,
 	commentCheckAll: false,
+	userCheckAll: false,
 	settingCheckAll: false,
 	articleIsIndeterminate: false,
-	tagIsIndeterminate: false,
 	commentIsIndeterminate: false,
+	userIsIndeterminate: false,
 	settingIsIndeterminate: false,
 })
 
@@ -560,14 +521,14 @@ function handleArticleCheckAllChange(val: any) {
 	selectAll.articleIsIndeterminate = false;
 }
 
-function handleTagCheckAllChange(val: any) {
-	newUser.tagPermission = val ? PermissionItem.tagPermission : []
-	selectAll.tagIsIndeterminate = false;
-}
-
 function handleCommentCheckAllChange(val: any) {
 	newUser.commentPermission = val ? PermissionItem.commentPermission : []
 	selectAll.commentIsIndeterminate = false;
+}
+
+function handleUserCheckAllChange(val: any) {
+	newUser.userPermission = val ? PermissionItem.userPermission : []
+	selectAll.userIsIndeterminate = false;
 }
 
 function handleSettingCheckAllChange(val: any) {
@@ -581,16 +542,16 @@ function handleArticleCheckedCitiesChange(value: any) {
 	selectAll.articleIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.articlePermission.length
 }
 
-function handleTagCheckedCitiesChange(value: any) {
-	let checkedCount = value.length;
-	selectAll.tagCheckAll = checkedCount === PermissionItem.tagPermission.length;
-	selectAll.tagIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.tagPermission.length
-}
-
 function handleCommentCheckedCitiesChange(value: any) {
 	let checkedCount = value.length;
 	selectAll.commentCheckAll = checkedCount === PermissionItem.commentPermission.length;
 	selectAll.commentIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.commentPermission.length
+}
+
+function handleUserCheckedCitiesChange(value: any) {
+	let checkedCount = value.length;
+	selectAll.userCheckAll = checkedCount === PermissionItem.userPermission.length;
+	selectAll.userIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.userPermission.length
 }
 
 function handleSettingCheckedCitiesChange(value: any) {
@@ -602,9 +563,11 @@ function handleSettingCheckedCitiesChange(value: any) {
 watch(newUser, (val) => {
 	console.log(val)
 })
-
-async function createNewUser() {
-	const response = await post('/manager/createManager', newUser)
+/**
+ * 创建或更改用户
+ */
+async function createOrUpdateNewUser() {
+	const response = await post('/manager/createOrUpdateManager', newUser)
 	if (response.code == 200) {
 		proxy.$notify({
 			title: '成功',
@@ -614,6 +577,61 @@ async function createNewUser() {
 		userManagement.length=0
 		loadUserList().then();
 		showCard.value = false;
+		newUser.id=null;
+		newUser.username=null;
+		newUser.password=null;
+		newUser.email=null;
+		newUser.articlePermission=[];
+		newUser.commentPermission=[];
+		newUser.userPermission=[];
+		newUser.settingPermission=[];
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+/**
+ * 用户的相关设置 回显数据
+ */
+async function userSetting(id:number) {
+	console.log(id)
+	await openNewUserWindow()
+	const response = await get(`/manager/getUserImportantInfo?id=${id}`)
+	if (response.code == 200) {
+		const data:INewUser=response.data
+		newUser.id=data.id;
+		newUser.username=data.username;
+		newUser.email=data.email;
+		newUser.articlePermission=data.articlePermission;
+		newUser.commentPermission=data.commentPermission;
+		newUser.userPermission=data.userPermission;
+		newUser.settingPermission=data.settingPermission;
+		//打开用户消息窗口
+		showCard.value=true;
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+
+/**
+ * 删除用户
+ */
+async function userDelete(id:number) {
+	const response = await get(`/manager/delete?ids=${id}`)
+	if (response.code == 200) {
+		proxy.$notify({
+			title: '成功',
+			message: '删除成功！',
+			type: 'success'
+		})
+		userManagement.length=0
+		loadUserList().then();
 	} else {
 		proxy.$notify.error({
 			title: '错误',

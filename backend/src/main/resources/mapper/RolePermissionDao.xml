@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.freedy.backend.dao.RolePermissionDao">
+    <delete id="deletePermissionByUserIds">
+        delete from blog_role_permission where manager_id in
+        (
+        <foreach collection="list" separator="," item="item">
+            #{item}
+        </foreach>
+        )
+    </delete>
 
     <select id="getPermissionsByManagerId" resultType="java.lang.String">
         select group_concat(permission_value) from blog_role_permission where manager_id=#{id}

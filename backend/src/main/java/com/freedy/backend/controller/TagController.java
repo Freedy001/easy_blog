@@ -3,8 +3,11 @@ package com.freedy.backend.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.freedy.backend.common.utils.AuthorityUtils;
 import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.exception.NoPermissionsException;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +30,7 @@ public class TagController {
     @Autowired
     private TagService tagService;
 
-    /**
-     * 列表
-     */
+    @ApiOperation("列出所有标签")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params){
         PageUtils page = tagService.queryPage(params);
@@ -37,20 +38,7 @@ public class TagController {
     }
 
 
-    /**
-     * 信息
-     */
-    @PreAuthorize("hasAuthority('tag-self')")
-    @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Integer id){
-		TagEntity tag = tagService.getById(id);
-        return Result.ok().put("tag", tag);
-    }
-
-    /**
-     * 保存
-     */
-    @PreAuthorize("hasAuthority('tag-self')")
+    @ApiOperation("保存标签")
     @PostMapping("/save")
     public Result save(@RequestBody TagEntity tag){
         tag.setCreatorId(Local.MANAGER_LOCAL.get().getId());
@@ -58,24 +46,32 @@ public class TagController {
         return Result.ok();
     }
 
-    /**
-     * 修改
-     */
-    @PreAuthorize("hasAuthority('tag-self')")
+    @ApiOperation("修改标签")
     @PostMapping("/update")
     public Result update(@RequestBody TagEntity tag){
+        //修改他人且没权限
+        if (!tag.getCreatorId().equals(Local.MANAGER_LOCAL.get().getId())&&
+                !AuthorityUtils.hasAuthority("tag-operation-to-others"))
+            throw new NoPermissionsException();
 		tagService.updateById(tag);
         return Result.ok();
     }
 
-    /**
-     * 删除
-     */
-    @PreAuthorize("hasAuthority('tag-self')")
+    @ApiOperation("删除标签")
     @GetMapping("/delete")
     public Result delete(Integer[] ids){
-		tagService.removeByIds(Arrays.asList(ids));
-
+       boolean exception=false;
+        for (Integer id : ids) {
+            if (!id.equals(Local.MANAGER_LOCAL.get().getId())&&
+                    !AuthorityUtils.hasAuthority("tag-operation-to-others")){
+                exception=true;
+            }else {
+                tagService.removeByIds(Arrays.asList(ids));
+            }
+        }
+        if (exception){
+            throw new NoPermissionsException();
+        }
         return Result.ok();
     }
 

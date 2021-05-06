@@ -76,6 +76,7 @@ async function save(form:any){
 		publishTime: form.publishTime.getTime(),
 		isComment: form.isComment,
 		isOverhead: form.isOverhead,
+		authorId: form.authorId,
 		articleCategoryId: form.category,
 		articleDesc: form.desc,
 		articlePoster: form.url,
