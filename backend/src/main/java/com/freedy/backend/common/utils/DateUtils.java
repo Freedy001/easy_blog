@@ -19,6 +19,10 @@ public class DateUtils {	/** 时间格式(yyyy-MM-dd) */
         return format(date, DATE_TIME_PATTERN);
     }
 
+    public static String formatDate(Date date) {
+        return format(date, DATE_PATTERN);
+    }
+
     public static String format(Date date, String pattern) {
         if(date != null){
             SimpleDateFormat df = new SimpleDateFormat(pattern);

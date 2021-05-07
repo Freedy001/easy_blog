@@ -22,7 +22,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
                 new Query<CommentEntity>().getPage(params),
                 new QueryWrapper<CommentEntity>()
         );
-
         return new PageUtils(page);
     }
 

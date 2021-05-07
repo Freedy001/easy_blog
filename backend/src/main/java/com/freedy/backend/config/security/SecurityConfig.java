@@ -97,6 +97,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/webjars/**").permitAll()
                 //允许swagger-ui.html访问
                 .antMatchers("/swagger-ui.html").permitAll()
+                //允许静态文件访问
+                .antMatchers("/image/**").permitAll()
                 //配置允许匿名访问的路径
                 .anyRequest().authenticated();
         // 解决跨域问题（重要）  只有在前端请求接口时才发现需要这个

@@ -1,15 +1,9 @@
 <template>
 	<router-view></router-view>
-	<ImgDrawer></ImgDrawer>
-
 </template>
 
 <script setup lang="ts">
-import ImgDrawer from './components/ImgDrawer.vue'
-import {defineComponent} from "vue";
-defineComponent({
-	ImgDrawer
-})
+
 </script>
 
 <style lang="scss">

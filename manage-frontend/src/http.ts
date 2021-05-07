@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {ElMessage} from "element-plus";
 const baseURL=import.meta.env.DEV?"http://localhost:1000/backend":""
+const ResourceURL=import.meta.env.DEV?"http://localhost:1000":""
 export interface ILogin {
     username:string,
     password:string
@@ -37,7 +38,6 @@ export async function logout(){
     }
 }
 
-
 export async function get(uri:string) {
     const authorization = localStorage.getItem("Authorization");
     const {data} =await axios.get(baseURL+uri,{
@@ -62,3 +62,6 @@ export async function post(uri:string,dataFiled:any) {
     return data
 }
 
+export function loadResource(uri:string){
+    return ResourceURL+uri;
+}

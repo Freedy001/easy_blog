@@ -76,7 +76,7 @@ public class ManagerController {
         String originUsername = oldUserEntity.getUsername();
         manager.setId(oldUserEntity.getId());
         Result result;
-        if (!originUsername.equals(manager.getUsername())) {
+        if (manager.getUsername()!=null&&!originUsername.equals(manager.getUsername())) {
             //用户修改了用户名需要下线
             redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + originUsername);
             managerService.updateById(manager);

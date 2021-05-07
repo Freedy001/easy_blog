@@ -5,36 +5,42 @@
 			v-model="drawer"
 			destroy-on-close>
 		<div class="container">
-			<div>
+			<div class="pic-index-container">
 				<div class="search">
 					<el-input v-model="input" placeholder="搜索"></el-input>
 					<el-button type="primary" icon="el-icon-search"></el-button>
 				</div>
 				<div class="pic-area">
-					<div class="img-container"  v-for="i in 2">
+					<div class="img-container" v-for="(url,i) in resource" :key="i">
 						<el-image class="image"
-						          fit="fill"
+						          fit="cover"
+						          :src="url"
+						          @click="handClick(url.replace('-thumbnails',''))"
 						          lazy
-						          src="https://cdn.pixabay.com/photo/2020/07/04/06/41/clouds-5368444_1280.jpg"
 						></el-image>
 					</div>
+					<el-button @click="addMore" round style="width: 100%; margin-bottom: 30px">加载更多</el-button>
 				</div>
 			</div>
 			<div class="btn-area">
 				<el-divider></el-divider>
-				<el-button type="danger">关闭</el-button>
-				<el-button type="primary">上传一个</el-button>
+				<div style="margin: 5px;text-align: right">
+					<el-button type="danger" @click="drawer=false">关闭</el-button>
+					<el-button type="primary" @click="showCard=true">上传</el-button>
+				</div>
 			</div>
 		</div>
 	</el-drawer>
 	<teleport to="body">
-		<div class="full-screen">
+		<div class="full-screen" v-if="showCard" @click="showCard=false">
 			<el-upload
+					@click.stop=""
 					class="upload-demo"
 					drag
-					action="http://localhost:1000/upload"
+					:action="url"
 					list-type="picture"
 					:headers="token"
+					:on-success="success"
 					multiple>
 				<i class="el-icon-upload"></i>
 				<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -44,12 +50,83 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
-
-let drawer = ref(true)
+import {
+	defineEmit,
+	defineProps,
+	getCurrentInstance,
+	onBeforeMount,
+	onMounted,
+	onUpdated,
+	reactive,
+	ref,
+	watch
+} from "vue";
+import {ElMessage} from "element-plus";
+import {get, loadResource} from "../http";
+const {proxy} = getCurrentInstance();
 let input = ref('')
+let token = {Authorization: localStorage.getItem('Authorization')}
+let showCard = ref(false)
+let resource = reactive<Array<string>>([])
+let page=1
+let drawer=ref(false);
+defineProps(['isDrawer','url'])
+defineEmit(['clickCallback'])
+watch(()=>proxy.isDrawer,(val)=>{
+	drawer.value=true;
+})
+function handClick(url) {
+	proxy.$emit('clickCallback',url)
+	drawer.value=false;
+}
+//关闭上传后重新加载
+watch(showCard,(val)=>{
+	if (!val){
+		page=1;
+		getImageUrls().then();
+	}
+})
 
-let token = {Authorization:localStorage.getItem('Authorization')}
+function addMore() {
+	page++;
+	getImageUrls().then();
+}
+//文件上传后的回调
+async function success(response: any) {
+	if (response.code != 200) {
+		ElMessage({
+			showClose: true,
+			message: `上传失败${response.msg}`,
+			type: 'error'
+		});
+	}
+}
+onMounted(async () => {
+	getImageUrls().then()
+	// setTimeout(()=>{
+	// 	let scrollWindows=document.querySelector(".pic-area")
+	// 	scrollWindows.onscroll=()=>{
+	// 		let totalHeight=scrollWindows.scrollHeight
+	// 		let windowHeight=scrollWindows.clientHeight
+	// 		let top=scrollWindows.scrollTop
+	// 		if (totalHeight-windowHeight>top-150){//150是误差值
+	// 			page++;
+	// 			getImageUrls().then();
+	// 		}
+	// 	}
+	// },2000)
+})
+
+
+async function getImageUrls() {
+	const response = await get(`/file/getImages?page=${page}&limit=10&sidx=id&order=desc`);
+	if (response.code == 200) {
+		const list: Array<any> = response.data.list
+		list.forEach((value, index) => {
+			resource.push(loadResource(value.resourceUrl))
+		})
+	}
+}
 
 
 </script>
@@ -57,31 +134,42 @@ let token = {Authorization:localStorage.getItem('Authorization')}
 <style scoped lang="scss">
 .container {
 	height: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	.search {
-		margin: 20px;
-		display: flex;
-	}
-	.pic-area {
-		margin: 10px;
-		overflow: auto;
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		.img-container{
-			width: 48%;
-			.image{
-				width: 100%;
-				height: auto;
+
+	.pic-index-container {
+		height: 100%;
+		.search {
+			margin: 20px;
+			display: flex;
+		}
+
+		.pic-area {
+			overflow: auto;
+			max-height: 800px;
+			margin: 10px;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+
+			.img-container {
+				cursor: pointer;
+				margin: 10px;
+				width: calc(100%/2 - 20px);
+				max-height: 250px;
+				.el-image.image {
+					width: 100%;
+					height: 100%;
+				}
 			}
 		}
 	}
-	.btn-area{
-		text-align: right;
-		margin: 5px;
-		.el-divider{
+
+	.btn-area {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		background: white;
+		.el-divider {
 			margin: 5px;
 		}
 	}
@@ -94,7 +182,7 @@ let token = {Authorization:localStorage.getItem('Authorization')}
 	position: absolute;
 	top: 0;
 	left: 0;
-	z-index: 1000;
+	z-index: 9999;
 
 	.upload-demo {
 		position: absolute;

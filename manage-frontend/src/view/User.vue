@@ -3,7 +3,7 @@
 	<div class="index-container">
 		<el-card class="box-card left">
 			<div class="info">
-				<div class="photo">
+				<div class="photo" @click="changeHeadImg" style="cursor: pointer">
 					<img :src="userInfoDetail.headImg" alt="">
 				</div>
 				<p v-if="userInfoDetail.rootAdmin" class="name">Admin</p>
@@ -246,16 +246,43 @@
 			</el-card>
 		</div>
 	</teleport>
+	<ImgDrawer
+			:isDrawer="drawer"
+			:url="url"
+			@clickCallback="handlePickPic"
+	></ImgDrawer>
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
-import {get, post} from "../http";
+import {defineComponent, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
+import {get, loadResource, post} from "../http";
 import {useRouter} from "vue-router";
-
+import ImgDrawer from '../components/ImgDrawer.vue'
 const router = useRouter();
-let activeName = ref('first')
 const {proxy} = getCurrentInstance();
+defineComponent({
+	ImgDrawer
+})
+let drawer=ref(false)
+let url=loadResource('/backend/file/upload')
+//更换头像
+function changeHeadImg() {
+	drawer.value=!drawer.value;
+}
+async function handlePickPic(url){
+	const response =await post('/manager/updateUserInfo',{
+		headImg:url
+	});
+	if (response.code == 200) {
+		initData().then()
+	} else {
+		proxy.$notify.error({
+			title: '错误',
+			message: response.msg
+		})
+	}
+}
+//**********************************校验**********************************start
 //密码验证表单
 let ruleForm = reactive({
 	oldPass: '',
@@ -296,7 +323,8 @@ function resetForm() {
 	ruleForm.pass = '';
 	ruleForm.checkPass = '';
 }
-
+//**********************************校验**********************************end
+//******************************tab1下面方法与参数**********************************start
 interface userInfo {
 	username: string,
 	nickname: string,
@@ -312,7 +340,6 @@ interface userInfo {
 	totalComment: number
 	totalVisit: number
 }
-
 let userInfoDetail: userInfo = reactive<userInfo>({
 	username: '',
 	nickname: '',
@@ -332,6 +359,7 @@ let userInfoDetail: userInfo = reactive<userInfo>({
 onMounted(async () => {
 	initData().then();
 })
+let page=1
 /**
  * 获取个人用户消息
  */
@@ -407,7 +435,7 @@ async function changePassword() {
 		})
 	}
 }
-
+//******************************tab3下面方法与参数**********************************start
 interface IUserManagement{
 	id: number
 	username: string
@@ -419,14 +447,15 @@ interface IUserManagement{
 	status: string
 }
 let userManagement = reactive<Array<IUserManagement>>([])
-let page=1
+
+let activeName = ref('first')
 function handleClick() {
 	if (activeName.value == 'third') {
 		userManagement.length=0
 		loadUserList()
 	}
 }
-
+//加载用户列表
 async function loadUserList() {
 	const response = await get(`/manager/list??page=${page}&limit=20`);
 	if(response.code==200){
@@ -504,7 +533,7 @@ let newUser = reactive<INewUser>({
 	settingPermission: [],
 })
 
-//下面是全选功能
+//******************************下面是全选功能******************************start
 let selectAll = reactive({
 	articleCheckAll: false,
 	commentCheckAll: false,
@@ -559,7 +588,7 @@ function handleSettingCheckedCitiesChange(value: any) {
 	selectAll.settingCheckAll = checkedCount === PermissionItem.settingPermission.length;
 	selectAll.settingIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.settingPermission.length
 }
-
+//******************************上面是全选功能******************************end
 watch(newUser, (val) => {
 	console.log(val)
 })
@@ -639,7 +668,7 @@ async function userDelete(id:number) {
 		})
 	}
 }
-
+//******************************tab3下面方法与参数**********************************startend
 </script>
 
 <style scoped lang="scss">
