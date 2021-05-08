@@ -45,11 +45,6 @@ export default defineComponent({
 				await router.push("/index")
 			}else {
 				const id=setInterval(()=>{
-					ElMessage({
-						showClose: true,
-						message: '亲，密码错了哦！',
-						type: 'error'
-					});
 					proxy.$notify.error({
 						title: '错误',
 						message: '亲，密码错了哦！',

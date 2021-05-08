@@ -15,7 +15,7 @@
 						<el-image class="image"
 						          fit="cover"
 						          :src="url"
-						          @click="handClick(url.replace('-thumbnails',''))"
+						          @click="handClick(url)"
 						          lazy
 						></el-image>
 					</div>

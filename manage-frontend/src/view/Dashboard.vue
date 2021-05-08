@@ -21,55 +21,9 @@
 	<div class="card-row second">
 		<el-card class="box-card" shadow="hover">
 			<h1>动态</h1>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
 		</el-card>
 		<el-card class="box-card" shadow="hover">
 			<h1>操作记录</h1>
-			<div>2</div>
-			<div>2</div>
-			<div>2</div>
 		</el-card>
 	</div>
 </template>

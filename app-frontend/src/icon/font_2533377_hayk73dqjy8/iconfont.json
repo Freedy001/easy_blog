@@ -1,0 +1,23 @@
+{
+  "id": "2533377",
+  "name": "app",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "9560416",
+      "name": "menu",
+      "font_class": "menu1",
+      "unicode": "e6a4",
+      "unicode_decimal": 59044
+    },
+    {
+      "icon_id": "1428310",
+      "name": "menu",
+      "font_class": "menu",
+      "unicode": "e851",
+      "unicode_decimal": 59473
+    }
+  ]
+}
