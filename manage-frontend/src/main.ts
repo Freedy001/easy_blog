@@ -11,3 +11,4 @@ vueApp.use(router)
 vueApp.use(store)
 vueApp.use(ElementPlus)
 vueApp.mount('#app')
+

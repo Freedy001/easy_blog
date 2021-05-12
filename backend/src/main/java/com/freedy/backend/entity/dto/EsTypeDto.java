@@ -1,5 +1,6 @@
 package com.freedy.backend.entity.dto;
 
+import com.freedy.backend.enumerate.EsType;
 import lombok.Data;
 
 /**
@@ -11,10 +12,4 @@ public class EsTypeDto {
     private EsType type;
     private Long id;
     private Long publishTime;
-
-    public enum EsType {
-        SAVE,
-        UPDATE,
-        DELETE
-    }
 }

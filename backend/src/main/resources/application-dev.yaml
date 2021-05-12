@@ -5,13 +5,13 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/blog_db?serverTimezone=UTC
     username: root
     password: Kz99596589
   redis:
-    host: 192.168.169.2
+    host: localhost
   rabbitmq:
-    addresses: 192.168.169.2
+    addresses: localhost
     port: 5672
     virtual-host: /
     publisher-confirm-type: correlated #开启发送端确认
@@ -25,6 +25,13 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      use-key-prefix: true
+      cache-null-values: true
+
 
 easy:
   thread:
@@ -48,6 +55,9 @@ easy:
     header: Authorization
     base64-secret: sanbayan
     token-validity-in-seconds: 14400000
+  elastic-search:
+    addr: localhost
+    port: 9200
 
 
 # Logger Config

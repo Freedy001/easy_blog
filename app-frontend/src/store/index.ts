@@ -3,12 +3,11 @@ import {createStore} from 'vuex'
 // @ts-ignore
 export default createStore({
     state: {
-        articleTitle:''
+        isLoading:false
     },
     mutations: {
-        setTitle(state,title){
-            state.articleTitle=title;
+        changeLoadStatus(state){
+            state.isLoading=!state.isLoading;
         }
     }
-
 })

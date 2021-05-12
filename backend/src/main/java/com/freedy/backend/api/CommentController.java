@@ -1,4 +1,4 @@
-package com.freedy.backend.controller;
+package com.freedy.backend.api;
 
 import java.util.Arrays;
 import java.util.Map;

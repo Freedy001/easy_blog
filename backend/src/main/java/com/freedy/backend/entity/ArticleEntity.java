@@ -45,6 +45,9 @@ public class ArticleEntity implements Serializable {
 	@ApiModelProperty("文章类容")
 	private String content;
 
+	@ApiModelProperty("文章字树")
+	private Long wordNum;
+
 	@ApiModelProperty("访问数量")
 	private Long visitNum;
 

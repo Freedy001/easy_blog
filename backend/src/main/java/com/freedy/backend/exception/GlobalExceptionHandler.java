@@ -20,24 +20,20 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public class GlobalExceptionHandler {
 
     /**
+     * 通用处理
+     */
+    @ExceptionHandler(value = ParentResultException.class)
+    public Result exceptionHandler(ParentResultException e) {
+        return handler(e.getMessage());
+    }
+
+    /**
      * 当用户尝试删除父表的值时
      * 该值已被子表所引用
      */
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     public Result exceptionHandler(SQLIntegrityConstraintViolationException e) {
-        log.error(e.getMessage());
-        return Result.error(ResultCode.TAG_HAS_BEEN_USED.getCode(),ResultCode.TAG_HAS_BEEN_USED.getMessage())
-                .put("reason",e.getMessage());
-    }
-
-    /**
-     * 权限不足不能访问
-     */
-    @ExceptionHandler(value = NoPermissionsException.class)
-    public Result exceptionHandler(NoPermissionsException e) {
-        log.error(e.getMessage());
-        return Result.error(ResultCode.NO_PERMISSION.getCode(),ResultCode.NO_PERMISSION.getMessage())
-                .put("reason",e.getMessage());
+        return handler("TAG_HAS_BEEN_USED",e.getMessage());
     }
 
     /**
@@ -45,9 +41,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = AccessDeniedException.class)
     public Result exceptionHandler(AccessDeniedException e) {
-        log.error(e.getMessage());
-        return Result.error(ResultCode.NO_PERMISSION.getCode(),ResultCode.NO_PERMISSION.getMessage())
-                .put("reason",e.getMessage());
+        return handler("NO_PERMISSION",e.getMessage());
     }
 
 
@@ -57,10 +51,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public Result exceptionHandler(Exception e) {
         e.printStackTrace();
-        log.error(e.getMessage());
-        log.error(e.getClass().getName());
-        return Result.error(ResultCode.UNKNOWN_EXCEPTION.getCode(),ResultCode.UNKNOWN_EXCEPTION.getMessage())
-                .put("reason",e.getMessage());
+        return handler("UNKNOWN_EXCEPTION",e.getMessage());
+    }
+
+
+    private Result handler(String resultCodeName ,String reason){
+        log.error(reason);
+        return Result.error( ResultCode.valueOf(resultCodeName).getCode(), ResultCode.valueOf(resultCodeName).getMessage());
+    }
+
+    private Result handler(String resultCodeName){
+        return Result.error( ResultCode.valueOf(resultCodeName).getCode(), ResultCode.valueOf(resultCodeName).getMessage());
     }
 
 }

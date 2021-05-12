@@ -33,7 +33,10 @@ public enum ResultCode {
 
     /* 业务错误 */
     TAG_HAS_BEEN_USED(3000,"该值被其他地方所引用！"),
-    NO_PERMISSION(3001, "没有权限");
+    NO_PERMISSION(3001, "没有权限"),
+    NO_ARTICLE(3002, "没有找到文章"),
+    NO_ID(3003, "没有id参数"),
+    ARGUMENT_ERROR(3004, "参数不正确");
     private final Integer code;
     private final String message;
 

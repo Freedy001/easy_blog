@@ -1,4 +1,4 @@
-package com.freedy.backend.controller;
+package com.freedy.backend.api;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.common.utils.Local;
 import com.freedy.backend.common.utils.Result;
-import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.entity.vo.NewUserVo;
@@ -15,7 +14,6 @@ import com.freedy.backend.entity.vo.UserInfoVo;
 import com.freedy.backend.entity.vo.UserPasswordVo;
 import com.freedy.backend.enumerate.ResultCode;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;

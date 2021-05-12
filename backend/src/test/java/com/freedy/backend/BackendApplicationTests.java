@@ -7,19 +7,19 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @SpringBootTest
 class BackendApplicationTests {
     @Autowired
     private PermissionItemProperties permissionItem;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Test
     public void test(){
         NewUserVo manager = new NewUserVo();
@@ -57,4 +57,11 @@ class BackendApplicationTests {
 
         System.out.println(manager);
     }
+
+    @Test
+    public void test1(){
+        Set<String> keys = redisTemplate.keys("*");
+        redisTemplate.delete(keys);
+    }
+
 }

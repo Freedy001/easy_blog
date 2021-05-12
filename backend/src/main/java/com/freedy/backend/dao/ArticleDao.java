@@ -4,6 +4,7 @@ import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
+import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -23,10 +24,7 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 文章列表
      */
     List<ArticleInfoVo> queryArticleList(PageUtils page);
-    /**
-     * 指定id的文章列表
-     */
-    List<ArticleInfoVo> queryArticleListByAuthorId(@Param("page") PageUtils page, @Param("id") Integer id);
+
     /**
      * 获取数据库条目
      */
@@ -36,4 +34,13 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
 
     Long getTotalComment(@Param("authorId") Integer authorId);
 
+    /**
+     * 获取ArticleEsModel
+     */
+    ArticleEsModel getEsModel(Long id);
+
+    /**
+     * 获取ArticleEsModel 列表
+     */
+    List<ArticleEsModel> getEsArticleList(@Param("page") Integer page, @Param("limit") Integer limit);
 }

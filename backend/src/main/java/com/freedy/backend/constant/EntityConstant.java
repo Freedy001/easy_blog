@@ -5,12 +5,12 @@ package com.freedy.backend.constant;
  * @date 2021/5/2 20:52
  */
 public class EntityConstant {
-    //文章状态 0:未发布 1:已发布 2:顶置 3:推荐 4:回收站
-    public static final Integer ARTICLE_UNPUBLISHED=0;
-    public static final Integer ARTICLE_PUBLISHED=1;
-    public static final Integer ARTICLE_Overhead=2;
-    public static final Integer ARTICLE_RECOMMEND=3;
-    public static final Integer ARTICLE_RECYCLE=4;
+    //文章状态 1:未发布 2:回收站 3:已发布 4:顶置 5:推荐
+    public static final Integer ARTICLE_UNPUBLISHED=1;
+    public static final Integer ARTICLE_RECYCLE=2;
+    public static final Integer ARTICLE_PUBLISHED=3;
+    public static final Integer ARTICLE_Overhead=4;
+    public static final Integer ARTICLE_RECOMMEND=5;
 
     //文章评论 0:开启 1:不开启
     public static final Integer ARTICLE_CAN_COMMENT=0;

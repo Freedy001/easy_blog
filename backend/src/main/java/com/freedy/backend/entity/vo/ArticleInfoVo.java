@@ -34,6 +34,10 @@ public class ArticleInfoVo implements Serializable {
     private int likeNum;
     @ApiModelProperty("作者信息")
     private String authorName;
+    @ApiModelProperty("文章字数")
+    private Long wordNum;
+    @ApiModelProperty("文章封面")
+    private String articlePoster;
     @ApiModelProperty("发布时间")
     private String publishTime;
     @ApiModelProperty("修改时间")

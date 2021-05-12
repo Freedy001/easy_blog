@@ -1,12 +1,17 @@
 package com.freedy.backend.middleWare.mq.mqCreator;
 
 import com.freedy.backend.constant.RabbitConstant;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.freedy.backend.constant.RabbitConstant.DELAYED_QUEUE_NAME;
+import static com.freedy.backend.constant.RabbitConstant.DELAYED_EXCHANGE_NAME;
+import static com.freedy.backend.constant.RabbitConstant.DELAYED_ROUTING_KEY;
 
 /**
  * @author Freedy
@@ -33,6 +38,25 @@ public class EsMqCreator {
                 Binding.DestinationType.QUEUE,
                 RabbitConstant.ES_EXCHANGE_NAME,
                 RabbitConstant.ES_ROUTE_KEY+".*", null);
+    }
+
+    @Bean
+    public Queue immediateQueue() {
+        return new Queue(DELAYED_QUEUE_NAME);
+    }
+
+    @Bean
+    public CustomExchange customExchange() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-delayed-type", "direct");
+        return new CustomExchange(DELAYED_EXCHANGE_NAME,
+                "x-delayed-message", true, false, args);
+    }
+
+    @Bean
+    public Binding bindingNotify(@Qualifier("immediateQueue") Queue queue,
+                                 @Qualifier("customExchange") CustomExchange customExchange) {
+        return BindingBuilder.bind(queue).to(customExchange).with(DELAYED_ROUTING_KEY).noargs();
     }
 
 }

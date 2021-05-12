@@ -14,6 +14,20 @@
         <result property="region" column="region"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
+    <select id="getTopFlore" resultType="java.lang.Integer">
+        select max(flore) from blog_db.blog_comment where article_id=#{id}
+    </select>
+
+    <select id="getCommentList" resultType="com.freedy.backend.entity.CommentEntity">
+        <bind name="key_offset" value="(page-1)*limit"></bind>
+        select * from blog_comment where article_id=#{id} and flore in (
+            select * from
+            (
+                select distinct(flore) from blog_comment
+                where article_id=#{id} order by flore desc limit #{key_offset},#{limit}
+            ) as t
+        )  order by flore desc limit 100; <!--最多100条数据-->
+    </select>
 
 
 </mapper>

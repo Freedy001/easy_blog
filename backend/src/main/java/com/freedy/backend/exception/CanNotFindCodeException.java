@@ -8,8 +8,4 @@ public class CanNotFindCodeException extends Exception{
     public CanNotFindCodeException(String message) {
         super(message);
     }
-
-    public CanNotFindCodeException(String message,Throwable cause) {
-        super(message,cause);
-    }
 }

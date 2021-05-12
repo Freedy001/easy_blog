@@ -1,0 +1,119 @@
+<template>
+	<div class="back-top show" :class="{'bounce-out-top':click}" v-if="show" @click="backTop">
+		<svg class="icon" aria-hidden="true">
+			<use xlink:href="#icon-huidaodingbu_huaban"></use>
+		</svg>
+	</div>
+</template>
+
+<script setup lang="ts">
+import {defineEmit, getCurrentInstance, onMounted, ref} from "vue";
+defineEmit(['scroll'])
+const {proxy} = getCurrentInstance();
+let show = ref(false)
+let click = ref(false)
+onMounted(() => {
+	setTimeout(()=>{
+		document.body.onscroll =({srcElement}: any) => {
+			proxy.$emit('scroll',srcElement)
+			const scroll: HTMLElement = srcElement.scrollingElement
+			show.value = scroll.scrollTop > scroll.clientHeight;
+		}
+	},500)
+})
+function backTop() {
+	click.value = true
+	setTimeout(() => {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth"
+		});
+		setTimeout(() => {
+			show.value = false
+			click.value = false
+		}, 500)
+	}, 500)
+}
+
+
+
+</script>
+
+<style lang="scss" scoped>
+.back-top {
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	z-index: 1;
+
+	&.show {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.icon {
+		font-size: 40px;
+		color: #73aada;
+
+		&:hover {
+			color: var(--color-active)
+		}
+	}
+}
+
+.bounce-out-top {
+	animation: bounce-out-top 1s ease-in-out both;
+}
+
+@keyframes bounce-out-top {
+	0% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+	}
+	5% {
+		transform: translateY(-30px);
+		animation-timing-function: ease-in;
+	}
+	15% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+	}
+	25% {
+		transform: translateY(-38px);
+		animation-timing-function: ease-in;
+	}
+	38% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+	}
+	52% {
+		transform: translateY(-75px);
+		animation-timing-function: ease-in;
+	}
+	70% {
+		transform: translateY(0);
+		animation-timing-function: ease-out;
+	}
+	85% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-2000px);
+		opacity: 1;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.back-top {
+		right: 20px;
+		bottom: 10px;
+
+		span {
+			font-size: 30px;
+		}
+	}
+}
+</style>

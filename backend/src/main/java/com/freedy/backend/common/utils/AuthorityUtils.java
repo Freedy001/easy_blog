@@ -27,6 +27,7 @@ public class AuthorityUtils {
     }
 
     public static boolean hasAuthority(String authority,String permissionString) {
+        if (permissionString==null) return false;
         for (String grantedAuthority : permissionString.split(",")) {
             if (grantedAuthority.equals(authority)) {
                 return true;

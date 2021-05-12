@@ -16,5 +16,10 @@ import java.util.Map;
 public interface CommentService extends IService<CommentEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 发表文章
+     */
+    void publishComment(CommentEntity comment);
 }
 

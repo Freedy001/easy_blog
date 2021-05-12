@@ -3,73 +3,104 @@
 
 <mapper namespace="com.freedy.backend.dao.ArticleDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.freedy.backend.entity.ArticleEntity" id="articleMap">
-        <result property="id" column="id"/>
-        <result property="title" column="title"/>
-        <result property="articleDesc" column="article_desc"/>
-        <result property="authorName" column="author_id"/>
-        <result property="articlePoster" column="article_poster"/>
-        <result property="content" column="content"/>
-        <result property="visitNum" column="visit_num"/>
-        <result property="commentNum" column="comment_num"/>
-        <result property="likeNum" column="like_num"/>
-        <result property="articleStatus" column="article_status"/>
-        <result property="articleCategoryId" column="article_category_id"/>
-        <result property="createTime" column="create_time"/>
-        <result property="updateTime" column="update_time"/>
-    </resultMap>
-
     <resultMap id="ArticleInfoMap" type="com.freedy.backend.entity.vo.ArticleInfoVo" autoMapping="true">
         <result property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="articleStatus" column="article_status"/>
         <result property="articleCategory" column="category_name"/>
+        <result property="wordNum" column="word_num"/>
         <result property="articleDesc" column="article_desc"/>
         <result property="visitNum" column="visit_num"/>
         <result property="commentNum" column="comment_num"/>
         <result property="likeNum" column="like_num"/>
-        <result property="authorName" column="author_id"/>
+        <result property="authorName" column="nickname"/>
         <result property="updateTime" column="update_time"/>
+        <result property="articlePoster" column="article_poster"/>
         <collection property="articleTags" javaType="list" ofType="string">
             <result column="tag_name"/>
         </collection>
     </resultMap>
 
+    <resultMap id="EsModelMap" type="com.freedy.backend.middleWare.es.model.ArticleEsModel" autoMapping="true">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="articleStatus" column="article_status"/>
+        <result property="articleCategory" column="category_name"/>
+        <result property="wordNum" column="word_num"/>
+        <result property="articleDesc" column="article_desc"/>
+        <result property="visitNum" column="visit_num"/>
+        <result property="commentNum" column="comment_num"/>
+        <result property="likeNum" column="like_num"/>
+        <result property="authorName" column="nickname"/>
+        <result property="content" column="content"/>
+        <result property="articlePoster" column="article_poster"/>
+        <collection property="articleTags" javaType="list" ofType="string">
+            <result column="tag_name"/>
+        </collection>
+    </resultMap>
+
+    <sql id="joinCondition">
+        left join blog_category as category on article.article_category_id=category.id
+        left join blog_article_tag_relation relation on article.id = relation.article_id
+        left join blog_tag tag on tag.id = relation.tag_id
+        left join blog_manager manager on article.author_id=manager.id
+    </sql>
+
+    <sql id="selectColumns">
+        select article.id,
+               article.title,
+               article.article_status,
+               category.category_name,
+               article.article_desc,
+               article.comment_num,
+               article.visit_num,
+               article.like_num,
+               manager.nickname,
+               article.publish_time,
+               article.content,
+               tag.tag_name,
+               article.article_poster
+    </sql>
+
     <select id="queryArticleList"
             resultMap="ArticleInfoMap"
             parameterType="com.freedy.backend.common.utils.PageUtils">
         <bind name="key_offset" value="(currPage-1)*pageSize"></bind>
-        select article.id,article.title,article.article_status,category.category_name,
-               article.article_desc,article.comment_num,article.visit_num,article.like_num,
-               article.author_id,article.publish_time,article.update_time,tag.tag_name
-        from (select * from blog_article limit #{key_offset},#{pageSize} )as article
-                 left join blog_category as category on article.article_category_id=category.id
-                 left join blog_article_tag_relation relation on article.id = relation.article_id
-                 left join blog_tag tag on tag.id = relation.tag_id
-    </select>
-
-    <select id="queryArticleListByAuthorId"  resultMap="ArticleInfoMap">
-        <bind name="key_offset" value="(page.currPage-1)*page.pageSize"></bind>
-        select article.id,article.title,article.article_status,category.category_name,
+        select article.id,article.title,article.article_status,category.category_name,article.word_num,
         article.article_desc,article.comment_num,article.visit_num,article.like_num,
-        article.author_id,article.publish_time,article.update_time,tag.tag_name
-        from (select * from blog_article where author_id=#{id} limit #{key_offset},#{page.pageSize} )as article
-        left join blog_category as category on article.article_category_id=category.id
-        left join blog_article_tag_relation relation on article.id = relation.article_id
-        left join blog_tag tag on tag.id = relation.tag_id
+        manager.nickname,article.publish_time,article.update_time,article.article_poster,tag.tag_name
+        from (select * from blog_article order by create_time desc limit #{key_offset},#{pageSize})as article
+        <include refid="joinCondition"></include>
     </select>
-
-
 
     <select id="getCount" resultType="java.lang.Long">
-        select count(*) from blog_article;
+        select count(*)
+        from blog_article;
     </select>
+
     <select id="getTotalVisit" resultType="java.lang.Long">
-        select sum(visit_num) from blog_article where author_id=#{authorId}
+        select sum(visit_num)
+        from blog_article
+        where author_id = #{authorId}
     </select>
+
     <select id="getTotalComment" resultType="java.lang.Long">
-        select sum(comment_num) from blog_article where author_id=#{authorId}
+        select sum(comment_num)
+        from blog_article
+        where author_id = #{authorId}
+    </select>
+
+    <select id="getEsModel" resultMap="EsModelMap">
+        <include refid="selectColumns"/>
+        from (select * from blog_article where id=#{id})as article
+        <include refid="joinCondition"/>
+    </select>
+
+    <select id="getEsArticleList" resultMap="EsModelMap">
+        <bind name="key_offset" value="(page-1)*limit"></bind>
+        <include refid="selectColumns"/>
+        from (select * from blog_article limit #{key_offset},#{limit})as article
+        <include refid="joinCondition"/>
     </select>
 
 

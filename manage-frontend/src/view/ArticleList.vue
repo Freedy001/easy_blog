@@ -87,12 +87,12 @@ import ArticleSettingDrawer from '../components/ArticleSettingDrawer.vue'
 defineComponent({
 	ArticleSettingDrawer
 })
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 const router = useRouter();
 interface formData {
 	id: string
 	title: string,
-	articleStatus: string,
+	articleStatus: number|string,
 	articleCategory: string,
 	articleTags: Array<string>,
 	articleDesc: string,
@@ -106,40 +106,40 @@ interface formData {
 }
 let tableDate = reactive<Array<formData>>([])
 onMounted(async () => {
-	getData().then();
+	getData(null).then();
 })
-let page=ref(1)
-async function getData(pageNum){
+let page=1
+async function getData(pageNum:any|null){
 	let response;
 	if (pageNum){
-		response = await get(`/article/list?page=1&limit=${pageNum*20}`)
+		response = await get(`/article/list?page=1&limit=${pageNum*40}`)
 	}else {
-		response = await get(`/article/list?page=${page.value}&limit=20`)
+		response = await get(`/article/list?page=${page}&limit=40`)
 	}
 	if (response.code == 200) {
 		const arr: Array<formData> = response.data.list
 		arr.forEach((value, index) => {
-			//文章状态 0:未发布 1:已发布 2:顶置 3:推荐 4:回收站
+			//文章状态 1:未发布 2:回收站 3:已发布 4:顶置 5:推荐
 			switch (value.articleStatus) {
-				case '0':
+				case 1:
 					value.dotColor = '#fdf000'
 					value.articleStatus = '未发布'
 					break;
-				case '1':
+				case 2:
+					value.dotColor = '#f6074e'
+					value.articleStatus = '回收站'
+					break;
+				case 3:
 					value.dotColor = '#52c41a'
 					value.articleStatus = '已发布'
 					break;
-				case '2':
-					value.dotColor = '#125ee3'
+				case 4:
+					value.dotColor = '#10fcf5'
 					value.articleStatus = '顶置'
 					break;
-				case '3':
-					value.dotColor = '#10fcf5'
+				case 5:
+					value.dotColor = '#125ee3'
 					value.articleStatus = '推荐'
-					break;
-				case '4':
-					value.dotColor = '#f6074e'
-					value.articleStatus = '回收站'
 					break;
 			}
 			tableDate.push(value)
@@ -153,7 +153,7 @@ async function getData(pageNum){
 }
 
 //点击编辑按钮 跳转到文章页面
-function doEdit(id) {
+function doEdit(id:any) {
 	router.push({
 		path: '/index/article',
 		query: {id: id}
@@ -162,7 +162,7 @@ function doEdit(id) {
 //设置回调
 let articleId=ref<string>();
 let drawer=ref(false)
-function doSetting(id) {
+function doSetting(id:any) {
 	articleId.value=id
 	drawer.value=!drawer.value
 }
@@ -171,7 +171,7 @@ function doSetting(id) {
  * 更改文章设置
  * @param form
  */
-async function save(form){
+async function save(form:any){
 	let existedTags: Array<number> = []
 	let notExistedTag: Array<string> = []
 	form.tagValue.forEach((value:any, index:number) => {
@@ -201,7 +201,7 @@ async function save(form){
 			type: 'success'
 		})
 		tableDate.length=0;
-		getData(page.value).then()
+		getData(page).then()
 	} else {
 		proxy.$notify.error({
 			title: '错误',
@@ -210,7 +210,7 @@ async function save(form){
 	}
 }
 
-async function doDel(id) {
+async function doDel(id:any) {
 	const response =await get(`/article/delete?ids=${id}`);
 	if (response.code == 200) {
 		proxy.$notify({
@@ -219,7 +219,7 @@ async function doDel(id) {
 			type: 'success'
 		})
 		tableDate.length=0;
-		getData(page.value).then()
+		getData(page).then()
 	} else {
 		proxy.$notify.error({
 			title: '错误',

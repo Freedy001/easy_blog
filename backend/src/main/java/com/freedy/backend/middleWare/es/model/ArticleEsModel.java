@@ -29,11 +29,19 @@ public class ArticleEsModel{
     private Long id;
 
     @ApiModelProperty("文章标题")
-    @Field(type = FieldType.Text /*,analyzer = "ik_max_word"*/)
+    @Field(type = FieldType.Text ,analyzer = "ik_max_word")
     private String title;
 
-    @ApiModelProperty("文章描述")
+    @ApiModelProperty("文章状态")
+    @Field(type = FieldType.Integer)
+    private Integer articleStatus;
+
+    @ApiModelProperty("分类名称")
     @Field(type = FieldType.Keyword)
+    private String articleCategory;
+
+    @ApiModelProperty("文章描述")
+    @Field(type = FieldType.Text,analyzer = "ik_max_word")
     private String articleDesc;
 
     @ApiModelProperty("文章作者")
@@ -45,8 +53,12 @@ public class ArticleEsModel{
     private String articlePoster;
 
     @ApiModelProperty("文章类容")
-    @Field(type = FieldType.Text /*,analyzer = "ik_max_word"*/)
+    @Field(type = FieldType.Text ,analyzer = "ik_max_word")
     private String content;
+
+    @ApiModelProperty("文字数量")
+    @Field(type = FieldType.Long)
+    private Long wordNum;
 
     @ApiModelProperty("访问数量")
     @Field(type = FieldType.Long)
@@ -60,20 +72,13 @@ public class ArticleEsModel{
     @Field(type = FieldType.Long)
     private Long likeNum;
 
-    @ApiModelProperty("分类名称")
-    @Field(type = FieldType.Keyword)
-    private String categoryName;
-
     @ApiModelProperty("标签列表")
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private List<String> articleTags;
 
-    @ApiModelProperty("文章创建时间")
+    @ApiModelProperty("文章发布时间")
     @Field(type = FieldType.Long,index = false)
-    private Long createTime;
+    private Long publishTime;
 
-    @ApiModelProperty("文章状态")
-    @Field(type = FieldType.Integer)
-    private Integer articleStatus;
 
 }

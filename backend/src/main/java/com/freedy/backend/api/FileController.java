@@ -1,24 +1,19 @@
-package com.freedy.backend.controller;
+package com.freedy.backend.api;
 
 import com.freedy.backend.common.utils.DateUtils;
 import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.constant.FileConstant;
-import com.freedy.backend.dao.ResourceDao;
 import com.freedy.backend.entity.ResourceEntity;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.service.ResourceService;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnailator;
 import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.util.ThumbnailatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;

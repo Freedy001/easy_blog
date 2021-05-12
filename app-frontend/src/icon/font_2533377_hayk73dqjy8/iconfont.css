@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2533377 */
-  src: url('iconfont.woff2?t=1620403853445') format('woff2'),
-       url('iconfont.woff?t=1620403853445') format('woff'),
-       url('iconfont.ttf?t=1620403853445') format('truetype');
+  src: url('iconfont.woff2?t=1620832274390') format('woff2'),
+       url('iconfont.woff?t=1620832274390') format('woff'),
+       url('iconfont.ttf?t=1620832274390') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,50 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-totop:before {
+  content: "\e7f3";
+}
+
+.icon-huidaodingbu:before {
+  content: "\e60f";
+}
+
+.icon-huidaodingbu_huaban:before {
+  content: "\e62b";
+}
+
+.icon-author:before {
+  content: "\e635";
+}
+
+.icon-zuozhe1:before {
+  content: "\e63f";
+}
+
+.icon-zuozhe:before {
+  content: "\e634";
+}
+
+.icon-huahanAPP-icon--:before {
+  content: "\e68e";
+}
+
+.icon-xihuan:before {
+  content: "\e6bd";
+}
+
+.icon-ziti1:before {
+  content: "\e614";
+}
+
+.icon-biaoqian:before {
+  content: "\e600";
+}
+
+.icon-category01:before {
+  content: "\e601";
 }
 
 .icon-menu1:before {

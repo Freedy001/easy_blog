@@ -1,9 +1,7 @@
-package com.freedy.backend.controller;
+package com.freedy.backend.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.entity.vo.NewUserVo;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.RolePermissionEntity;
 import com.freedy.backend.service.RolePermissionService;
-import com.freedy.backend.common.utils.PageUtils;
 
 
 /**

@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseURL=import.meta.env.DEV?"http://localhost:1000/backend":""
+const baseURL=import.meta.env.DEV?"http://localhost:1000/frontend":""
 const ResourceURL=import.meta.env.DEV?"http://localhost:1000":""
 
 export async function get(uri:string) {

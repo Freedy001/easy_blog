@@ -1,27 +1,30 @@
 package com.freedy.backend;
 
+import com.freedy.backend.common.utils.MarkDown;
+import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiImageType;
+import com.vladsch.flexmark.ext.emoji.EmojiShortcutType;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 
-import com.freedy.backend.common.utils.DateUtils;
-import com.freedy.backend.common.utils.IPUtil;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
-
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 /**
  * @author Freedy
  * @date 2021/4/29 13:11
  */
 public class Text {
-    public static void main(String[] args) throws IOException {
-        for (Method method : ITest.class.getMethods()) {
-            Type superclass = method.getReturnType().getGenericSuperclass();
-            System.out.println(method.getReturnType().getGenericSuperclass().getTypeName());
-        }
+    public static void main(String[] args) throws Exception {
+        System.out.println(MarkDown.render("*i love you*"));
     }
-
 }
+
 

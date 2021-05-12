@@ -30,6 +30,12 @@ public class CommentEntity implements Serializable {
 	@ApiModelProperty("文章id")
 	private Long articleId;
 
+	@ApiModelProperty("父评论id")
+	private Long fatherCommentId;
+
+	@ApiModelProperty("评论的楼数")
+	private Integer flore;
+
 	@ApiModelProperty("评论类容")
 	private String content;
 
@@ -46,6 +52,6 @@ public class CommentEntity implements Serializable {
 	private String region;
 
 	@ApiModelProperty("评论时间")
-	private Date createTime;
+	private Long createTime;
 
 }

@@ -5,6 +5,7 @@ import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.entity.vo.ArticleDraftVo;
 import com.freedy.backend.entity.vo.ArticleVo;
+import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ public interface ArticleService extends IService<ArticleEntity> {
     /**
      * 查询文章详细列表
      */
-    PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException;
+    PageUtils getBackArticleList(Map<String, Object> params) throws ExecutionException, InterruptedException;
 
     /**
      * 发布文章 或修改文章
@@ -54,5 +55,20 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 获取该用户的文章的总评论数
      */
     Long getTotalComment();
+
+    /**
+     * 获取前台文章列表
+     */
+    PageUtils getFrontArticleList(Map<String, Object> params) throws ExecutionException, InterruptedException;
+
+    /**
+     * 获取要保存到es里面的model
+     */
+    ArticleEsModel getEsArticle(Long id);
+
+    /**
+     * 获取es model 列表
+     */
+    List<ArticleEsModel> getEsArticleList(Integer page,Integer limit);
 }
 

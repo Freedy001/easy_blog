@@ -1,7 +1,9 @@
 package com.freedy.backend.middleWare.mq.aspect;
 
 import com.freedy.backend.constant.RabbitConstant;
-import com.freedy.backend.middleWare.mq.annotation.StringSender;
+import com.freedy.backend.entity.dto.EsTypeDto;
+import com.freedy.backend.enumerate.EsType;
+import com.freedy.backend.middleWare.mq.annotation.ESEvict;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,6 +13,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author Freedy
@@ -24,22 +28,23 @@ public class RefreshEsMqAspect {
     @Autowired
     private RabbitTemplate template;
 
-    @Pointcut("@annotation(com.freedy.backend.middleWare.mq.annotation.StringSender)")
-    public void pointCut() {
 
-    }
-
-    @Around("pointCut()")
-    public Object around(ProceedingJoinPoint pjp) throws Throwable{
+    @SuppressWarnings("unchecked")
+    @Around("@annotation(com.freedy.backend.middleWare.mq.annotation.ESEvict)")
+    public Object around(ProceedingJoinPoint pjp) throws Throwable {
         try {
             log.debug("starting..........");
-            Object result = pjp.proceed();
-            MethodSignature signature = (MethodSignature) pjp.getSignature();
-            StringSender annotation = signature.getMethod().getAnnotation(StringSender.class);
-            log.debug(annotation.msg());
-            template.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
-                    RabbitConstant.ES_ROUTE_KEY+".refresh",
-                    annotation.msg());
+            Object[] args = pjp.getArgs();//List<Long> articleId
+            Object result = pjp.proceed(args);
+            Long[] articleId = (Long[]) args[0];
+            for (Long id : articleId) {
+                EsTypeDto dto = new EsTypeDto();
+                dto.setType(EsType.DELETE);
+                dto.setId(id);
+                template.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                        RabbitConstant.ES_ROUTE_KEY + ".refresh",
+                        dto);
+            }
             return result;
         } catch (Throwable e) {
             e.printStackTrace();

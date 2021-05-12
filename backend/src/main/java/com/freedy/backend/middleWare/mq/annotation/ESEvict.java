@@ -9,8 +9,6 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface StringSender {
-    String exchange() default "";
-    String queue() default "";
-    String msg();
+public @interface ESEvict {
+
 }
