@@ -48,6 +48,7 @@ public class FrontArticleController {
         return Result.ok().setData(page);
     }
 
+    @ApiOperation("获取文章详情")
     @GetMapping("/get")
     public Result getArticle(@RequestParam Long id){
         Optional<ArticleEsModel> optional = repository.findById(id);

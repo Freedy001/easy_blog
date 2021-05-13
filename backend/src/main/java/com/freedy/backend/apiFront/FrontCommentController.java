@@ -6,6 +6,7 @@ import com.freedy.backend.common.utils.Result;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.entity.vo.CommentVo;
 import com.freedy.backend.service.CommentService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class FrontCommentController {
     @Autowired
     private CommentService commentService;
 
+    @ApiOperation("发布评论")
     @PostMapping("/publish")
     public Result publishComment(@RequestBody CommentEntity comment, HttpServletRequest httpRequest){
         comment.setIp(IPUtil.getRemoteIpAddr(httpRequest));
@@ -32,6 +34,7 @@ public class FrontCommentController {
         return Result.ok();
     }
 
+    @ApiOperation("获取评论列表")
     @GetMapping("/getList")
     public Result getComments(@RequestParam Map<String, Object> params){
         PageUtils page = commentService.queryPage(params);

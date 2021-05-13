@@ -1,6 +1,6 @@
 package com.freedy.backend.middleWare.es.model;
 
-import com.baomidou.mybatisplus.annotation.TableId;
+import static com.freedy.backend.constant.EsConstant.INDEX;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
+
 /**
  * @author Freedy
  * @date 2021/5/1 14:54
@@ -21,7 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("ES搜索实体类")
-@Document(indexName = "article")
+@Document(indexName =INDEX)
 public class ArticleEsModel{
 
     @ApiModelProperty("主键")

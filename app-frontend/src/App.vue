@@ -2,7 +2,7 @@
 	<LoadingTab v-if="isLoading"></LoadingTab>
 	<div class="logo-and-menu">
 		<img @click="$router.push('/')" :src="loadResource('/image/LOGO谷歌.png')" alt="">
-		<svg class="icon" aria-hidden="true">
+		<svg class="icon" aria-hidden="true" @click="isShowMenu=!isShowMenu">
 			<use xlink:href="#icon-menu1"></use>
 		</svg>
 	</div>
@@ -13,18 +13,23 @@
 			<component :is="Component"/>
 		</transition>
 	</router-view>
+	<transition enter-active-class="slide-in-top" leave-active-class="slide-out-top">
+		<Menu v-if="isShowMenu" @clickCb="isShowMenu=false"></Menu>
+	</transition>
 </template>
 
 <script setup lang="ts">
 import {defineComponent, onMounted, ref} from "vue";
 import LoadingTab from './components/LoadingTab.vue'
+import Menu from './components/Menu.vue'
 import router from "./router";
 import {get, loadResource} from "./http";
 defineComponent({
-	LoadingTab
+	LoadingTab,
+	Menu
 })
 let isLoading=ref(true)
-
+let isShowMenu=ref(false)
 router.beforeEach((to, from)=>{
 	isLoading.value=true;
 })
@@ -36,7 +41,6 @@ router.afterEach(()=>{
 onMounted(()=>{
 
 })
-
 </script>
 
 <style lang="scss">
@@ -47,7 +51,7 @@ onMounted(()=>{
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	z-index: 99999;
+	z-index: 1000;
 	img{
 		margin-left: 30px;
 		cursor: pointer;
@@ -88,6 +92,33 @@ onMounted(()=>{
 		opacity: 0;
 	}
 }
+.slide-in-top{
+	animation: slide-in-top 0.3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+@keyframes slide-in-top {
+	0% {
+		transform: translateY(-1000px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+.slide-out-top{
+	animation: slide-out-top 0.3s cubic-bezier(0.550, 0.085, 0.680, 0.530) both;
+}
+@keyframes slide-out-top {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-1000px);
+		opacity: 0;
+	}
+}
+
 
 * {
 	margin: 0;

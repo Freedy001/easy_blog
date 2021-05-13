@@ -132,11 +132,13 @@ async function loadArticle() {
  * 清除样式 防止干扰其他页面
  */
 onBeforeRouteLeave((to, from, next) => {
-	const cssLink: HTMLCollectionOf<Element> = document.getElementsByClassName("md-css");
-	const length = cssLink.length;
-	for (let i = 0; i < length; i++) {
-		cssLink[0].remove()
-	}
+	setTimeout(()=>{
+		const cssLink: HTMLCollectionOf<Element> = document.getElementsByClassName("md-css");
+		const length = cssLink.length;
+		for (let i = 0; i < length; i++) {
+			cssLink[0].remove()
+		}
+	},300)
 	next();
 })
 
@@ -178,7 +180,7 @@ async function getComments() {
 async function commentCB(data:any) {
 		commentItem.length = 0
 		getComments().then(()=>{
-			const element: HTMLElement = document.getElementById("CommentList")
+			const element: any = document.getElementById("CommentList")
 			window.scrollTo({
 				top: element.offsetTop,
 				behavior: "smooth"
@@ -195,7 +197,6 @@ async function commentCB(data:any) {
 .kenburns-top-right {
 	animation: kenburns-top-right 5s ease-out both;
 }
-
 @keyframes kenburns-top-right {
 	0% {
 		transform: scale(1) translate(0, 0);
@@ -206,7 +207,6 @@ async function commentCB(data:any) {
 		transform-origin: right top;
 	}
 }
-
 .slide-in-bck-top{
 	animation: slide-in-bck-top 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
@@ -221,16 +221,14 @@ async function commentCB(data:any) {
 	}
 }
 
-
 ::v-global(.markdown-body .hljs) {
 	color: black;
 }
 
 .markdown-body {
 	overflow: hidden;
-	margin-top: 380px;
+	padding-top: 400px;
 }
-
 .title {
 	width: 100%;
 	height: 360px;

@@ -227,7 +227,8 @@ async function getArticleList() {
 }
 
 .content {
-	margin-top: calc(100vh + 100px);
+	position: relative;
+	top:  calc(100vh);
 	max-width: 1200px;
 	margin-left: auto;
 	margin-right: auto;

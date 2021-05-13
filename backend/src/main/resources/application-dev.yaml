@@ -5,13 +5,13 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/blog_db?serverTimezone=UTC
+    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
     username: root
     password: Kz99596589
   redis:
-    host: localhost
+    host: 192.168.169.2
   rabbitmq:
-    addresses: localhost
+    addresses: 192.168.169.2
     port: 5672
     virtual-host: /
     publisher-confirm-type: correlated #开启发送端确认
@@ -56,7 +56,7 @@ easy:
     base64-secret: sanbayan
     token-validity-in-seconds: 14400000
   elastic-search:
-    addr: localhost
+    addr: 192.168.169.2
     port: 9200
 
 

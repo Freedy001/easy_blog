@@ -13,7 +13,15 @@ const routes: Array<RouteRecordRaw> = [
 
 const router= createRouter({
     history:createWebHashHistory(),
-    routes
+    routes,
+    scrollBehavior(to, from, savedPosition) {
+        // if (savedPosition) {
+        //     return  { top: 0 }
+        // } else {
+        //     return { top: 0 }
+        // }
+        return { top: 0 }
+    },
 })
 
 export default router
