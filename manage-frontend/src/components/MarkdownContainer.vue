@@ -12,7 +12,7 @@ import 'highlight.js/styles/github.css';
 import hljs from 'highlight.js';
 import '@toast-ui/editor/dist/i18n/zh-cn'
 let editor: Editor;
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 defineEmit(['getArticle'])
 defineProps(['initText'])
 
@@ -42,6 +42,6 @@ watch(()=>proxy.initText,(val)=>{
 
 <style scoped lang="scss">
 #editor{
-
+	font-size: 15px;
 }
 </style>

@@ -1,20 +1,16 @@
 package com.freedy.backend.config.security;
 
 
-import com.freedy.backend.config.security.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -100,6 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //允许静态文件访问
                 .antMatchers("/image/**").permitAll()
                 .antMatchers("/css/**").permitAll()
+                .antMatchers("/resource/**").permitAll()
                 //允许前台页面访问
                 .antMatchers("/frontend/**").permitAll()
                 //配置允许匿名访问的路径

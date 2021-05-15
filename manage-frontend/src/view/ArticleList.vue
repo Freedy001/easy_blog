@@ -1,4 +1,5 @@
 <template>
+<div class="root">
 	<el-table
 			class="article-table"
 			:data="tableDate"
@@ -77,18 +78,21 @@
 	                      @content="getContent">
 
 	</ArticleSettingDrawer>
+</div>
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted, getCurrentInstance, defineComponent} from "vue";
+import {ref, reactive, onMounted, getCurrentInstance, defineComponent, watch} from "vue";
 import {get, post} from "../http";
 import {useRouter} from "vue-router";
 import ArticleSettingDrawer from '../components/ArticleSettingDrawer.vue'
+import {useStore} from "vuex";
 defineComponent({
 	ArticleSettingDrawer
 })
 const {proxy}:any = getCurrentInstance();
 const router = useRouter();
+const store = useStore();
 interface formData {
 	id: string
 	title: string,
@@ -109,12 +113,15 @@ onMounted(async () => {
 	getData(null).then();
 })
 let page=1
+/**
+ * 获取文章数据
+ */
 async function getData(pageNum:any|null){
 	let response;
 	if (pageNum){
-		response = await get(`/article/list?page=1&limit=${pageNum*40}`)
+		response = await get(`/article/list?page=1&limit=${pageNum*20}`)
 	}else {
-		response = await get(`/article/list?page=${page}&limit=40`)
+		response = await get(`/article/list?page=${page}&limit=20`)
 	}
 	if (response.code == 200) {
 		const arr: Array<formData> = response.data.list
@@ -162,6 +169,7 @@ function doEdit(id:any) {
 //设置回调
 let articleId=ref<string>();
 let drawer=ref(false)
+//设置文章
 function doSetting(id:any) {
 	articleId.value=id
 	drawer.value=!drawer.value
@@ -210,6 +218,10 @@ async function save(form:any){
 	}
 }
 
+/**
+ * 删除文章
+ * @param id
+ */
 async function doDel(id:any) {
 	const response =await get(`/article/delete?ids=${id}`);
 	if (response.code == 200) {
@@ -228,6 +240,10 @@ async function doDel(id:any) {
 	}
 }
 
+watch(()=>store.state.scrollCount,(val)=>{
+	page++;
+	getData(null)
+})
 
 </script>
 

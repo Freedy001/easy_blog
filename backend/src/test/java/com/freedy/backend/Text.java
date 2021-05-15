@@ -1,5 +1,6 @@
 package com.freedy.backend;
 
+import com.alibaba.fastjson.JSON;
 import com.freedy.backend.common.utils.MarkDown;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
@@ -23,8 +24,19 @@ import java.util.Arrays;
  */
 public class Text {
     public static void main(String[] args) throws Exception {
-        System.out.println(MarkDown.render("*i love you*"));
+        myTest myTest = new myTest();
+        String toJSONString = JSON.toJSONString(myTest);
+        System.out.println(toJSONString);
     }
 }
 
+class myTest{
+    public Integer getNum(){
+        return 12;
+    }
+
+    public String getName(){
+        return "小明";
+    }
+}
 

@@ -103,5 +103,14 @@
         <include refid="joinCondition"/>
     </select>
 
+    <select id="getTitles" resultType="com.freedy.backend.entity.vo.CommentAdminVo$Article">
+        select id,title from blog_db.blog_article where id in
+        (
+         <foreach collection="list" item="item" separator=",">
+            #{item}
+         </foreach>
+         )
+    </select>
+
 
 </mapper>

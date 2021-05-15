@@ -287,7 +287,7 @@ async function commentCB(data:any) {
 		left: 60vw;
 		top: 330px;
 		height: 30px;
-		z-index: 9999;
+		z-index: 500;
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;

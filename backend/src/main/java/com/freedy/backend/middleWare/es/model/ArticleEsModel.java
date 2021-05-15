@@ -81,5 +81,9 @@ public class ArticleEsModel{
     @Field(type = FieldType.Long,index = false)
     private Long publishTime;
 
+    //todo 为设置添加建议字段提升提示的速度
+//    @ApiModelProperty("建议字段")
+//    @Field(type = FieldType.Auto,analyzer = "ik_max_word")
+//    private String suggest;
 
 }

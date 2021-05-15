@@ -1,8 +1,13 @@
 package com.freedy.backend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.freedy.backend.common.utils.DateUtils;
+import com.freedy.backend.common.utils.Query;
+import com.freedy.backend.entity.vo.CommentAdminVo;
 import com.freedy.backend.entity.vo.CommentVo;
 import com.freedy.backend.exception.ArgumentErrorException;
+import com.freedy.backend.service.ArticleService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -12,7 +17,10 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.freedy.backend.common.utils.PageUtils;
@@ -27,6 +35,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private ArticleService articleService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -70,7 +81,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
 
     /**
      * 将评论树扁平化处理
-     * @param commentList  迭代器对象
+     *
+     * @param commentList 迭代器对象
      * @param childNode   子节点
      * @param parentNode  父节点
      */
@@ -115,6 +127,42 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             }
         }
         baseMapper.insert(comment);
+    }
+
+//    @Override
+//    public PageUtils queryAdminPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
+//        IPage<CommentEntity> page = this.page(new Query<CommentEntity>().getPage(params),
+//                new QueryWrapper<CommentEntity>().lambda().orderByDesc(CommentEntity::getCreateTime));
+//        List<CompletableFuture<CommentAdminVo>> futureList = page.getRecords().stream().map(item -> CompletableFuture.supplyAsync(() -> {
+//            CommentAdminVo adminVo = new CommentAdminVo();
+//            BeanUtils.copyProperties(item, adminVo);
+//            CommentAdminVo.Article article = articleService.getArticleTitles(Collections.singletonList(item.getArticleId())).get(0);
+//            adminVo.setArticle(article);
+//            adminVo.setId(item.getId().toString());
+//            adminVo.setCreateTime(DateUtils.formatTime(new Date(item.getCreateTime())));
+//            if (item.getFatherCommentId() != null) {
+//                CommentEntity entity = baseMapper.selectById(item.getFatherCommentId());
+//                adminVo.setFatherComment(entity.getContent());
+//            }
+//            return adminVo;
+//        })).collect(Collectors.toList());
+//        List<CommentAdminVo> vos = new ArrayList<>();
+//        for (CompletableFuture<CommentAdminVo> item : futureList) {
+//            vos.add(item.get());
+//        }
+//        return new PageUtils(vos, (int) page.getTotal(), (int) page.getSize(), (int) page.getCurrent());
+//    }
+
+    @Override
+    public PageUtils queryAdminPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
+        PageUtils utils = new PageUtils(params);
+        CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
+            List<CommentAdminVo> vos = baseMapper.getAdminCommentList(utils);
+            utils.setList(vos);
+        });
+        utils.setTotalCount(count());
+        f1.get();
+        return utils;
     }
 
 }

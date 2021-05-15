@@ -16,10 +16,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String path = "file:"+System.getProperty("user.home")+"\\.easy\\image\\";
         String cssPath = "file:"+System.getProperty("user.home")+"\\.easy\\css\\";
+        String resource = "classpath:/font-resource/";
         log.info("配置图片静态地址:{}",path);
         log.info("配置css静态地址:{}",cssPath);
+        log.info("配置resource静态地址:{}",resource);
         registry.addResourceHandler("/image/**").addResourceLocations(path);
         registry.addResourceHandler("/css/**").addResourceLocations(cssPath);
+        registry.addResourceHandler("/resource/**").addResourceLocations(resource);
 
     }
 }

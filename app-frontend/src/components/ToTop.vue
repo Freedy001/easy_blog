@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import {defineEmit, getCurrentInstance, onMounted, ref} from "vue";
 defineEmit(['scroll'])
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 let show = ref(false)
 let click = ref(false)
 onMounted(() => {

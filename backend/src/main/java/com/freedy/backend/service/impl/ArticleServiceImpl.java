@@ -11,6 +11,7 @@ import com.freedy.backend.entity.dto.EsTypeDto;
 import com.freedy.backend.entity.vo.ArticleDraftVo;
 import com.freedy.backend.entity.vo.ArticleVo;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
+import com.freedy.backend.entity.vo.CommentAdminVo;
 import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.middleWare.es.dao.ArticleRepository;
@@ -247,6 +248,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Override
     public List<ArticleEsModel> getEsArticleList(Integer page, Integer limit) {
         return baseMapper.getEsArticleList(page, limit);
+    }
+
+    @Override
+    public List<CommentAdminVo.Article> getArticleTitles(List<Long> articleIds) {
+        return baseMapper.getTitles(articleIds);
     }
 
 }

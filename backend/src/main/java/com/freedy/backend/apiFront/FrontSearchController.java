@@ -1,7 +1,8 @@
 package com.freedy.backend.apiFront;
 
 import com.freedy.backend.common.utils.Result;
-import com.freedy.backend.entity.vo.SuccessionVo;
+import com.freedy.backend.entity.vo.SearchResult;
+import com.freedy.backend.entity.vo.SuggestionVo;
 import com.freedy.backend.service.SearchService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +30,16 @@ public class FrontSearchController {
     @ApiOperation("获取搜索建议")
     @GetMapping("/getSuggestions")
     public Result getSuggestions(@RequestParam String queryString) throws IOException {
-        List<SuccessionVo> suggestions = service.getSuggestions(queryString);
+        List<SuggestionVo> suggestions = service.getSuggestions(queryString);
         return Result.ok().setData(suggestions);
+    }
+
+    @ApiOperation("搜索")
+    @GetMapping("/doSearch")
+    public Result search(@RequestParam(name = "searchString") String searchString ,
+            @RequestParam(name = "page") Integer page) throws IOException {
+        List<SearchResult> results=service.doSearch(searchString,page);
+        return Result.ok().setData(results);
     }
 
 

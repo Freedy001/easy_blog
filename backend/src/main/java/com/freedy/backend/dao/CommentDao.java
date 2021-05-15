@@ -1,7 +1,9 @@
 package com.freedy.backend.dao;
 
+import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.CommentEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.freedy.backend.entity.vo.CommentAdminVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +30,9 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
     List<CommentEntity> getCommentList(@Param("page") int page,
                                        @Param("limit") int limit,
                                        @Param("id") long id);
+
+    /**
+     *获取后台评论列表
+     */
+    List<CommentAdminVo> getAdminCommentList(PageUtils utils);
 }

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="sidebar" :class="{hide:scale, show:show}">
+		<div class="sidebar" :class="{hide:scale}">
 			<div class="info">
 				<el-dropdown>
 					<div class="photo" style="cursor:pointer;">
@@ -57,8 +57,6 @@
 				<span v-else @click="scale=!scale" class="el-icon-turn-off"></span>
 			</transition>
 		</div>
-		<div class="misk"></div>
-		<span class="btn" :class="[show ? 'el-icon-close' : 'el-icon-heavy-rain']"></span>
 	</div>
 </template>
 
@@ -113,7 +111,6 @@ async function lg() {
 			margin-top: 10px;
 			margin-bottom: 10px;
 			background: linear-gradient(30deg, #f8f8f8, #00b9ff, #3a9ff5, #ffff00);
-			//background: linear-gradient(30deg, #00ffc4, #01defa, #ecfd00, #ff00e5);
 			background-size: 1400% 300%;
 			animation: mymove 3s ease-in-out infinite alternate;
 		}

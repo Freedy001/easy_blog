@@ -4,6 +4,7 @@ import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.freedy.backend.entity.vo.ArticleInfoVo;
+import com.freedy.backend.entity.vo.CommentAdminVo;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -43,4 +44,9 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 获取ArticleEsModel 列表
      */
     List<ArticleEsModel> getEsArticleList(@Param("page") Integer page, @Param("limit") Integer limit);
+
+    /**
+     * 获取文章标题
+     */
+    List<CommentAdminVo.Article> getTitles(List<Long> articleIds);
 }

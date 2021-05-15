@@ -1,6 +1,7 @@
 package com.freedy.backend.service;
 
-import com.freedy.backend.entity.vo.SuccessionVo;
+import com.freedy.backend.entity.vo.SearchResult;
+import com.freedy.backend.entity.vo.SuggestionVo;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,7 +14,12 @@ public interface SearchService {
     /**
      * 获取搜索建议
      * @param queryString 搜索字符串
-     * @return
      */
-    List<SuccessionVo> getSuggestions(String queryString) throws IOException;
+    List<SuggestionVo> getSuggestions(String queryString) throws IOException;
+
+    /**
+     * 搜索文章
+     * @param searchString 搜索字符串
+     */
+    List<SearchResult> doSearch(String searchString,Integer page) throws IOException;
 }

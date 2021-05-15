@@ -1,5 +1,6 @@
 <!--suppress JSUnresolvedVariable -->
 <template>
+<div class="root">
 	<div class="indexContainer">
 		<div class="title-row">
 			<h1>{{ $store.state.articleTitle === '' ? '新文章' : $store.state.articleTitle }}</h1>
@@ -16,6 +17,7 @@
 	                      @saveCallback="save"
 	                      @content="getContent"
 	></ArticleSettingDrawer>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -130,6 +132,9 @@ onMounted(()=>{
 </script>
 
 <style scoped lang="scss">
+.root{
+	height: 100%;
+}
 .indexContainer {
 	.title-row {
 		margin: 0 20px 10px 20px;

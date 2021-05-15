@@ -2,33 +2,70 @@
 	<div class="main">
 		<Sidebar class="side"></Sidebar>
 		<div class="container">
-			<div class="content">
-				<router-view></router-view>
+			<div class="content" @scroll="doScroll" id="content">
+				<router-view v-slot="{ Component }">
+					<transition enter-active-class="fade-in"
+					            leave-active-class="fade-out"
+					            mode="out-in">
+						<component :is="Component"/>
+					</transition>
+				</router-view>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, onMounted} from 'vue'
 import Sidebar from "../components/Sidebar.vue";
-
+import {useStore} from "vuex";
 defineComponent({
 	Sidebar
 })
-
-
+const store = useStore();
+let timeout:any;
+function doScroll(event:any) {
+	const scroll= event.srcElement
+	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50)) {
+		if (timeout){
+			clearTimeout(timeout)
+		}
+		timeout = setTimeout(()=>{
+			store.commit('addScroll')
+		},300);
+	}
+}
 </script>
 
 <style scoped lang="scss">
+.fade-in {
+	animation: fade-in 0.3s both;
+}
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+.fade-out {
+	animation: fade-out 0.3s ease-out both;
+}
+@keyframes fade-out {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
 
 .main {
 	display: flex;
-	width: 90%;
-	height: 85%;
-	//max-height: 90vh;
-	//max-width: 1200px;
-	border-radius: 20px;
+	width: 100%;
+	height: 100%;
 	margin: auto;
 	overflow: hidden;
 	background: #0e8bff;
@@ -42,7 +79,8 @@ defineComponent({
 		width: 100%;
 		height: 100%;
 		padding: 40px 0;
-		border-radius: 20px;
+		border-top-left-radius: 20px;
+		border-bottom-left-radius: 20px;
 		background: #fff;
 		overflow: hidden;
 		transition: all .3s;

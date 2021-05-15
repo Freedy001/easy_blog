@@ -3,17 +3,7 @@
 
 <mapper namespace="com.freedy.backend.dao.CommentDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.freedy.backend.entity.CommentEntity" id="commentMap">
-        <result property="id" column="id"/>
-        <result property="articleId" column="article_id"/>
-        <result property="content" column="content"/>
-        <result property="username" column="username"/>
-        <result property="email" column="email"/>
-        <result property="ip" column="ip"/>
-        <result property="region" column="region"/>
-        <result property="createTime" column="create_time"/>
-    </resultMap>
+
     <select id="getTopFlore" resultType="java.lang.Integer">
         select max(flore) from blog_db.blog_comment where article_id=#{id}
     </select>
@@ -27,6 +17,30 @@
                 where article_id=#{id} order by flore desc limit #{key_offset},#{limit}
             ) as t
         )  order by flore desc limit 100; <!--最多100条数据-->
+    </select>
+
+    <resultMap id="adminList" type="com.freedy.backend.entity.vo.CommentAdminVo">
+        <id column="id" property="id"></id>
+        <result column="username" property="username"></result>
+        <result column="content" property="content"></result>
+        <result column="email" property="email"></result>
+        <result column="ip" property="ip"></result>
+        <result column="region" property="region"></result>
+        <result column="fatherComment" property="fatherComment"></result>
+        <result column="create_time" property="createTime"></result>
+        <association property="article" javaType="com.freedy.backend.entity.vo.CommentAdminVo$Article">
+            <result column="article_id" property="id"></result>
+            <result column="title" property="title"></result>
+        </association>
+    </resultMap>
+
+    <select id="getAdminCommentList" resultMap="adminList">
+        <bind name="key_offset" value="(currPage-1)*pageSize"></bind>
+        select c.id,c.username,c.flore,c.ip,c.create_time,c.article_id as article_id,
+               c.content as content,c.email,c.region,parent.content as fatherComment,ba.title
+        from blog_comment as c
+        left join blog_comment parent on c.father_comment_id=parent.id
+        left join blog_article ba on c.article_id = ba.id order by c.create_time desc limit #{key_offset},#{pageSize}
     </select>
 
 

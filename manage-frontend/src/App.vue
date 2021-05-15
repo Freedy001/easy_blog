@@ -1,12 +1,61 @@
 <template>
-	<router-view></router-view>
+	<LoadingTab v-if="isLoading"></LoadingTab>
+	<router-view v-slot="{ Component }">
+		<transition enter-active-class="fade-in-right"
+		            leave-active-class="fade-out-left"
+		            mode="out-in">
+			<component :is="Component"/>
+		</transition>
+	</router-view>
 </template>
 
 <script setup lang="ts">
-
+import {defineComponent, ref} from "vue";
+import LoadingTab from './components/LoadingTab.vue'
+import {useRouter} from "vue-router";
+defineComponent({
+	LoadingTab
+})
+const router = useRouter();
+let isLoading=ref(false)
+router.beforeEach((to, from)=>{
+	isLoading.value=true;
+})
+router.afterEach(()=>{
+	setTimeout(()=>{
+		isLoading.value=false
+	},500)
+})
 </script>
 
 <style lang="scss">
+.fade-in-right {
+	animation: fade-in-right 0.3s ease-in both;
+}
+@keyframes fade-in-right {
+	0% {
+		transform: translateX(50px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+.fade-out-left {
+	animation: fade-out-left 0.3s ease-out both;
+}
+@keyframes fade-out-left {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(-50px);
+		opacity: 0;
+	}
+}
+
 *{
 	margin: 0;
 	padding: 0;
@@ -28,7 +77,6 @@ body{
 	overflow: hidden;
 }
 #app{
-	padding: 0 15px;
 	height: 100vh;
 	width: 100vw;
 	display: flex;

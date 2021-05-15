@@ -1,10 +1,12 @@
 <template>
 	<LoadingTab v-if="isLoading"></LoadingTab>
 	<div class="logo-and-menu">
-		<img @click="$router.push('/')" :src="loadResource('/image/LOGO谷歌.png')" alt="">
-		<svg class="icon" aria-hidden="true" @click="isShowMenu=!isShowMenu">
-			<use xlink:href="#icon-menu1"></use>
-		</svg>
+		<img @click="$router.push('/')" :src="loadResource('/resource/EASY Blog White.svg')" alt="">
+		<div class="icon" @click="isShowMenu=!isShowMenu">
+			<div class="line"></div>
+			<div class="line"></div>
+			<div class="line"></div>
+		</div>
 	</div>
 	<router-view v-slot="{ Component }">
 		<transition enter-active-class="fade-in-right"
@@ -22,6 +24,7 @@
 import {defineComponent, onMounted, ref} from "vue";
 import LoadingTab from './components/LoadingTab.vue'
 import Menu from './components/Menu.vue'
+import MenuLogo from './components/Menu.vue'
 import router from "./router";
 import {get, loadResource} from "./http";
 defineComponent({
@@ -55,15 +58,41 @@ onMounted(()=>{
 	img{
 		margin-left: 30px;
 		cursor: pointer;
-		width: 30px;
-		height: 30px;
+		width: 65px;
+		height: 65px;
+		border-radius: 50%;
+		transition: all 0.5s ease;
+		&:hover{
+			background-color: #253236;
+		}
 	}
 	.icon {
-		font-size: 20px;
-		color: #000000;
+		width: 30px;
+		height: 33px;
 		border-radius: 5px;
 		margin-right: 50px;
 		cursor: pointer;
+		background-color: rgba(255, 255, 255, 0);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		align-items: center;
+		transition: all .3s ease;
+		.line{
+			width: 30px;
+			height: 4px;
+			background-color: rgb(114, 114, 114);
+			border-radius: 50px;
+			transition: all .3s ease;
+		}
+		&:hover{
+			flex-direction: row;
+			.line{
+				height: 30px;
+				width: 5px;
+				background-color: rgb(9, 136, 146);
+			}
+		}
 	}
 }
 .fade-in-right {
@@ -157,5 +186,8 @@ body {
 }
 :root {
 	--animate-duration: 2s;
+}
+img{
+	user-select: none;
 }
 </style>

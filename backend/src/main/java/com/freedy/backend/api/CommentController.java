@@ -2,8 +2,10 @@ package com.freedy.backend.api;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import com.freedy.backend.common.utils.Result;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,50 +27,15 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    /**
-     * 列表
-     */
+    @ApiOperation("列出评论")
     @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
-        PageUtils page = commentService.queryPage(params);
-
-        return Result.ok().put("page", page);
+    public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
+        PageUtils page = commentService.queryAdminPage(params);
+        return Result.ok().setData(page);
     }
 
 
-    /**
-     * 信息
-     */
-    @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Long id){
-		CommentEntity comment = commentService.getById(id);
-
-        return Result.ok().put("comment", comment);
-    }
-
-    /**
-     * 保存
-     */
-    @PostMapping("/save")
-    public Result save(@RequestBody CommentEntity comment){
-		commentService.save(comment);
-
-        return Result.ok();
-    }
-
-    /**
-     * 修改
-     */
-    @PostMapping("/update")
-    public Result update(@RequestBody CommentEntity comment){
-		commentService.updateById(comment);
-
-        return Result.ok();
-    }
-
-    /**
-     * 删除
-     */
+    @ApiOperation("删除")
     @GetMapping("/delete")
     public Result delete(@RequestBody Long[] ids){
 		commentService.removeByIds(Arrays.asList(ids));

@@ -1,4 +1,5 @@
 <template>
+<div class="root">
 	<div class="card-row first">
 		<el-card class="box-card" shadow="hover">
 			<h1>文章</h1>
@@ -26,6 +27,7 @@
 			<h1>操作记录</h1>
 		</el-card>
 	</div>
+</div>
 </template>
 
 <script setup lang="ts">

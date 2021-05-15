@@ -32,7 +32,6 @@ spring:
       use-key-prefix: true
       cache-null-values: true
 
-
 easy:
   thread:
     core-size: 50

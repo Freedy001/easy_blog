@@ -9,6 +9,7 @@ import com.freedy.backend.service.CommentService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ public class FrontCommentController {
 
     @ApiOperation("获取评论列表")
     @GetMapping("/getList")
+    @Cacheable(cacheNames = "comment",sync = true)
     public Result getComments(@RequestParam Map<String, Object> params){
         PageUtils page = commentService.queryPage(params);
         return Result.ok().setData(page);

@@ -5,6 +5,7 @@ import com.freedy.backend.common.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.entity.vo.ArticleDraftVo;
 import com.freedy.backend.entity.vo.ArticleVo;
+import com.freedy.backend.entity.vo.CommentAdminVo;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 
 import java.util.List;
@@ -70,5 +71,10 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 获取es model 列表
      */
     List<ArticleEsModel> getEsArticleList(Integer page,Integer limit);
+
+    /**
+     * 获取文章title
+     */
+    List<CommentAdminVo.Article> getArticleTitles(List<Long> articleIDs);
 }
 
