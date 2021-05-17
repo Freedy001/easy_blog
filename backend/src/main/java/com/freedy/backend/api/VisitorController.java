@@ -3,14 +3,14 @@ package com.freedy.backend.api;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.Result;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.VisitorEntity;
 import com.freedy.backend.service.VisitorService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 
 
 /**

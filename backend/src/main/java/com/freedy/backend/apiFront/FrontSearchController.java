@@ -1,8 +1,8 @@
 package com.freedy.backend.apiFront;
 
-import com.freedy.backend.common.utils.Result;
-import com.freedy.backend.entity.vo.SearchResult;
-import com.freedy.backend.entity.vo.SuggestionVo;
+import com.freedy.backend.utils.Result;
+import com.freedy.backend.entity.vo.search.SearchResult;
+import com.freedy.backend.entity.vo.search.SuggestionVo;
 import com.freedy.backend.service.SearchService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

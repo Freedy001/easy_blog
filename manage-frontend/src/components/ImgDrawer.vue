@@ -14,7 +14,7 @@
 					<div class="img-container" v-for="(url,i) in resource" :key="i">
 						<el-image class="image"
 						          fit="cover"
-						          :src="url"
+						          :src="loadResource(url)"
 						          @click="handClick(url)"
 						          lazy
 						></el-image>
@@ -37,7 +37,7 @@
 					@click.stop=""
 					class="upload-demo"
 					drag
-					:action="url"
+					:action="loadResource('/backend/file/upload')"
 					list-type="picture"
 					:headers="token"
 					:on-success="success"
@@ -63,19 +63,19 @@ import {
 } from "vue";
 import {ElMessage} from "element-plus";
 import {get, loadResource} from "../http";
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 let input = ref('')
 let token = {Authorization: localStorage.getItem('Authorization')}
 let showCard = ref(false)
 let resource = reactive<Array<string>>([])
 let page=1
 let drawer=ref(false);
-defineProps(['isDrawer','url'])
+defineProps(['isDrawer'])
 defineEmit(['clickCallback'])
 watch(()=>proxy.isDrawer,(val)=>{
 	drawer.value=true;
 })
-function handClick(url) {
+function handClick(url:string) {
 	proxy.$emit('clickCallback',url)
 	drawer.value=false;
 }
@@ -123,7 +123,7 @@ async function getImageUrls() {
 	if (response.code == 200) {
 		const list: Array<any> = response.data.list
 		list.forEach((value, index) => {
-			resource.push(loadResource(value.resourceUrl))
+			resource.push(value.resourceUrl)
 		})
 	}
 }

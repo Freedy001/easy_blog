@@ -1,12 +1,12 @@
 package com.freedy.backend.service.impl;
 
-import com.freedy.backend.common.utils.AuthorityUtils;
-import com.freedy.backend.common.utils.Local;
+import com.freedy.backend.utils.AuthorityUtils;
+import com.freedy.backend.utils.Local;
 import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.*;
-import com.freedy.backend.entity.vo.NewUserVo;
-import com.freedy.backend.entity.vo.UserInfoVo;
+import com.freedy.backend.entity.vo.manager.NewUserVo;
+import com.freedy.backend.entity.vo.manager.UserInfoVo;
 import com.freedy.backend.enumerate.SettingEnum;
 import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.properties.PermissionItemProperties;
@@ -15,13 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -31,13 +28,11 @@ import java.util.stream.Collectors;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.freedy.backend.common.utils.PageUtils;
-import com.freedy.backend.common.utils.Query;
+import com.freedy.backend.utils.PageUtils;
+import com.freedy.backend.utils.Query;
 
 import com.freedy.backend.dao.ManagerDao;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 
 @Slf4j
 @Service("managerService")
@@ -102,8 +97,8 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         }
         //获取主页uri
         CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> {
-            SettingEntity page = settingService.getOne(new QueryWrapper<SettingEntity>()
-                    .eq("item_name", SettingEnum.pageUrl.name()));
+            SettingEntity page = settingService.getOne(new QueryWrapper<SettingEntity>().lambda()
+                    .eq(SettingEntity::getItem,SettingEnum.pageUrl.name()));
             infoVo.setPageUrl(page.getItem());
         }, executor);
         //获取文章总数

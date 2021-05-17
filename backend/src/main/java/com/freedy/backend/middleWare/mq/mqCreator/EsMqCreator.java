@@ -21,19 +21,19 @@ import static com.freedy.backend.constant.RabbitConstant.DELAYED_ROUTING_KEY;
 public class EsMqCreator {
 
     @Bean
-    public Exchange orderEventExchange() {
+    public Exchange ESExchange() {
         return new TopicExchange(RabbitConstant.ES_EXCHANGE_NAME,
                 true, false);
     }
 
     @Bean
-    public Queue OrderReleaseQueue() {
+    public Queue ESQueue() {
         return new Queue(RabbitConstant.ES_QUEUE_NAME,
                 true, false, false);
     }
 
     @Bean
-    public Binding orderCreateOrderBinding() {
+    public Binding ESBinding() {
         return new Binding(RabbitConstant.ES_QUEUE_NAME,
                 Binding.DestinationType.QUEUE,
                 RabbitConstant.ES_EXCHANGE_NAME,

@@ -3,8 +3,8 @@ package com.freedy.backend.api;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.freedy.backend.common.utils.Result;
-import com.freedy.backend.entity.vo.NewUserVo;
+import com.freedy.backend.utils.Result;
+import com.freedy.backend.entity.vo.manager.NewUserVo;
 import com.freedy.backend.properties.PermissionItemProperties;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

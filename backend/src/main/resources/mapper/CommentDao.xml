@@ -3,23 +3,22 @@
 
 <mapper namespace="com.freedy.backend.dao.CommentDao">
 
-
     <select id="getTopFlore" resultType="java.lang.Integer">
         select max(flore) from blog_db.blog_comment where article_id=#{id}
     </select>
 
     <select id="getCommentList" resultType="com.freedy.backend.entity.CommentEntity">
         <bind name="key_offset" value="(page-1)*limit"></bind>
-        select * from blog_comment where article_id=#{id} and flore in (
+        select * from blog_comment where article_id=#{id} and comment_status=1 and flore in (
             select * from
             (
                 select distinct(flore) from blog_comment
-                where article_id=#{id} order by flore desc limit #{key_offset},#{limit}
+                where article_id=#{id} and comment_status=1 order by flore desc limit #{key_offset},#{limit}
             ) as t
         )  order by flore desc limit 100; <!--最多100条数据-->
     </select>
 
-    <resultMap id="adminList" type="com.freedy.backend.entity.vo.CommentAdminVo">
+    <resultMap id="adminList" type="com.freedy.backend.entity.vo.comment.CommentAdminVo">
         <id column="id" property="id"></id>
         <result column="username" property="username"></result>
         <result column="content" property="content"></result>
@@ -27,8 +26,10 @@
         <result column="ip" property="ip"></result>
         <result column="region" property="region"></result>
         <result column="fatherComment" property="fatherComment"></result>
+        <result column="has_read" property="hasRead"></result>
+        <result column="comment_status" property="commentStatus"></result>
         <result column="create_time" property="createTime"></result>
-        <association property="article" javaType="com.freedy.backend.entity.vo.CommentAdminVo$Article">
+        <association property="article" javaType="com.freedy.backend.entity.vo.comment.CommentAdminVo$Article">
             <result column="article_id" property="id"></result>
             <result column="title" property="title"></result>
         </association>
@@ -37,11 +38,28 @@
     <select id="getAdminCommentList" resultMap="adminList">
         <bind name="key_offset" value="(currPage-1)*pageSize"></bind>
         select c.id,c.username,c.flore,c.ip,c.create_time,c.article_id as article_id,
-               c.content as content,c.email,c.region,parent.content as fatherComment,ba.title
+               c.content as content,c.email,c.region,parent.content as fatherComment,ba.title,
+               c.has_read,c.comment_status
         from blog_comment as c
         left join blog_comment parent on c.father_comment_id=parent.id
         left join blog_article ba on c.article_id = ba.id order by c.create_time desc limit #{key_offset},#{pageSize}
     </select>
+
+    <select id="getAllCommentInOneFlore" resultType="com.freedy.backend.entity.CommentEntity">
+        select * from blog_comment where
+        <foreach collection="list" separator="or" item="item">
+            article_id=#{item.articleId} and flore=#{item.flore}
+        </foreach>
+    </select>
+
+    <update id="confirmExaminations">
+        update blog_db.blog_comment set comment_status=1 where blog_db.blog_comment.id in
+            (
+            <foreach collection="list" item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+    </update>
 
 
 </mapper>

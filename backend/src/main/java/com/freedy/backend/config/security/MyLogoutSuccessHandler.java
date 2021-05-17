@@ -1,14 +1,13 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.JwtTokenUtil;
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.JwtTokenUtil;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.properties.JwtProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

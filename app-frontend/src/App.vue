@@ -1,7 +1,7 @@
 <template>
 	<LoadingTab v-if="isLoading"></LoadingTab>
 	<div class="logo-and-menu">
-		<img @click="$router.push('/')" :src="loadResource('/resource/EASY Blog White.svg')" alt="">
+		<img @click="$router.push('/')" :src="loadResource($store.state.indexSetting.logo)" alt="">
 		<div class="icon" @click="isShowMenu=!isShowMenu">
 			<div class="line"></div>
 			<div class="line"></div>
@@ -27,6 +27,8 @@ import Menu from './components/Menu.vue'
 import MenuLogo from './components/Menu.vue'
 import router from "./router";
 import {get, loadResource} from "./http";
+import {useStore} from "vuex";
+const store = useStore();
 defineComponent({
 	LoadingTab,
 	Menu
@@ -42,8 +44,16 @@ router.afterEach(()=>{
     },500)
 })
 onMounted(()=>{
-
+	getIndexSetting()
 })
+
+async function getIndexSetting() {
+	const response =await get('/sys/getIndexSetting');
+	if (response.code==200){
+		const data:any = response.data;
+		store.commit('setIndexSetting',data)
+	}
+}
 </script>
 
 <style lang="scss">

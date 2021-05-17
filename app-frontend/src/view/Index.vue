@@ -1,18 +1,19 @@
+<!--suppress JSUnresolvedVariable -->
 <template>
 <div class="root">
 	<teleport to="body">
 		<div id="cover" class="index-cover" ref="container">
 			<div class="img" :style="moveStyle">
-				<img src="https://cdn.pixabay.com/photo/2014/05/02/23/46/bridge-336475_1280.jpg" alt="">
+				<img :src="loadResource($store.state.indexSetting.poster)" alt="">
 			</div>
-			<div class="triangle"></div>
+			<div class="triangle" :style="{'border-bottom': `400vh solid ${$store.state.indexSetting.indexColor}`}"></div>
 
 			<div class="cover-title">
-				<div class="time">一月 23, 2020</div>
+				<div class="time">{{ $store.state.indexSetting.indexArticle.publishTime }}</div>
 				<div class="title">
-					<a href="/#" data-v-241ea8f0="" class="title-a">要么孤独，要么庸俗</a>
+					<a href="/#" data-v-241ea8f0="" class="title-a">{{$store.state.indexSetting.indexArticle.title}}</a>
 				</div>
-				<div class="describe">愿所有的美好如约而至，愿所有的黑暗都能看到希望，我们都能微笑前行，人生没有完美，有些遗憾才美...</div>
+				<div class="describe">{{$store.state.indexSetting.indexArticle.articleDesc}}</div>
 			</div>
 		</div>
 	</teleport>
@@ -42,9 +43,10 @@
 import {defineComponent, onMounted, reactive, ref, watch} from "vue";
 import SimpleArticleContainer from '../components/SimpleArticleContainer.vue'
 import LoadMore from "../components/LoadMore.vue";
-import {get} from "../http";
+import {get, loadResource} from "../http";
 import ToTop from "../components/ToTop.vue";
-
+import {useStore} from "vuex";
+const store = useStore();
 defineComponent({
 	SimpleArticleContainer,
 	LoadMore,
@@ -117,7 +119,6 @@ interface IArticleItem {
 
 let articleItem = reactive<Array<IArticleItem>>([])
 let page = 1
-
 /**
  * 加载数据
  */
@@ -146,8 +147,6 @@ async function getArticleList() {
 		}
 	}
 }
-
-
 </script>
 
 <style scoped lang="scss">

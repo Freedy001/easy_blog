@@ -1,10 +1,10 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.ManagerEntity;
-import com.freedy.backend.entity.vo.NewUserVo;
-import com.freedy.backend.entity.vo.UserInfoVo;
+import com.freedy.backend.entity.vo.manager.NewUserVo;
+import com.freedy.backend.entity.vo.manager.UserInfoVo;
 
 import java.util.List;
 import java.util.Map;

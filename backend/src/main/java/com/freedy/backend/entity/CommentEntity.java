@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class CommentEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-
 	@ApiModelProperty("主键")
 	@TableId(type = IdType.AUTO)
 	private Long id;
@@ -47,6 +46,12 @@ public class CommentEntity implements Serializable {
 
 	@ApiModelProperty("评论人ip")
 	private String ip;
+
+	@ApiModelProperty("是否已读")
+	private Integer hasRead;
+
+	@ApiModelProperty("评论状态 0待审核 1已发布")
+	private Integer commentStatus;
 
 	@ApiModelProperty("评论人地区")
 	private String region;

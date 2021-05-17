@@ -13,4 +13,8 @@ public class RabbitConstant {
     public static final String DELAYED_QUEUE_NAME = "delay.article.delay.queue";
     public static final String DELAYED_EXCHANGE_NAME = "delay.article.delay.exchange";
     public static final String DELAYED_ROUTING_KEY = "delay.article.delay.routing.key";
+    //与邮件系统相关的队列与交换机
+    public static final String EMAIL_EXCHANGE_NAME="email.sender.exchange";
+    public static final String EMAIL_REPLAY_QUEUE_NAME="email.replay.sender.queue";
+    public static final String EMAIL_REPLAY_ROUTING_KEY="email.replay.sender.routing.key";
 }

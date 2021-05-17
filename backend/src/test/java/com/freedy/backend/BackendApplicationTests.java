@@ -1,16 +1,15 @@
 package com.freedy.backend;
 
 
-import com.freedy.backend.entity.vo.NewUserVo;
+import com.freedy.backend.utils.EmailSender;
+import com.freedy.backend.entity.vo.manager.NewUserVo;
 import com.freedy.backend.properties.PermissionItemProperties;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -20,6 +19,8 @@ class BackendApplicationTests {
     private PermissionItemProperties permissionItem;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private EmailSender sender;
     @Test
     public void test(){
         NewUserVo manager = new NewUserVo();
@@ -62,6 +63,11 @@ class BackendApplicationTests {
     public void test1(){
         Set<String> keys = redisTemplate.keys("*");
         redisTemplate.delete(keys);
+    }
+
+    @Test
+    public void test2(){
+        sender.sendHtml("985948228@qq.com","test","<h1>love you haha</h1>");
     }
 
 }

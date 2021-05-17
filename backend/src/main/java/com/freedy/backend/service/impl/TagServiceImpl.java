@@ -7,8 +7,8 @@ import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.freedy.backend.common.utils.PageUtils;
-import com.freedy.backend.common.utils.Query;
+import com.freedy.backend.utils.PageUtils;
+import com.freedy.backend.utils.Query;
 
 import com.freedy.backend.dao.TagDao;
 import com.freedy.backend.entity.TagEntity;

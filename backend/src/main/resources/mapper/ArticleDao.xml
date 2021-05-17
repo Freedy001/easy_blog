@@ -3,7 +3,7 @@
 
 <mapper namespace="com.freedy.backend.dao.ArticleDao">
 
-    <resultMap id="ArticleInfoMap" type="com.freedy.backend.entity.vo.ArticleInfoVo" autoMapping="true">
+    <resultMap id="ArticleInfoMap" type="com.freedy.backend.entity.vo.article.ArticleInfoVo" autoMapping="true">
         <result property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="articleStatus" column="article_status"/>
@@ -64,7 +64,7 @@
 
     <select id="queryArticleList"
             resultMap="ArticleInfoMap"
-            parameterType="com.freedy.backend.common.utils.PageUtils">
+            parameterType="com.freedy.backend.utils.PageUtils">
         <bind name="key_offset" value="(currPage-1)*pageSize"></bind>
         select article.id,article.title,article.article_status,category.category_name,article.word_num,
         article.article_desc,article.comment_num,article.visit_num,article.like_num,
@@ -103,7 +103,7 @@
         <include refid="joinCondition"/>
     </select>
 
-    <select id="getTitles" resultType="com.freedy.backend.entity.vo.CommentAdminVo$Article">
+    <select id="getTitles" resultType="com.freedy.backend.entity.vo.comment.CommentAdminVo$Article">
         select id,title from blog_db.blog_article where id in
         (
          <foreach collection="list" item="item" separator=",">

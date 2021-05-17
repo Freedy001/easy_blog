@@ -5,7 +5,7 @@
 			<el-card class="box-card left">
 				<div class="info">
 					<div class="photo" @click="changeHeadImg" style="cursor: pointer">
-						<img :src="userInfoDetail.headImg" alt="">
+						<img :src="loadResource(userInfoDetail.headImg)" alt="">
 					</div>
 					<p v-if="userInfoDetail.rootAdmin" class="name">Admin</p>
 					<p class="name">{{ userInfoDetail.nickname }}</p>
@@ -150,9 +150,9 @@
 				</el-tabs>
 			</el-card>
 		</div>
-		<teleport to="body">
-			<div class="full-screen" v-if="showCard" @click="showCard=false">
-				<el-card class="box-card" @click.stop="">
+		<transition name="el-fade-in-linear">
+			<FullScreen v-if="showCard" @click="showCard=false" :opacity="0.5">
+				<el-card class="permission-card" @click.stop="">
 					<div class="newUserForm">
 						<div class="item">
 							<span>用户名:</span>
@@ -246,11 +246,10 @@
 						</div>
 					</div>
 				</el-card>
-			</div>
-		</teleport>
+			</FullScreen>
+		</transition>
 		<ImgDrawer
 				:isDrawer="drawer"
-				:url="url"
 				@clickCallback="handlePickPic"
 		></ImgDrawer>
 	</div>
@@ -261,18 +260,20 @@ import {defineComponent, getCurrentInstance, onMounted, reactive, ref, watch} fr
 import {get, loadResource, post} from "../http";
 import {useRouter} from "vue-router";
 import ImgDrawer from '../components/ImgDrawer.vue'
+import FullScreen from '../components/FullScreen.vue'
 const router = useRouter();
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 defineComponent({
-	ImgDrawer
+	ImgDrawer,
+	FullScreen
 })
 let drawer=ref(false)
-let url=loadResource('/backend/file/upload')
 //更换头像
 function changeHeadImg() {
 	drawer.value=!drawer.value;
 }
-async function handlePickPic(url){
+//更换头像
+async function handlePickPic(url:string){
 	const response =await post('/manager/updateUserInfo',{
 		headImg:url
 	});
@@ -820,72 +821,62 @@ async function userDelete(id:number) {
 		}
 	}
 
-	.full-screen {
-		width: 100%;
-		height: 100%;
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 1000;
+}
+.permission-card {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 65%;
+	overflow: auto;
+	height: 90%;
+	&::-webkit-scrollbar {
+		width: 0;
+	}
 
-		.box-card {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			width: 50%;
-			overflow: auto;
-			height: 85%;
+	.newUserForm {
 
-			.newUserForm {
-				.item {
-					margin: 10px;
-					display: flex;
-					justify-content: left;
-					align-items: center;
+		.item {
+			margin: 10px;
+			display: flex;
+			justify-content: left;
+			align-items: center;
 
-					span {
-						width: 80px;
-						text-align: left;
-					}
+			span {
+				width: 80px;
+				text-align: left;
+			}
 
-					.el-input {
-						margin-left: 20px;
-
-					}
-
-					.el-select {
-						width: 100%;
-					}
-				}
-
-				.permission.item {
-					margin: 0;
-					display: flex;
-					flex-direction: column;
-
-					.permissionContainer {
-						margin: 10px;
-						width: 80%;
-
-						.line {
-							margin: 20px;
-
-							.el-switch {
-								margin-bottom: 15px;
-							}
-
-
-						}
-					}
-				}
-
+			.el-input {
+				margin-left: 20px;
 
 			}
 
+			.el-select {
+				width: 100%;
+			}
 		}
 
-		background-color: rgba(0, 0, 0, 0.9);
+		.permission.item {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+
+			.permissionContainer {
+				margin: 10px;
+				width: 80%;
+
+				.line {
+					margin: 20px;
+
+					.el-switch {
+						margin-bottom: 15px;
+					}
+
+
+				}
+			}
+		}
 	}
 
 }

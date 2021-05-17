@@ -1,9 +1,9 @@
 package com.freedy.backend.dao;
 
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.CommentEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.freedy.backend.entity.vo.CommentAdminVo;
+import com.freedy.backend.entity.vo.comment.CommentAdminVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -35,4 +35,14 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      *获取后台评论列表
      */
     List<CommentAdminVo> getAdminCommentList(PageUtils utils);
+
+    /**
+     * 获取同楼层的所有评论
+     */
+    List<CommentEntity> getAllCommentInOneFlore(List<CommentEntity> entities);
+
+    /**
+     * 审核通过
+     */
+    void confirmExaminations(List<Long> ids);
 }

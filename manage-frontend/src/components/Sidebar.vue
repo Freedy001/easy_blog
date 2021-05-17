@@ -4,16 +4,19 @@
 			<div class="info">
 				<el-dropdown>
 					<div class="photo" style="cursor:pointer;">
-						<img src="src/assets/login-0.png">
+						<img :src="loadResource(headImg)" alt="">
 					</div>
 					<template #dropdown>
 						<el-dropdown-menu>
-							<el-dropdown-item @click="$router.push('/index/user')"><i class="el-icon-user-solid" style="margin-right: 10px"></i>个人资料</el-dropdown-item>
-							<el-dropdown-item @click="lg"><i class="el-icon-more-outline" style="margin-right: 10px"></i>退出登录</el-dropdown-item>
+							<el-dropdown-item @click="$router.push('/index/user')"><i class="el-icon-user-solid"
+							                                                          style="margin-right: 10px"></i>个人资料
+							</el-dropdown-item>
+							<el-dropdown-item @click="lg"><i class="el-icon-more-outline" style="margin-right: 10px"></i>退出登录
+							</el-dropdown-item>
 						</el-dropdown-menu>
 					</template>
 				</el-dropdown>
-				<p class="name">Freedy</p>
+				<p class="name">{{ nickname }}</p>
 			</div>
 			<el-menu
 					mode="horizontal"
@@ -61,10 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
-import {logout} from'../http'
+import {onMounted, ref} from "vue";
+import {get, loadResource, logout} from '../http'
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
+
 const scale = ref(false)
 const router = useRouter();
 
@@ -72,6 +76,17 @@ async function lg() {
 	await logout()
 	await router.push('/login')
 }
+
+let nickname = ref()
+let headImg = ref()
+onMounted(async () => {
+	const response = await get('/manager/getUserInfo');
+	if (response.code == 200) {
+		console.log(response.data)
+		nickname.value = response.data.nickname;
+		headImg.value = response.data.headImg;
+	}
+})
 
 </script>
 

@@ -1,9 +1,8 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.RolePermissionEntity;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;

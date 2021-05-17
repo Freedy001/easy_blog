@@ -58,6 +58,9 @@
 					filterable
 					allow-create
 					default-first-option
+					remote
+					:remote-method="remoteMethod"
+					:loading="loading"
 					placeholder="请选择文章标签">
 				<el-option
 						v-for="item in options"
@@ -68,17 +71,17 @@
 			</el-select>
 			<el-divider></el-divider>
 			<h1>摘要</h1>
-			<el-input type="textarea" v-model="form.desc"></el-input>
+			<el-input type="textarea" placeholder="请输入文章的摘要,不输入则自动截取!" v-model="form.desc"></el-input>
 			<el-divider></el-divider>
 			<h1>封面图</h1>
-			<div @click="innerDrawer=true">
+			<div @click="innerDrawer++" class="poster">
 				<el-image
 						fit="fill"
-						:src="form.url"
+						:src="loadResource(form.url)"
 				>
 					<template #error>
 						<div class="image-slot">
-							<i class="el-icon-picture-outline"></i>
+							<span>点我,选择一个图片吧🤪</span>
 						</div>
 					</template>
 					<template #placeholder>
@@ -95,44 +98,55 @@
 				<el-button @click="drawer=false">取消</el-button>
 			</div>
 		</div>
-<!--		<el-drawer-->
-<!--				:size="400"-->
-<!--				title="选择图片"-->
-<!--				:append-to-body="true"-->
-<!--				v-model="innerDrawer">-->
-<!--			<p>_(:зゝ∠)_</p>-->
-<!--		</el-drawer>-->
+		<ImgDrawer :isDrawer="innerDrawer" @clickCallback="clickCb"></ImgDrawer>
 	</el-drawer>
-	<teleport to="body">
-		<div class="full-screen" v-if="showCard" @click="showCard=false">
-			<div class="boxs" @click.stop="">
+	<transition name="el-fade-in">
+		<FullScreen v-if="showCard" @clickOutSide="showCard=false" :opacity="0.2">
+			<div class="boxs">
 				<CategoryOrTagCard @callback="addSuccess" name="分类"></CategoryOrTagCard>
 			</div>
-		</div>
-	</teleport>
+		</FullScreen>
+	</transition>
 </template>
 
 <script setup lang="ts">
-import { defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
-import {get} from "../http";
+import {defineComponent, defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
+import {get, loadResource} from "../http";
 import {ElMessage} from "element-plus";
 import $ from 'jquery'
+import ImgDrawer from './ImgDrawer.vue'
+import CategoryOrTagCard from './CategoryOrTagCard.vue'
+import FullScreen from './FullScreen.vue'
 import {useStore} from "vuex";
-defineProps(['id','isOpenDrawer'])
-defineEmit(['saveCallback','content'])
-// noinspection TypeScriptExplicitMemberType
-const {proxy} = getCurrentInstance();
+
+defineProps(['id', 'isOpenDrawer'])
+defineEmit(['saveCallback', 'content'])
+defineComponent({
+	ImgDrawer,
+	CategoryOrTagCard,
+	FullScreen
+})
+
+function abc() {
+	console.log("showCard=false")
+}
+
+const {proxy}: any = getCurrentInstance();
 const store = useStore();
-//是否打开里面的侧边栏
-let innerDrawer = ref(false)
+//是否打开图片侧边栏
+let innerDrawer = ref(0)
 //显示添加分类
 let showCard = ref(false)
 //表单的所有数据
-let drawer=ref(false)
-watch(()=>proxy.isOpenDrawer,(val)=>{
-	console.log("watch到isOpenDrawer的改变",val)
-	drawer.value=true;
+let drawer = ref(false)
+watch(() => proxy.isOpenDrawer, (val) => {
+	drawer.value = true;
 })
+
+function clickCb(url: string) {
+	form.url = url;
+}
+
 interface originalForm {
 	title: string,
 	publishTime: Date,
@@ -144,6 +158,7 @@ interface originalForm {
 	tagValue: Array<any>,
 	url: string
 }
+
 //抽屉中表单的数据项
 let form = reactive<originalForm>({
 	title: '',
@@ -154,20 +169,34 @@ let form = reactive<originalForm>({
 	category: 0,
 	desc: '',
 	tagValue: [],
-	url: 'https://cdn.pixabay.com/photo/2020/07/05/09/59/groningen-5372387_1280.jpg'
+	url: ''
 })
-watch(()=>form.title,(val)=>{
-	console.log("watch到form.title的改变",val)
-	store.commit('setTitle',val)
+watch(() => form.title, (val) => {
+	store.commit('setTitle', val)
 })
-watch(()=>store.state.articleTitle,(val)=>{
-	console.log("watch到articleTitle的改变",val)
-	form.title=val
+watch(() => store.state.articleTitle, (val) => {
+	form.title = val
 })
 let options = reactive([{
 	value: '',
 	label: ''
 }])
+let loading=ref(false)
+async function remoteMethod(queryString:string) {
+	loading.value=true;
+	const response =await get(`/tag/getSuggestion?queryString=${queryString}`);
+	if (response.code==200){
+		options.length=0;
+		response.data.forEach((value: any)=>{
+			options.push({
+				value: value.id,
+				label: value.tagName
+			})
+		})
+	}
+	loading.value=false;
+}
+
 //分类数组
 let categoryArr = reactive([{
 	id: 1,
@@ -175,11 +204,7 @@ let categoryArr = reactive([{
 	url: 'blank',
 	priority: 1,
 }]);
-//保证3个标题栏一致
-watch(form, (nval, oval) => {
-	console.log(nval)
-	console.log(proxy.drawer)
-})
+
 //增加分类
 function addCategory() {
 	$(".el-overlay").css({
@@ -187,11 +212,13 @@ function addCategory() {
 	})
 	showCard.value = true
 }
+
 let page = 1;
+
 //添加分类成功后的回调
-async function addSuccess(){
+async function addSuccess() {
 	//重新获取分类
-	const data = await get(`/category/list?page=1&limit=${page*6}&sidx=priority&order=asc`);
+	const data = await get(`/category/list?page=1&limit=${page * 6}&sidx=priority&order=asc`);
 	if (data.code == 200) {
 		let arr: Array<any> = data.page.list
 		arr.forEach((value, index) => {
@@ -211,6 +238,7 @@ async function addSuccess(){
 	}
 	showCard.value = false
 }
+
 //加载更多
 async function addMore() {
 	const data = await get(`/category/list?page=${++page}&limit=6&sidx=priority&order=asc`);
@@ -232,13 +260,29 @@ async function addMore() {
 		});
 	}
 }
+
 //点击保存 通知父组件进行保存
 async function onSave() {
-	proxy.$emit('saveCallback',form);
-	drawer.value=false//关闭抽屉！
+	proxy.$emit('saveCallback', form);
+	drawer.value = false//关闭抽屉！
 }
+
+//******************************数据初始化******************************
+onMounted(async () => {
+	$(".el-drawer.rtl").css({
+		'overflow': 'auto',
+		'z-index': 10
+	})
+	initDate().then();
+})
+watch(() => proxy.id, (val) => {
+	if (val) {
+		initDate();
+	}
+})
+
 //后台传来的数据接口
-interface formData{
+interface formData {
 	title: string,
 	content: string,
 	publishTime: Date,
@@ -251,20 +295,9 @@ interface formData{
 	existedTags: Array<any>,
 	notExistedTag: Array<string>,
 }
-onMounted(async () => {
-	$(".el-drawer.rtl").css({
-		'overflow': 'auto',
-		'z-index': 10
-	})
-	initDate().then();
-})
-watch(()=>proxy.id,(val)=>{
-	if (val){
-		initDate();
-	}
-})
+
 //初始化数据
-async function initDate(){
+async function initDate() {
 	//获取分类
 	const data = await get(`/category/list?page=${page}&limit=6&sidx=priority&order=asc`);
 	if (data.code == 200) {
@@ -304,17 +337,17 @@ async function initDate(){
 	//当传入id时 进行数据回显
 	if (proxy.id) {
 		const data = await get(`/article/info/${proxy.id}`);
-		const info:formData=data.data;
-		form.title=info.title
-		form.publishTime=(new Date(info.publishTime))
-		form.isComment=info.isComment
-		form.isOverhead=info.isOverhead
-		form.category=info.articleCategoryId
-		form.desc=info.articleDesc
-		form.tagValue=info.existedTags
-		form.url=info.articlePoster
-		form.authorId=info.authorId
-		proxy.$emit('content',info.content);
+		const info: formData = data.data;
+		form.title = info.title
+		form.publishTime = (new Date(info.publishTime))
+		form.isComment = info.isComment
+		form.isOverhead = info.isOverhead
+		form.category = info.articleCategoryId
+		form.desc = info.articleDesc
+		form.tagValue = info.existedTags
+		form.url = info.articlePoster
+		form.authorId = info.authorId
+		proxy.$emit('content', info.content);
 	}
 }
 
@@ -342,6 +375,20 @@ async function initDate(){
 		height: 100%;
 		min-height: 200px;
 		cursor: pointer;
+		border: 1px solid #46b6f3;
+		border-radius: 10px;
+	}
+
+	.image-slot {
+		width: 100%;
+		height: 180px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		span {
+			color: #929292;
+		}
 	}
 
 	.category-header {

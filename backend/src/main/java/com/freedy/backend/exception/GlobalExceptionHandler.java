@@ -1,11 +1,10 @@
 package com.freedy.backend.exception;
 
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.enumerate.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

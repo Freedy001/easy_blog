@@ -66,7 +66,7 @@ import {get, post} from "../http";
 import {ElMessage} from "element-plus";
 defineProps(['name'])
 defineEmit(['callback'])
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 //按钮显示
 let showBtn = ref(false)
 //点击标签事件
@@ -99,12 +99,11 @@ function returnBtn() {
 	showBtn.value = false
 	cleanForm()
 }
-
 /**
  * 添加标签或者更新标签
  */
 async function insertOrUpdate(){
-	let data;
+	let data:any;
 	if (proxy.name=='标签'){
 		data={
 			id:form.id,
@@ -176,7 +175,6 @@ async function deleteItem() {
 	}
 	cleanForm()
 }
-
 //清空表单
 function cleanForm() {
 	form.id=''

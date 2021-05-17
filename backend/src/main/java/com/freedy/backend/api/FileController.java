@@ -1,8 +1,8 @@
 package com.freedy.backend.api;
 
-import com.freedy.backend.common.utils.DateUtils;
-import com.freedy.backend.common.utils.PageUtils;
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.DateUtils;
+import com.freedy.backend.utils.PageUtils;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.FileConstant;
 import com.freedy.backend.entity.ResourceEntity;
 import com.freedy.backend.enumerate.ResultCode;
@@ -45,7 +45,7 @@ public class FileController {
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         String fileName = uuid + "-" + originalFilename;
         //缩略图名称
-        String thumbnailsName = uuid + "-"+ FileConstant.ZIP_IMAGE_InFIX+"-" + originalFilename;
+        String thumbnailsName = uuid + "-"+ FileConstant.ZIP_IMAGE_INFIX+"-" + originalFilename;
         String date = DateUtils.formatDate(new Date());
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             ResourceEntity entity = new ResourceEntity("/image/" + date + "/" + fileName);

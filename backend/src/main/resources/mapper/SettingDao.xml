@@ -3,12 +3,20 @@
 
 <mapper namespace="com.freedy.backend.dao.SettingDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.freedy.backend.entity.SettingEntity" id="settingMap">
-        <result property="id" column="id"/>
-        <result property="itemName" column="item_name"/>
-        <result property="item" column="item"/>
-    </resultMap>
-
+    <update id="updateBath">
+        update blog_db.blog_setting
+        set value =
+        case item
+        <foreach collection="list" item="item">
+            when #{item.item} then #{item.value}
+        </foreach>
+        END
+        where item in
+        (
+            <foreach collection="list" item="item" separator=",">
+                    #{item.item}
+            </foreach>
+        )
+    </update>
 
 </mapper>

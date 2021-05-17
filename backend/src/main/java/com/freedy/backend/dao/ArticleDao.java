@@ -1,10 +1,10 @@
 package com.freedy.backend.dao;
 
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.freedy.backend.entity.vo.ArticleInfoVo;
-import com.freedy.backend.entity.vo.CommentAdminVo;
+import com.freedy.backend.entity.vo.article.ArticleInfoVo;
+import com.freedy.backend.entity.vo.comment.CommentAdminVo;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

@@ -1,7 +1,7 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.enumerate.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;

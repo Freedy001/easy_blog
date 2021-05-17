@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.Local;
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.utils.Local;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.dto.UserTokenInfo;
-import com.freedy.backend.entity.vo.NewUserVo;
-import com.freedy.backend.entity.vo.UserInfoVo;
-import com.freedy.backend.entity.vo.UserPasswordVo;
+import com.freedy.backend.entity.vo.manager.NewUserVo;
+import com.freedy.backend.entity.vo.manager.UserInfoVo;
+import com.freedy.backend.entity.vo.manager.UserPasswordVo;
 import com.freedy.backend.enumerate.ResultCode;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.service.ManagerService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 
 
 /**
@@ -49,6 +49,7 @@ public class ManagerController {
         UserInfoVo infoVo = managerService.getUserInfo();
         return Result.ok().setData(infoVo);
     }
+
     @ApiOperation("修改个人用户密码")
     @PostMapping("/updateUserPassword")
     public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {

@@ -1,7 +1,7 @@
 package com.freedy.backend.service;
 
-import com.freedy.backend.entity.vo.SearchResult;
-import com.freedy.backend.entity.vo.SuggestionVo;
+import com.freedy.backend.entity.vo.search.SearchResult;
+import com.freedy.backend.entity.vo.search.SuggestionVo;
 
 import java.io.IOException;
 import java.util.List;

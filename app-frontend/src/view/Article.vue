@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedVariable -->
 <template>
 	<div class="root">
 		<teleport to="body">

@@ -1,35 +1,37 @@
 import axios from 'axios'
 import {ElMessage} from "element-plus";
-const baseURL=import.meta.env.DEV?"http://localhost:1000/backend":""
-const ResourceURL=import.meta.env.DEV?"http://localhost:1000":""
+
+const baseURL = import.meta.env.DEV ? "http://localhost:1000/backend" : ""
+const ResourceURL = import.meta.env.DEV ? "http://localhost:1000" : ""
+
 export interface ILogin {
-    username:string,
-    password:string
+    username: string,
+    password: string
 }
 
-export async function login(info:ILogin){
+export async function login(info: ILogin) {
     console.log(info)
     let {data} = await axios.post(`${baseURL}/login?username=${info.username}&password=${info.password}`);
-    if (data.code===201){
+    if (data.code === 201) {
         localStorage.setItem("Authorization", data.token);
         return true;
-    }else {
+    } else {
         return false;
     }
 }
 
-export async function logout(){
+export async function logout() {
     const authorization = localStorage.getItem("Authorization");
-    const {data} =await axios.get(`${baseURL}/logout`,{
+    const {data} = await axios.get(`${baseURL}/logout`, {
         headers: {'Authorization': authorization}
     });
-    if (data.code==200){
+    if (data.code == 200) {
         localStorage.removeItem("Authorization")
         ElMessage({
             showClose: true,
             message: data.msg,
         });
-    }else {
+    } else {
         ElMessage({
             showClose: true,
             message: data.msg,
@@ -38,30 +40,39 @@ export async function logout(){
     }
 }
 
-export async function get(uri:string) {
+export async function get(uri: string) {
     const authorization = localStorage.getItem("Authorization");
-    const {data} =await axios.get(baseURL+uri,{
+    const {data} = await axios.get(baseURL + uri, {
         headers: {'Authorization': authorization}
     });
-    if (data.code==2001){
+    if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        location.href="/"
+        location.href = "/"
     }
     return data
 }
 
-export async function post(uri:string,dataFiled:any) {
+export async function post(uri: string, dataFiled: any) {
     const authorization = localStorage.getItem("Authorization");
-    const {data} =await axios.post(baseURL+uri,dataFiled,{
+    const {data} = await axios.post(baseURL + uri, dataFiled, {
         headers: {'Authorization': authorization}
     });
-    if (data.code==2001){
+    if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        location.href="/"
+        location.href = "/"
     }
     return data
 }
 
-export function loadResource(uri:string){
-    return ResourceURL+uri;
+export function loadResource(uri: string) {
+    if ((""+uri).startsWith("http")) {
+        return uri;
+    } else {
+        return ResourceURL + uri;
+    }
+}
+
+export async function getFrontApi(uri: string) {
+    const {data} = await axios.get(ResourceURL + uri);
+    return data;
 }

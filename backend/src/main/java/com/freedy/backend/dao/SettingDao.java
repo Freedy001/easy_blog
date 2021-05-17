@@ -4,6 +4,9 @@ import com.freedy.backend.entity.SettingEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 系统设置表
  * 
@@ -13,5 +16,9 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface SettingDao extends BaseMapper<SettingEntity> {
-	
+
+    /**
+     * 批量更新
+     */
+    void updateBath(List<SettingEntity> entities);
 }

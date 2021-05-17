@@ -28,9 +28,9 @@ public class SettingEntity implements Serializable {
 	private Integer id;
 
 	@ApiModelProperty("设置项名称")
-	private String itemName;
+	private String item;
 
 	@ApiModelProperty("设置项值")
-	private String item;
+	private String value;
 
 }

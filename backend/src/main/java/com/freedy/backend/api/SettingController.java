@@ -1,16 +1,16 @@
 package com.freedy.backend.api;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.SysSetting.LoadSetting;
+import com.freedy.backend.utils.Result;
+import com.freedy.backend.entity.vo.setting.CommentSettingVo;
+import com.freedy.backend.entity.vo.setting.CommonSettingVo;
+import com.freedy.backend.entity.vo.setting.SMTPSettingVo;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.service.SettingService;
-import com.freedy.backend.common.utils.PageUtils;
 
 
 /**
@@ -26,45 +26,64 @@ public class SettingController {
     @Autowired
     private SettingService settingService;
 
-    @ApiOperation("返回权限列表")
-    @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
-        PageUtils page = settingService.queryPage(params);
+    @Autowired
+    private LoadSetting loadSetting;
 
-        return Result.ok().put("page", page);
+    @ApiOperation("获取常规设置")
+    @GetMapping("/getCommonSetting")
+    public Result getCommonSetting() {
+        CommonSettingVo settingVo = new CommonSettingVo();
+        BeanUtils.copyProperties(loadSetting,settingVo);
+        CommonSettingVo.IndexArticle article = new CommonSettingVo.IndexArticle();
+        String[] split = loadSetting.getIndexArticleIdAndTitle().split(",", 2);
+        article.setId(split[0]);
+        article.setTitle(split[1]);
+        settingVo.setIndexArticle(article);
+        return Result.ok().setData(settingVo);
     }
 
-
-    @ApiOperation("返回权限列表")
-    @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Integer id){
-		SettingEntity setting = settingService.getById(id);
-
-        return Result.ok().put("setting", setting);
+    @ApiOperation("保存常规设置")
+    @PostMapping("/saveCommon")
+    public Result saveCommon(@RequestBody CommonSettingVo settingVo){
+        settingService.saveCommonSetting(settingVo);
+        loadSetting.refreshSetting();
+        return Result.ok();
+    }
+    @ApiOperation("获取smtp设置")
+    @GetMapping("/getSMTPSetting")
+    public Result getSMTPSetting(){
+        SMTPSettingVo settingVo = new SMTPSettingVo();
+        BeanUtils.copyProperties(loadSetting,settingVo);
+        return Result.ok().setData(settingVo);
     }
 
-    @ApiOperation("返回权限列表")
-    @PostMapping("/save")
-    public Result save(@RequestBody SettingEntity setting){
-		settingService.save(setting);
-
+    @PostMapping("/saveSMTP")
+    public Result saveSMTP(@RequestBody SMTPSettingVo smtpSettingVo){
+        settingService.saveSMTP(smtpSettingVo);
+        loadSetting.refreshSetting();
         return Result.ok();
     }
 
-    @ApiOperation("返回权限列表")
-    @PostMapping("/update")
-    public Result update(@RequestBody SettingEntity setting){
-		settingService.updateById(setting);
+    @GetMapping("/getCommentSetting")
+    public Result getCommentSetting(){
+        CommentSettingVo settingVo = new CommentSettingVo();
+        BeanUtils.copyProperties(loadSetting,settingVo);
+        return Result.ok().setData(settingVo);
+    }
 
+    @PostMapping("/saveComment")
+    public Result saveComment(@RequestBody CommentSettingVo commentSettingVo){
+        settingService.saveComment(commentSettingVo);
+        loadSetting.refreshSetting();
         return Result.ok();
     }
 
-    @ApiOperation("返回权限列表")
-    @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids){
-		settingService.removeByIds(Arrays.asList(ids));
 
+    @GetMapping("/refresh")
+    public Result refresh(){
+        loadSetting.refreshSetting();
         return Result.ok();
     }
+
 
 }

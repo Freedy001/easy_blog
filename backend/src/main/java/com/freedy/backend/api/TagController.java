@@ -1,11 +1,14 @@
 package com.freedy.backend.api;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-import com.freedy.backend.common.utils.AuthorityUtils;
-import com.freedy.backend.common.utils.Local;
-import com.freedy.backend.common.utils.Result;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.entity.CategoryEntity;
+import com.freedy.backend.utils.AuthorityUtils;
+import com.freedy.backend.utils.Local;
+import com.freedy.backend.utils.Result;
 import com.freedy.backend.exception.NoPermissionsException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.TagEntity;
 import com.freedy.backend.service.TagService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 
 
 /**
@@ -72,6 +75,15 @@ public class TagController {
             throw new NoPermissionsException();
         }
         return Result.ok();
+    }
+
+    @ApiOperation("获取建议")
+    @GetMapping("/getSuggestion")
+    public Result getSuggestion(@RequestParam String queryString){
+        List<TagEntity> list = tagService.list(new QueryWrapper<TagEntity>()
+                .lambda().like(TagEntity::getTagName, queryString)
+        );
+        return Result.ok().setData(list);
     }
 
 }

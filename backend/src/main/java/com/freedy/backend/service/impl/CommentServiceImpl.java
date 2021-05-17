@@ -1,33 +1,32 @@
 package com.freedy.backend.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.freedy.backend.common.utils.DateUtils;
-import com.freedy.backend.common.utils.Query;
-import com.freedy.backend.entity.vo.CommentAdminVo;
-import com.freedy.backend.entity.vo.CommentVo;
+import com.freedy.backend.utils.DateUtils;
+import com.freedy.backend.utils.Local;
+import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.entity.vo.comment.CommentAdminVo;
+import com.freedy.backend.entity.vo.comment.CommentVo;
 import com.freedy.backend.exception.ArgumentErrorException;
-import com.freedy.backend.service.ArticleService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 
 import com.freedy.backend.dao.CommentDao;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
+
+import static com.freedy.backend.constant.RabbitConstant.EMAIL_EXCHANGE_NAME;
+import static com.freedy.backend.constant.RabbitConstant.EMAIL_REPLAY_ROUTING_KEY;
 
 
 @Service("commentService")
@@ -37,7 +36,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     private RedissonClient redissonClient;
 
     @Autowired
-    private ArticleService articleService;
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -106,10 +105,17 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
 
     @Override
     public void publishComment(CommentEntity comment) {
+        comment.setHasRead(0);
+
         comment.setCreateTime(new Date().getTime());
         if (comment.getFatherCommentId() != null) {
             CommentEntity fatherEntity = baseMapper.selectById(comment.getFatherCommentId());
             comment.setFlore(fatherEntity.getFlore());
+            //发送异步消息去发送邮件
+            if (comment.getCommentStatus()==1) {
+                //发布状态的评论 以方式异步发送邮件通知对方
+                rabbitTemplate.convertAndSend(EMAIL_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
+            }
         } else {
             Integer topFlore;
             RLock lock = redissonClient.getLock("lock");
@@ -129,30 +135,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         baseMapper.insert(comment);
     }
 
-//    @Override
-//    public PageUtils queryAdminPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
-//        IPage<CommentEntity> page = this.page(new Query<CommentEntity>().getPage(params),
-//                new QueryWrapper<CommentEntity>().lambda().orderByDesc(CommentEntity::getCreateTime));
-//        List<CompletableFuture<CommentAdminVo>> futureList = page.getRecords().stream().map(item -> CompletableFuture.supplyAsync(() -> {
-//            CommentAdminVo adminVo = new CommentAdminVo();
-//            BeanUtils.copyProperties(item, adminVo);
-//            CommentAdminVo.Article article = articleService.getArticleTitles(Collections.singletonList(item.getArticleId())).get(0);
-//            adminVo.setArticle(article);
-//            adminVo.setId(item.getId().toString());
-//            adminVo.setCreateTime(DateUtils.formatTime(new Date(item.getCreateTime())));
-//            if (item.getFatherCommentId() != null) {
-//                CommentEntity entity = baseMapper.selectById(item.getFatherCommentId());
-//                adminVo.setFatherComment(entity.getContent());
-//            }
-//            return adminVo;
-//        })).collect(Collectors.toList());
-//        List<CommentAdminVo> vos = new ArrayList<>();
-//        for (CompletableFuture<CommentAdminVo> item : futureList) {
-//            vos.add(item.get());
-//        }
-//        return new PageUtils(vos, (int) page.getTotal(), (int) page.getSize(), (int) page.getCurrent());
-//    }
-
     @Override
     public PageUtils queryAdminPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils utils = new PageUtils(params);
@@ -164,5 +146,65 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         f1.get();
         return utils;
     }
+
+    @Override
+    public void replay(CommentEntity commentEntity) {
+        ManagerEntity entity = Local.MANAGER_LOCAL.get();
+        commentEntity.setUsername(entity.getNickname());
+        commentEntity.setEmail(entity.getEmail());
+        commentEntity.setCommentStatus(1);
+        publishComment(commentEntity);
+    }
+
+    @Override
+    public void deleteComment(List<Long> ids) {
+        List<CommentEntity> commentEntities = baseMapper.selectBatchIds(ids);
+        List<CommentEntity> commentEntitiesAndFlore = new LinkedList<>(baseMapper.getAllCommentInOneFlore(commentEntities));
+        ArrayList<Long> deleteIds = new ArrayList<>(ids);
+        for (CommentEntity entity : commentEntities) {
+            if (entity.getFatherCommentId() == null) {
+                //直接删掉整个楼层
+                for (int i = 0; i < commentEntitiesAndFlore.size(); i++) {
+                    CommentEntity flore = commentEntitiesAndFlore.get(i);
+                    if (flore.getArticleId().equals(entity.getArticleId()) &&
+                            flore.getFlore().equals(entity.getFlore())
+                    ) {
+                        deleteIds.add(flore.getId());
+                        commentEntitiesAndFlore.remove(flore);
+                    }
+                }
+            } else {
+                buildDeleteIds(deleteIds, entity, commentEntitiesAndFlore);
+            }
+        }
+        baseMapper.deleteBatchIds(deleteIds);
+    }
+
+    /**
+     * 找到与之关联的所有子节点
+     * 并将找到的节点id添加到删除list中
+     * 方便批量删除
+     * @param deleteIds 删除id list
+     * @param parentComment 父实体类
+     * @param commentEntitiesAndFlore 所有实体类
+     */
+    private void buildDeleteIds(List<Long> deleteIds,
+                                CommentEntity parentComment,
+                                List<CommentEntity> commentEntitiesAndFlore) {
+        for (int i = 0; i < commentEntitiesAndFlore.size(); i++) {
+            CommentEntity flore = commentEntitiesAndFlore.get(i);
+            if (parentComment.getId().equals(flore.getFatherCommentId())) {
+                deleteIds.add(flore.getId());
+                commentEntitiesAndFlore.remove(flore);
+                buildDeleteIds(deleteIds, flore, commentEntitiesAndFlore);
+            }
+        }
+    }
+
+    @Override
+    public void confirmExaminations(List<Long> asList) {
+        baseMapper.confirmExaminations(asList);
+    }
+
 
 }

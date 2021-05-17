@@ -37,12 +37,13 @@ const store = useStore();
 //是否打开侧边栏
 let drawer = ref(false)
 // noinspection TypeScriptExplicitMemberType
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 let initArticle=ref<string>();
 //文章markdown文本
 let article = ref()
 /**
- * 同步markdown文本当修改markdown时
+ * 同步markdown文本
+ * 当修改markdown时
  * 子组件将会通过该方法给article赋值
  * 方便后面的传值
  */
@@ -123,11 +124,7 @@ async function saveDraft(){
 	}
 }
 onMounted(()=>{
-	//每次打开该页面时先 重置文章标题
-	if (!route.query.id){
-		//只有没有传递id时才重置
-		store.commit('setTitle','');
-	}
+
 })
 </script>
 

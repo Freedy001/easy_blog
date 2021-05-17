@@ -1,16 +1,15 @@
 package com.freedy.backend.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.DateUtils;
-import com.freedy.backend.entity.vo.SearchResult;
-import com.freedy.backend.entity.vo.SuggestionVo;
+import com.freedy.backend.utils.DateUtils;
+import com.freedy.backend.entity.vo.search.SearchResult;
+import com.freedy.backend.entity.vo.search.SuggestionVo;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import com.freedy.backend.service.SearchService;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -74,7 +73,7 @@ public class SearchServiceImpl implements SearchService {
             }
             ArticleEsModel esModel = JSON.parseObject(hit.getSourceAsString(), ArticleEsModel.class);
             vo.setTitle(esModel.getTitle());
-            vo.setId(esModel.getId());
+            vo.setId(esModel.getId().toString());
             vos.add(vo);
         }
         return vos;

@@ -1,11 +1,11 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
-import com.freedy.backend.entity.vo.ArticleDraftVo;
-import com.freedy.backend.entity.vo.ArticleVo;
-import com.freedy.backend.entity.vo.CommentAdminVo;
+import com.freedy.backend.entity.vo.article.ArticleDraftVo;
+import com.freedy.backend.entity.vo.article.ArticleVo;
+import com.freedy.backend.entity.vo.comment.CommentAdminVo;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 
 import java.util.List;

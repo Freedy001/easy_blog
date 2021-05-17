@@ -131,4 +131,7 @@ h2.tit{
 		--color-main-hover: #0279e9;
 	}
 }
+img{
+	user-select: none;
+}
 </style>

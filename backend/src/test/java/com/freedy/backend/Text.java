@@ -1,42 +1,44 @@
 package com.freedy.backend;
 
-import com.alibaba.fastjson.JSON;
-import com.freedy.backend.common.utils.MarkDown;
-import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
-import com.vladsch.flexmark.ext.emoji.EmojiExtension;
-import com.vladsch.flexmark.ext.emoji.EmojiImageType;
-import com.vladsch.flexmark.ext.emoji.EmojiShortcutType;
-import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
-import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
-import com.vladsch.flexmark.ext.tables.TablesExtension;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.data.MutableDataSet;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 /**
  * @author Freedy
  * @date 2021/4/29 13:11
  */
 public class Text {
+    //模拟100万条评论大小
     public static void main(String[] args) throws Exception {
-        myTest myTest = new myTest();
-        String toJSONString = JSON.toJSONString(myTest);
-        System.out.println(toJSONString);
-    }
-}
-
-class myTest{
-    public Integer getNum(){
-        return 12;
-    }
-
-    public String getName(){
-        return "小明";
+        File file = new File("C:\\Users\\Freedy\\Desktop\\资料\\test.assets\\test.txt");
+        if (!file.exists()&&!file.createNewFile()){
+            throw new RuntimeException("文件创建失败");
+        }
+        FileOutputStream stream = new FileOutputStream(file);
+        String str="i am a test string , and i must be long as you see, ha ha !!";
+        ArrayList<Thread> threads = new ArrayList<>();
+        for (int i = 0; i <10; i++) {
+            threads.add(new Thread(()->{
+                try {
+                    for (int j = 0; j < 100000; j++) {
+                        stream.write(str.getBytes(StandardCharsets.UTF_8));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("线程"+Thread.currentThread().getName()+"完成写入");
+            }));
+        }
+        threads.forEach(Thread::start);
+        threads.forEach(item->{
+            try {
+                item.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        stream.close();
     }
 }
 

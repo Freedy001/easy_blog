@@ -4,14 +4,21 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import com.freedy.backend.common.utils.Result;
+import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.utils.IPUtil;
+import com.freedy.backend.utils.Result;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -27,6 +34,7 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true)
     @ApiOperation("列出评论")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -34,12 +42,29 @@ public class CommentController {
         return Result.ok().setData(page);
     }
 
+    @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
+    @ApiOperation("回复评论")
+    @PostMapping("/replay")
+    public Result replay(@RequestBody CommentEntity commentEntity, HttpServletRequest request){
+        commentEntity.setIp(IPUtil.getRemoteIpAddr(request));
+        commentService.replay(commentEntity);
+        return Result.ok();
+    }
+
+    @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
+    @ApiOperation("审核通过")
+    @GetMapping("/confirmExaminations")
+    public Result confirmExaminations(Long[] ids){
+        commentService.confirmExaminations(Arrays.asList(ids));
+        return Result.ok();
+    }
+
 
     @ApiOperation("删除")
+    @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @GetMapping("/delete")
-    public Result delete(@RequestBody Long[] ids){
-		commentService.removeByIds(Arrays.asList(ids));
-
+    public Result delete(Long[] ids){
+		commentService.deleteComment(Arrays.asList(ids));
         return Result.ok();
     }
 

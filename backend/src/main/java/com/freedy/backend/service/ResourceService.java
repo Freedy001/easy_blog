@@ -1,7 +1,7 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.freedy.backend.common.utils.PageUtils;
+import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.ResourceEntity;
 
 import java.util.Map;

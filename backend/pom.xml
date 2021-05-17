@@ -155,7 +155,11 @@
             <artifactId>redisson-spring-boot-starter</artifactId>
             <version>3.13.6</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-email</artifactId>
+            <version>1.5</version>
+        </dependency>
     </dependencies>
 
     <build>
