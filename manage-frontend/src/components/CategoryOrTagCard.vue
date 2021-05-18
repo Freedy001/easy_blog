@@ -76,6 +76,7 @@ interface tag{
 	name: string,
 	url: string,
 	priority: number|string,
+	creatorId:number|string
 }
 //表单数据
 let form = reactive<tag>({
@@ -83,14 +84,10 @@ let form = reactive<tag>({
 	name: '',
 	url: '',
 	priority: '',
+	creatorId:'',
 })
 //标签集合---服务器返回的数据
-let tagList = reactive<Array<tag>>([{
-	id: '',
-	name: '',
-	url: '',
-	priority: '',
-}])
+let tagList = reactive<Array<tag>>([])
 //*************form*****************
 function returnBtn() {
 	for (let i = 0; i < checked.length; i++) {
@@ -109,14 +106,16 @@ async function insertOrUpdate(){
 			id:form.id,
 			tagName:form.name,
 			tagImgUrl:form.url,
-			priority:form.priority
+			priority:form.priority,
+			creatorId:form.creatorId
 		}
 	}else {
 		data={
 			id:form.id,
 			categoryName:form.name,
 			categoryImgUrl:form.url,
-			priority:form.priority
+			priority:form.priority,
+			creatorId:form.creatorId
 		}
 	}
 	if (showBtn.value){
@@ -143,6 +142,7 @@ async function insertOrUpdate(){
 		if(response.code==200){
 			proxy.$emit('callback')
 			loadTag().then()
+			cleanForm()
 			proxy.$notify({
 				title: '成功',
 				message: '保存成功!',
@@ -155,9 +155,8 @@ async function insertOrUpdate(){
 			})
 		}
 	}
-	cleanForm()
 }
-
+//删除表单
 async function deleteItem() {
 	const response = await get(`/${proxy.name=='分类'?'category':'tag'}/delete?ids=${form.id}`);
 	if(response.code==200){
@@ -197,6 +196,7 @@ function onChange(index:number) {
 	form.name = tagList[index].name
 	form.url = tagList[index].url
 	form.priority = tagList[index].priority
+	form.creatorId = tagList[index].creatorId
 }
 //初始化页面的时候加载
 onMounted( () => {
@@ -213,7 +213,8 @@ async function loadTag() {
 				id: value.id,
 				name: proxy.name=='分类'?value.categoryName:value.tagName,
 				url: proxy.name=='分类'?value.categoryImgUrl:value.tagImgUrl,
-				priority: value.priority
+				priority: value.priority,
+				creatorId:value.creatorId
 			})
 		})
 		for (let i = 0; i < arr.length; i++) {

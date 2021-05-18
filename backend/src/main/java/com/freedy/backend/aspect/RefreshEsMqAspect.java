@@ -1,20 +1,15 @@
-package com.freedy.backend.middleWare.mq.aspect;
+package com.freedy.backend.aspect;
 
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.dto.EsTypeDto;
 import com.freedy.backend.enumerate.EsType;
-import com.freedy.backend.middleWare.mq.annotation.ESEvict;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * @author Freedy
@@ -30,7 +25,7 @@ public class RefreshEsMqAspect {
 
 
     @SuppressWarnings("unchecked")
-    @Around("@annotation(com.freedy.backend.middleWare.mq.annotation.ESEvict)")
+    @Around("@annotation(com.freedy.backend.aspect.annotation.ESEvict)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         try {
             log.debug("starting..........");

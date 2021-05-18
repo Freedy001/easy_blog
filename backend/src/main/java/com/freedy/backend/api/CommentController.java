@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.IPUtil;
 import com.freedy.backend.utils.Result;
 import io.swagger.annotations.ApiOperation;
@@ -42,28 +45,36 @@ public class CommentController {
         return Result.ok().setData(page);
     }
 
+    @GetMapping("/getNotReadNum")
+    public Result notReadNum(){
+        int count = commentService.count(new QueryWrapper<CommentEntity>().lambda().eq(CommentEntity::getHasRead, 0));
+        return Result.ok().setData(count);
+    }
+
+    @RecordLog(type = RecordEnum.COMMENT)
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @ApiOperation("回复评论")
     @PostMapping("/replay")
-    public Result replay(@RequestBody CommentEntity commentEntity, HttpServletRequest request){
+    public Result replayComment(@RequestBody CommentEntity commentEntity, HttpServletRequest request){
         commentEntity.setIp(IPUtil.getRemoteIpAddr(request));
         commentService.replay(commentEntity);
         return Result.ok();
     }
 
+    @RecordLog(type = RecordEnum.COMMENT)
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @ApiOperation("审核通过")
     @GetMapping("/confirmExaminations")
-    public Result confirmExaminations(Long[] ids){
+    public Result confirmComment(Long[] ids){
         commentService.confirmExaminations(Arrays.asList(ids));
         return Result.ok();
     }
 
-
+    @RecordLog(type = RecordEnum.COMMENT)
     @ApiOperation("删除")
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @GetMapping("/delete")
-    public Result delete(Long[] ids){
+    public Result deleteComment(Long[] ids){
 		commentService.deleteComment(Arrays.asList(ids));
         return Result.ok();
     }

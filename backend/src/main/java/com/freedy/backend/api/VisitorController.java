@@ -30,7 +30,6 @@ public class VisitorController {
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params){
         PageUtils page = visitorService.queryPage(params);
-
         return Result.ok().put("page", page);
     }
 
@@ -39,7 +38,6 @@ public class VisitorController {
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long id){
 		VisitorEntity visitor = visitorService.getById(id);
-
         return Result.ok().put("visitor", visitor);
     }
 
@@ -47,7 +45,6 @@ public class VisitorController {
     @PostMapping("/save")
     public Result save(@RequestBody VisitorEntity visitor){
 		visitorService.save(visitor);
-
         return Result.ok();
     }
 
@@ -55,7 +52,6 @@ public class VisitorController {
     @PostMapping("/update")
     public Result update(@RequestBody VisitorEntity visitor){
 		visitorService.updateById(visitor);
-
         return Result.ok();
     }
 
@@ -63,7 +59,6 @@ public class VisitorController {
     @GetMapping("/delete")
     public Result delete(@RequestBody Long[] ids){
 		visitorService.removeByIds(Arrays.asList(ids));
-
         return Result.ok();
     }
 

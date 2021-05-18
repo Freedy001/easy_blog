@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
@@ -42,7 +44,6 @@ public class ManagerController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     @ApiOperation("查询当前用户消息")
     @GetMapping("/getUserInfo")
     public Result info() throws ExecutionException, InterruptedException {
@@ -50,6 +51,7 @@ public class ManagerController {
         return Result.ok().setData(infoVo);
     }
 
+    @RecordLog(type = RecordEnum.USER)
     @ApiOperation("修改个人用户密码")
     @PostMapping("/updateUserPassword")
     public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {
@@ -68,6 +70,7 @@ public class ManagerController {
                 ResultCode.OLD_PASSWORD_NOT_CORRECT.getMessage());
     }
 
+    @RecordLog(type = RecordEnum.USER)
     @ApiOperation("修改用户个人信息")
     @PostMapping("/updateUserInfo")
     public Result updateUserInfo(@RequestBody ManagerEntity manager) {
@@ -120,19 +123,20 @@ public class ManagerController {
         return Result.ok().setData(userVo);
     }
 
+    @RecordLog(type = RecordEnum.USER)
     @ApiOperation("创建新管理员")
     @PreAuthorize("hasAuthority('user-manager')")
     @PostMapping("/createOrUpdateManager")
-    public Result createOrUpdateManager(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
+    public Result createOrUpdateUser(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
         managerService.createOrUpdateManager(manager);
         return Result.ok();
     }
 
-
+    @RecordLog(type = RecordEnum.USER)
     @ApiOperation("删除用户")
     @PreAuthorize("hasAuthority('user-permission-manager')")
     @GetMapping("/delete")
-    public Result delete(@RequestParam Integer[] ids) {
+    public Result deleteUser(@RequestParam Integer[] ids) {
         managerService.deleteUserByIds(Arrays.asList(ids));
         return Result.ok();
     }

@@ -43,12 +43,12 @@ easy:
     comment-permission:
       comment-operation-to-others: 可操作他人
     user-permission:
-      user-manager: 可管理用户(非权限)
+      user-manager: 可管理用户(但不能管理用户的权限)
       user-permission-manager: 可管理用户权限
     setting-permission:
-      setting-normal: 常规设置
-      setting-comment: 评论设置
+      setting-common: 常规设置
       setting-smtp: SMTP设置
+      setting-comment: 评论设置
       setting-attachment : 附件设置
   jwt:
     header: Authorization

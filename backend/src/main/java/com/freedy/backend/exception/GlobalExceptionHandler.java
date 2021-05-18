@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
      * 该值已被子表所引用
      */
     @ExceptionHandler(value = DataIntegrityViolationException.class)
-    public Result exceptionHandler(SQLIntegrityConstraintViolationException e) {
+    public Result exceptionHandler(DataIntegrityViolationException e) {
         return handler("TAG_HAS_BEEN_USED",e.getMessage());
     }
 

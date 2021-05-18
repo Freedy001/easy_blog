@@ -43,7 +43,7 @@
 				<el-menu-item index="/index/comment">
 					<i class="el-icon-help"></i>
 					<span>评论</span>
-					<span>2</span>
+					<span class="badge">{{notReadNum}}</span>
 				</el-menu-item>
 				<el-menu-item index="/index/user">
 					<i class="el-icon-help"></i>
@@ -64,14 +64,14 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {get, loadResource, logout} from '../http'
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
-
+import {useStore} from "vuex";
 const scale = ref(false)
 const router = useRouter();
-
+const store = useStore();
 async function lg() {
 	await logout()
 	await router.push('/login')
@@ -79,14 +79,30 @@ async function lg() {
 
 let nickname = ref()
 let headImg = ref()
+let notReadNum=ref(0)
 onMounted(async () => {
+	getNickNameAndHeadImg().then();
+	getNotReadNum().then();
+})
+watch(()=>store.state.notifyReloadNickNameAndHeadImg,()=>{
+	getNickNameAndHeadImg()
+})
+async function getNickNameAndHeadImg() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
-		console.log(response.data)
 		nickname.value = response.data.nickname;
 		headImg.value = response.data.headImg;
 	}
+}
+watch(()=>store.state.notifyReloadReadNum,()=>{
+	getNotReadNum()
 })
+async function getNotReadNum(){
+	const num =await get('/comment/getNotReadNum')
+	if (num.code==200){
+		notReadNum.value=num.data;
+	}
+}
 
 </script>
 
@@ -154,7 +170,26 @@ onMounted(async () => {
 			padding: 0 0 0 32px;
 			text-align: left;
 			border-radius: 20px 0 0 20px;
-			transition: all .3s;
+			transition: all .3s ease;
+			position: relative;
+			.badge{
+				top: 20%;
+				right: 50%;
+				position: absolute;
+				flex-shrink: 0;
+				width: 20px;
+				height: 20px;
+				display: flex;
+				background-color: white;
+				align-items: center;
+				justify-content: center;
+				border-radius: 100%;
+				color: #0b9aff;
+				text-align: center;
+				margin-left: 5px;
+				font-size: 5px;
+				font-weight: 500;
+			}
 
 			i {
 				color: #fff;
@@ -169,10 +204,28 @@ onMounted(async () => {
 			&:hover, &.is-active {
 				color: #0084ff;
 				background: #fff;
-				position: static;
+				position: relative;
 
 				i {
 					color: #0084ff;
+				}
+				.badge{
+					top: 20%;
+					right: 50%;
+					position: absolute;
+					flex-shrink: 0;
+					width: 20px;
+					height: 20px;
+					display: flex;
+					background-color: #0084ff;
+					align-items: center;
+					justify-content: center;
+					border-radius: 100%;
+					color: #fafafa;
+					text-align: center;
+					margin-left: 5px;
+					font-size: 5px;
+					font-weight: 500;
 				}
 			}
 
@@ -183,8 +236,9 @@ onMounted(async () => {
 		text-align: center;
 
 		.photo {
-			width: 70px;
-			height: 70px;
+			box-sizing: content-box;
+			width: 65px;
+			height: 65px;
 			margin: auto;
 			border-radius: 50%;
 			background: #fff;
@@ -195,6 +249,7 @@ onMounted(async () => {
 			img {
 				width: 100%;
 				height: 100%;
+				object-fit: cover;
 			}
 		}
 

@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
  * @date 2021/5/4 22:40
  */
 @Configuration
-public class EmailMqCreator {
+public class ThirdPartServiceMqCreator {
     @Bean
     public Exchange EmailExchange() {
-        return new DirectExchange(RabbitConstant.EMAIL_EXCHANGE_NAME,
+        return new DirectExchange(RabbitConstant.THIRD_PART_EXCHANGE_NAME,
                 true, false);
     }
 
@@ -27,8 +27,23 @@ public class EmailMqCreator {
     public Binding EmailBinding() {
         return new Binding(RabbitConstant.EMAIL_REPLAY_QUEUE_NAME,
                 Binding.DestinationType.QUEUE,
-                RabbitConstant.EMAIL_EXCHANGE_NAME,
+                RabbitConstant.THIRD_PART_EXCHANGE_NAME,
                 RabbitConstant.EMAIL_REPLAY_ROUTING_KEY,
+                null);
+    }
+
+    @Bean
+    public Queue IpQueue() {
+        return new Queue(RabbitConstant.IP_REGION_QUEUE_NAME,
+                true, false, false);
+    }
+
+    @Bean
+    public Binding IpBinding() {
+        return new Binding(RabbitConstant.IP_REGION_QUEUE_NAME,
+                Binding.DestinationType.QUEUE,
+                RabbitConstant.THIRD_PART_EXCHANGE_NAME,
+                RabbitConstant.IP_REGION_ROUTING_KEY,
                 null);
     }
 }

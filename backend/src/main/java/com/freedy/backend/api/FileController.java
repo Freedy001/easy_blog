@@ -1,5 +1,7 @@
 package com.freedy.backend.api;
 
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.utils.Result;
@@ -36,6 +38,7 @@ public class FileController {
     private ThreadPoolExecutor executor;
 
     @PostMapping("/upload")
+    @RecordLog(type = RecordEnum.UPLOAD)
     public Result UploadFile(MultipartFile file) throws Exception {
         if (file.isEmpty()) {
             log.info("上传失败,文件为空");

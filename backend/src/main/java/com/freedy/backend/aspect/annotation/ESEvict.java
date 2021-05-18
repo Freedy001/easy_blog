@@ -1,4 +1,4 @@
-package com.freedy.backend.middleWare.mq.annotation;
+package com.freedy.backend.aspect.annotation;
 
 import java.lang.annotation.*;
 

@@ -33,6 +33,7 @@ import com.freedy.backend.utils.Query;
 
 import com.freedy.backend.dao.ManagerDao;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service("managerService")
@@ -98,7 +99,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         //获取主页uri
         CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> {
             SettingEntity page = settingService.getOne(new QueryWrapper<SettingEntity>().lambda()
-                    .eq(SettingEntity::getItem,SettingEnum.pageUrl.name()));
+                    .eq(SettingEntity::getItem, SettingEnum.pageUrl.name()));
             infoVo.setPageUrl(page.getItem());
         }, executor);
         //获取文章总数
@@ -135,13 +136,14 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     @Transactional
     public void createOrUpdateManager(NewUserVo manager) throws ExecutionException, InterruptedException {
         if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
-            //没有管理用户权限的的权限
+            //没有管理用户权限的的 权限
             try {
                 for (Field field : manager.getClass().getDeclaredFields()) {
                     if (field.getType().getSimpleName().equals("List")) {
                         field.setAccessible(true);
                         List<String> list = (List<String>) field.get(manager);
                         try {
+                            //只能创建用户 如果给了权限就直接抛异常
                             if (list.size() > 0) {
                                 throw new NoPermissionsException();
                             }
@@ -207,7 +209,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
                 }
             }
             log.debug("userPermissionList构建时长{}", System.currentTimeMillis() - middleTime);
-            if (f2!=null){
+            if (f2 != null) {
                 f2.get();//忽略空指针异常
             }
             permissionService.saveBatch(userPermissionList);
@@ -216,7 +218,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
                 redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + entity.getUsername());
             }
             log.debug("createManager总耗时{}", System.currentTimeMillis() - time);
-            if (f1!=null){
+            if (f1 != null) {
                 f1.get();//忽略空指针异常
             }
         }
@@ -225,7 +227,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     @Override
     public void deleteUserByIds(List<Integer> ids) {
         List<Integer> list = ids.stream().filter(i -> i != 1).collect(Collectors.toList());
-        List<String> usernames=baseMapper.getUsernamesByIds(list);
+        List<String> usernames = baseMapper.getUsernamesByIds(list);
         for (String username : usernames) {
             //退出登录
             AuthorityUtils.logout(username);
@@ -238,13 +240,15 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     public NewUserVo getUserImportantInfo(Integer id) throws Exception {
         NewUserVo userVo = new NewUserVo();
         String permissionStr;
-        CompletableFuture<Void> f1=null;
+        CompletableFuture<Void> f1 = null;
         if (id.equals(Local.MANAGER_LOCAL.get().getId())) {
+            //获取自己的权限
             ManagerEntity entity = Local.MANAGER_LOCAL.get();
             permissionStr = Local.PERMISSION_LOCAL.get();
             BeanUtils.copyProperties(entity, userVo);
         } else {
-             f1 = CompletableFuture.runAsync(() -> {
+            //获取他人的权限
+            f1 = CompletableFuture.runAsync(() -> {
                 ManagerEntity entity = baseMapper.selectOne(new QueryWrapper<ManagerEntity>().eq("id", id));
                 BeanUtils.copyProperties(entity, userVo);
             });
@@ -252,25 +256,29 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         }
         //回显权限消息
         for (Field field : userVo.getClass().getDeclaredFields()) {
+            //利用反射获取属性中的权限列表 并给其赋值
             if (field.getType().getSimpleName().equals("List")) {
                 field.setAccessible(true);
                 ArrayList<String> permissionNameList = new ArrayList<>();
+                //对应属性列表的名称
                 String typeName = field.getName().replace("Permission", "");
-                for (String permission : permissionStr.split(",")) {
-                    if (permission.startsWith(typeName)) {
-                        //首字母大写
-                        String upperType = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
-                        //noinspection unchecked
-                        Map<String, String> invoke = (Map<String, String>) permissionItem.getClass().getDeclaredMethod("get" + upperType + "Permission").invoke(permissionItem);
-                        String permissionName = invoke.get(permission);
-                        permissionNameList.add(permissionName);
+                if (StringUtils.hasText(permissionStr)){
+                    for (String permission : permissionStr.split(",")) {
+                        if (permission.startsWith(typeName)) {
+                            //首字母大写
+                            String upperType = typeName.substring(0, 1).toUpperCase() + typeName.substring(1);
+                            //noinspection unchecked
+                            Map<String, String> invoke = (Map<String, String>) permissionItem.getClass().getDeclaredMethod("get" + upperType + "Permission").invoke(permissionItem);
+                            String permissionName = invoke.get(permission);
+                            permissionNameList.add(permissionName);
+                        }
                     }
+                    field.set(userVo, permissionNameList);
                 }
-                field.set(userVo, permissionNameList);
             }
         }
         userVo.setPassword("");
-        if (f1!=null){
+        if (f1 != null) {
             f1.get();
         }
         return userVo;

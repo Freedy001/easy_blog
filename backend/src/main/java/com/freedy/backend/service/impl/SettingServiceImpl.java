@@ -37,8 +37,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> i
 
     @Override
     public void saveCommonSetting(CommonSettingVo settingVo) {
-        settingVo.setLogo(ResourceUrlUtil.ConvertUrl(settingVo.getLogo()));
-        settingVo.setPoster(ResourceUrlUtil.ConvertUrl(settingVo.getPoster()));
+        //转化为高清图片
+        settingVo.setLogo(ResourceUrlUtil.ConvertToHDUrl(settingVo.getLogo()));
+        settingVo.setPoster(ResourceUrlUtil.ConvertToHDUrl(settingVo.getPoster()));
         List<SettingEntity> list = getSettingEntities(settingVo);
         //因为settingVo里面没有indexArticleIdAndTitle所以要自己构建
         SettingEntity entity = new SettingEntity();

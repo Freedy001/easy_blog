@@ -13,12 +13,17 @@
 import {defineComponent, ref} from "vue";
 import LoadingTab from './components/LoadingTab.vue'
 import {useRouter} from "vue-router";
+import {useStore} from "vuex";
+const store = useStore();
 defineComponent({
 	LoadingTab
 })
 const router = useRouter();
 let isLoading=ref(false)
 router.beforeEach((to, from)=>{
+	if (from.path==='/index/comment'){
+		store.commit('notifyReloadReadNum');
+	}
 	isLoading.value=true;
 })
 router.afterEach(()=>{

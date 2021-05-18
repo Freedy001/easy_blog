@@ -99,7 +99,7 @@
 										<div class="expand">
 											<div class="info">
 												<div class="photo">
-													<img :src="props.row.headImg" alt="">
+													<img :src="loadResource(props.row.headImg)" alt="">
 												</div>
 												<p class="name">{{ props.row.nickname }}</p>
 											</div>
@@ -261,6 +261,8 @@ import {get, loadResource, post} from "../http";
 import {useRouter} from "vue-router";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import FullScreen from '../components/FullScreen.vue'
+import {useStore} from "vuex";
+const store = useStore();
 const router = useRouter();
 const {proxy}:any = getCurrentInstance();
 defineComponent({
@@ -275,13 +277,15 @@ function changeHeadImg() {
 //更换头像
 async function handlePickPic(url:string){
 	const response =await post('/manager/updateUserInfo',{
-		headImg:url
+		headImg:url,
+		username:userInfoDetail.username
 	});
 	if (response.code == 200) {
 		initData().then()
+		store.commit('notifyReloadNickNameAndHeadImg')
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -386,7 +390,7 @@ async function initData() {
 		userInfoDetail.totalVisit = resData.totalVisit
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -407,6 +411,7 @@ async function saveInfo() {
 		})
 		await router.push('/login');
 	} else if (response.code == 200) {
+		store.commit('notifyReloadNickNameAndHeadImg')
 		proxy.$notify({
 			title: '成功',
 			message: '修改成功!',
@@ -414,7 +419,7 @@ async function saveInfo() {
 		})
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -434,7 +439,7 @@ async function changePassword() {
 		await router.push('/login');
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -478,7 +483,7 @@ async function loadUserList() {
 		})
 	}else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -512,7 +517,7 @@ async function openNewUserWindow() {
 		PermissionItem.settingPermission = item.settingPermission
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -620,7 +625,7 @@ async function createOrUpdateNewUser() {
 		newUser.settingPermission=[];
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -646,7 +651,7 @@ async function userSetting(id:number) {
 		showCard.value=true;
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -667,7 +672,7 @@ async function userDelete(id:number) {
 		loadUserList().then();
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -685,7 +690,6 @@ async function userDelete(id:number) {
 
 		.box-card.left {
 			width: 49%;
-			height: 600px;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -693,6 +697,7 @@ async function userDelete(id:number) {
 			.photo {
 				width: 70px;
 				height: 70px;
+				box-sizing: content-box;
 				margin: auto;
 				border-radius: 50%;
 				background: #fff;
@@ -702,6 +707,7 @@ async function userDelete(id:number) {
 				img {
 					width: 100%;
 					height: 100%;
+					object-fit: cover;
 				}
 			}
 

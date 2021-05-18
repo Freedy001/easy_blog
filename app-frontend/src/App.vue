@@ -45,6 +45,7 @@ router.afterEach(()=>{
 })
 onMounted(()=>{
 	getIndexSetting()
+	heartBeat();
 })
 
 async function getIndexSetting() {
@@ -53,6 +54,12 @@ async function getIndexSetting() {
 		const data:any = response.data;
 		store.commit('setIndexSetting',data)
 	}
+}
+//没5s 发送一次心跳让服务器知道此用户在线
+async function heartBeat() {
+	setInterval(()=>{
+		const sys = get('/sys/heartbeat');
+	},5000)
 }
 </script>
 

@@ -204,6 +204,12 @@ async function querySearch(queryString: string) {
 			}
 		})
 		loading.value=false;
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
 	}
 }
 //表示要更换图片的那个一项
@@ -234,6 +240,12 @@ async function initCommonValue() {
 			id:data.indexArticle.id,
 			label:data.indexArticle.title,
 		})
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
 	}
 }
 //保存数据
@@ -244,6 +256,12 @@ async function saveCommon() {
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
+		});
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
 		});
 	}
 }
@@ -264,6 +282,12 @@ async function initSMTPValue(){
 			Object.keys(data).forEach((value, index) => {
 				SMPTData[value]=data[value];
 			})
+		}else {
+			proxy.$notify({
+				title: '出差啦😢！',
+				message: response.msg,
+				type: 'error'
+			});
 		}
 }
 //保存smtp设置
@@ -274,6 +298,12 @@ async function saveSMTP() {
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
+		});
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
 		});
 	}
 }
@@ -286,6 +316,12 @@ async function initCommentValue() {
 		Object.keys(data).forEach((value, index) => {
 			comment[value]=data[value];
 		})
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
 	}
 }
 //保存评论数据
@@ -296,6 +332,12 @@ async function savaComment() {
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
+		});
+	}else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
 		});
 	}
 }

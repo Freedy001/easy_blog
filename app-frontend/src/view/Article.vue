@@ -4,7 +4,7 @@
 		<teleport to="body">
 			<div class="title">
 				<div class="img">
-					<img :src="article.articlePoster" alt="nothing" class="kenburns-top-right">
+					<img :src="loadResource(article.articlePoster)" alt="nothing" class="kenburns-top-right">
 				</div>
 				<div class="content">
 					<span class="block">{{ article.title }}</span>

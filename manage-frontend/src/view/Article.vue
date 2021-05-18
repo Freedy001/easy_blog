@@ -95,7 +95,7 @@ async function save(form:any){
 		await router.push('/index/articleList');
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: `保存失败！ reason-->${response.msg}`
 		})
 	}
@@ -118,7 +118,7 @@ async function saveDraft(){
 		await router.push('/index/articleList');
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: `保存到草稿！ reason-->${response.msg}`
 		})
 	}

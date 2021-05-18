@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.entity.CategoryEntity;
+import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
@@ -34,52 +37,44 @@ public class TagController {
 
     @ApiOperation("列出所有标签")
     @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
+    public Result list(@RequestParam Map<String, Object> params) {
         PageUtils page = tagService.queryPage(params);
         return Result.ok().put("page", page);
     }
 
-
+    @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("保存标签")
     @PostMapping("/save")
-    public Result save(@RequestBody TagEntity tag){
+    public Result saveTag(@RequestBody TagEntity tag) {
         tag.setCreatorId(Local.MANAGER_LOCAL.get().getId());
-		tagService.save(tag);
+        tagService.save(tag);
         return Result.ok();
     }
 
+    @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("修改标签")
     @PostMapping("/update")
-    public Result update(@RequestBody TagEntity tag){
+    public Result updateTag(@RequestBody TagEntity tag) {
+        ManagerEntity entity = Local.MANAGER_LOCAL.get();
         //修改他人且没权限
-        if (!tag.getCreatorId().equals(Local.MANAGER_LOCAL.get().getId())&&
-                !AuthorityUtils.hasAuthority("tag-operation-to-others"))
+        if (!tag.getCreatorId().equals(entity.getId())&&entity.getStatus()!=1)
             throw new NoPermissionsException();
-		tagService.updateById(tag);
+        tagService.updateById(tag);
         return Result.ok();
     }
 
+    @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("删除标签")
     @GetMapping("/delete")
-    public Result delete(Integer[] ids){
-       boolean exception=false;
-        for (Integer id : ids) {
-            if (!id.equals(Local.MANAGER_LOCAL.get().getId())&&
-                    !AuthorityUtils.hasAuthority("tag-operation-to-others")){
-                exception=true;
-            }else {
-                tagService.removeByIds(Arrays.asList(ids));
-            }
-        }
-        if (exception){
-            throw new NoPermissionsException();
-        }
+    public Result deleteTag(Integer[] ids) {
+        tagService.deleteTags(Arrays.asList(ids));
         return Result.ok();
     }
+
 
     @ApiOperation("获取建议")
     @GetMapping("/getSuggestion")
-    public Result getSuggestion(@RequestParam String queryString){
+    public Result getSuggestion(@RequestParam String queryString) {
         List<TagEntity> list = tagService.list(new QueryWrapper<TagEntity>()
                 .lambda().like(TagEntity::getTagName, queryString)
         );

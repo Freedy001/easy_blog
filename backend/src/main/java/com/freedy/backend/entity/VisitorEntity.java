@@ -34,9 +34,9 @@ public class VisitorEntity implements Serializable {
 	private String region;
 
 	@ApiModelProperty("访问时间")
-	private String visitTime;
+	private Long visitTime;
 
 	@ApiModelProperty("访问时长")
-	private String visitDuration;
+	private Long visitDuration;
 
 }

@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.freedy.backend.utils.PageUtils;
@@ -37,6 +39,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private ThreadPoolExecutor executor;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -140,8 +145,12 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         PageUtils utils = new PageUtils(params);
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             List<CommentAdminVo> vos = baseMapper.getAdminCommentList(utils);
+            List<String> list = vos.stream().map(CommentAdminVo::getId).collect(Collectors.toList());
+            if (list.size()>0){
+                baseMapper.readAll(list);
+            }
             utils.setList(vos);
-        });
+        },executor);
         utils.setTotalCount(count());
         f1.get();
         return utils;

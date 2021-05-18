@@ -1,6 +1,8 @@
 package com.freedy.backend.api;
 
 import com.freedy.backend.SysSetting.LoadSetting;
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
 import com.freedy.backend.entity.vo.setting.CommonSettingVo;
@@ -8,6 +10,7 @@ import com.freedy.backend.entity.vo.setting.SMTPSettingVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.service.SettingService;
@@ -29,6 +32,7 @@ public class SettingController {
     @Autowired
     private LoadSetting loadSetting;
 
+    @PreAuthorize("hasAuthority('setting-common')")
     @ApiOperation("获取常规设置")
     @GetMapping("/getCommonSetting")
     public Result getCommonSetting() {
@@ -42,13 +46,17 @@ public class SettingController {
         return Result.ok().setData(settingVo);
     }
 
+    @PreAuthorize("hasAuthority('setting-common')")
+    @RecordLog(type = RecordEnum.SETTING)
     @ApiOperation("保存常规设置")
     @PostMapping("/saveCommon")
-    public Result saveCommon(@RequestBody CommonSettingVo settingVo){
+    public Result saveCommonSetting(@RequestBody CommonSettingVo settingVo){
         settingService.saveCommonSetting(settingVo);
         loadSetting.refreshSetting();
         return Result.ok();
     }
+
+    @PreAuthorize("hasAuthority('setting-smtp')")
     @ApiOperation("获取smtp设置")
     @GetMapping("/getSMTPSetting")
     public Result getSMTPSetting(){
@@ -57,13 +65,18 @@ public class SettingController {
         return Result.ok().setData(settingVo);
     }
 
+    @PreAuthorize("hasAuthority('setting-smtp')")
+    @RecordLog(type = RecordEnum.SETTING,logMsg = "修改smtp设置")
+    @ApiOperation("保存smtp设置")
     @PostMapping("/saveSMTP")
-    public Result saveSMTP(@RequestBody SMTPSettingVo smtpSettingVo){
+    public Result saveSMTPSetting(@RequestBody SMTPSettingVo smtpSettingVo){
         settingService.saveSMTP(smtpSettingVo);
         loadSetting.refreshSetting();
         return Result.ok();
     }
 
+    @PreAuthorize("hasAuthority('setting-comment')")
+    @ApiOperation("获取评论设置")
     @GetMapping("/getCommentSetting")
     public Result getCommentSetting(){
         CommentSettingVo settingVo = new CommentSettingVo();
@@ -71,19 +84,22 @@ public class SettingController {
         return Result.ok().setData(settingVo);
     }
 
+    @PreAuthorize("hasAuthority('setting-comment')")
+    @RecordLog(type = RecordEnum.SETTING)
+    @ApiOperation("保存评论设置")
     @PostMapping("/saveComment")
-    public Result saveComment(@RequestBody CommentSettingVo commentSettingVo){
+    public Result saveCommentSetting(@RequestBody CommentSettingVo commentSettingVo){
         settingService.saveComment(commentSettingVo);
         loadSetting.refreshSetting();
         return Result.ok();
     }
 
-
+    @PreAuthorize("hasAnyAuthority('setting-common','setting-smtp','setting-comment')")
+    @ApiOperation("刷新设置")
     @GetMapping("/refresh")
     public Result refresh(){
         loadSetting.refreshSetting();
         return Result.ok();
     }
-
 
 }

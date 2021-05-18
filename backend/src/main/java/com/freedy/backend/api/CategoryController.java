@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
@@ -34,47 +37,38 @@ public class CategoryController {
 
     @ApiOperation("列出所有分类")
     @GetMapping("/list")
-    public Result list(@RequestParam Map<String, Object> params){
+    public Result list(@RequestParam Map<String, Object> params) {
         PageUtils page = categoryService.queryPage(params);
-
         return Result.ok().put("page", page);
     }
 
+    @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("保存分类")
     @PostMapping("/save")
-    public Result save(@RequestBody CategoryEntity category){
+    public Result saveCategory(@RequestBody CategoryEntity category) {
         category.setCreatorId(Local.MANAGER_LOCAL.get().getId());
-		categoryService.save(category);
+        categoryService.save(category);
         return Result.ok();
     }
 
+    @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("更新分类")
     @PostMapping("/update")
-    public Result update(@RequestBody CategoryEntity category){
+    public Result updateCategory(@RequestBody CategoryEntity category) {
         //修改他人且没权限
-        if (!category.getCreatorId().equals(Local.MANAGER_LOCAL.get().getId())&&
-                !AuthorityUtils.hasAuthority("tag-operation-to-others"))
+        ManagerEntity entity = Local.MANAGER_LOCAL.get();
+        if (!category.getCreatorId().equals(entity.getId())&&entity.getStatus()!=1)
             throw new NoPermissionsException();
-		categoryService.updateById(category);
+        categoryService.updateById(category);
 
         return Result.ok();
     }
 
+    @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("删除分类")
     @GetMapping("/delete")
-    public Result delete(Integer[] ids){
-        boolean exception=false;
-        for (Integer id : ids) {
-            if (!id.equals(Local.MANAGER_LOCAL.get().getId())&&
-                    !AuthorityUtils.hasAuthority("tag-operation-to-others")){
-                exception=true;
-            }else {
-                categoryService.removeByIds(Arrays.asList(ids));
-            }
-        }
-        if (exception){
-            throw new NoPermissionsException();
-        }
+    public Result deleteCategory(Integer[] ids) {
+        categoryService.deleteCategories(Arrays.asList(ids));
         return Result.ok();
     }
 }

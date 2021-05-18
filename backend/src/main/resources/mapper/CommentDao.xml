@@ -61,5 +61,14 @@
             )
     </update>
 
+    <update id="readAll">
+        update blog_db.blog_comment set has_read=1 where id in
+        (
+            <foreach collection="list" item="item" separator=",">
+                #{item}
+            </foreach>
+        )
+    </update>
+
 
 </mapper>

@@ -45,4 +45,9 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      * 审核通过
      */
     void confirmExaminations(List<Long> ids);
+
+    /**
+     * 读取所有评论
+     */
+    void readAll(List<String> ids);
 }

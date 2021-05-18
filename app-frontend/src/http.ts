@@ -13,5 +13,9 @@ export async function post(uri:string,dataFiled:any) {
 }
 
 export function loadResource(uri:string){
-    return ResourceURL+uri;
+    if ((""+uri).startsWith("http")) {
+        return uri;
+    } else {
+        return ResourceURL + uri;
+    }
 }

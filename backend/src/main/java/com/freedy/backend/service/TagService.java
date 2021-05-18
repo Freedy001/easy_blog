@@ -23,5 +23,9 @@ public interface TagService extends IService<TagEntity> {
      */
     void createTagsByName(List<TagEntity> notExistedTag);
 
+    /**
+     * 批量删除标签
+     */
+    void deleteTags(List<Integer> asList);
 }
 

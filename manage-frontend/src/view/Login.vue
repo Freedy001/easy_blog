@@ -46,11 +46,11 @@ export default defineComponent({
 			}else {
 				const id=setInterval(()=>{
 					proxy.$notify.error({
-						title: '错误',
+						title: '出差啦😢！',
 						message: '亲，密码错了哦！',
 					});
 					proxy.$notify.error({
-						title: '错误',
+						title: '出差啦😢！',
 						message: '亲，密码错了哦！',
 						position: 'top-left'
 					});

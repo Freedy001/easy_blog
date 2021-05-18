@@ -7,7 +7,7 @@
 				<div class="title-content">
 					<h2 class="title" v-html="result.title" @click="$router.push(`article?id=${result.id}`)"></h2>
 					<div class="content">
-						<img :src="result.articlePoster" alt="asd" @click="$router.push(`article?id=${result.id}`)">
+						<img :src="loadResource(result.articlePoster)" alt="asd" @click="$router.push(`article?id=${result.id}`)">
 						<div class="details-area">
 							<div v-for="hitContent in result.hitItem" class="details-item">
 								<span>{{hitContent.field}}</span>

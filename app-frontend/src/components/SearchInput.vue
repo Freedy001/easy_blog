@@ -21,7 +21,7 @@
 							<div class="value">
 								<div class="content">
 									<el-tooltip placement="left" :content="item.logoExplain" effect="light">
-										<img :src="item.logo" style="width: 25px;height: 25px;object-fit: cover" alt="">
+										<img :src="loadResource(item.logo)" style="width: 25px;height: 25px;object-fit: cover" alt="">
 									</el-tooltip>
 									<div v-html="item.content"></div>
 								</div>
@@ -61,7 +61,7 @@ interface ISuggest {
 	logo: any
 	logoExplain: string
 }
-
+//以下是获取建议
 let search = ref()
 let showPop = ref(false)
 let queryString = ref()
@@ -107,8 +107,8 @@ watch(queryString, (val) => {
 	}, 500);
 })
 
+//以下都是修改样式
 let focusStyle = reactive<any>({})
-
 function changeStyle() {
 	if (!showPop.value) {
 		focusStyle['border-top'] = "2px solid #4e71f2";

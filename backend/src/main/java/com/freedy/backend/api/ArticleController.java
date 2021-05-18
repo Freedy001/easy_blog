@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.article.ArticleDraftVo;
 import com.freedy.backend.entity.vo.article.ArticleVo;
-import com.freedy.backend.middleWare.mq.annotation.ESEvict;
+import com.freedy.backend.aspect.annotation.ESEvict;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -46,29 +48,32 @@ public class ArticleController {
         return Result.ok().setData(articleService.getArticle(id));
     }
 
-    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME)
+    @RecordLog(type = RecordEnum.ARTICLE)
+    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
     @ApiOperation("保存或修改文章")
     @PostMapping("/saveOrUpdate")
-    public Result saveOrUpdate(@RequestBody ArticleVo article) throws ExecutionException, InterruptedException {
+    public Result saveOrUpdateArticle(@RequestBody ArticleVo article) throws ExecutionException, InterruptedException {
         //当传入的ArticleVo没有id时表示创建新的文章
         //当传入的ArticleVo有id时表示修改文章
         articleService.saveArticle(article);
         return Result.ok();
     }
 
-    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME)
+    @RecordLog(type = RecordEnum.DRAFT)
+    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
     @ApiOperation("保存文章为草稿")
     @PostMapping("/saveDraft")
-    public Result saveDraft(@RequestBody ArticleDraftVo draftVo){
+    public Result saveDraftArticle(@RequestBody ArticleDraftVo draftVo){
         articleService.saveDraft(draftVo);
         return Result.ok();
     }
 
     @ESEvict
-    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME)
+    @RecordLog(type = RecordEnum.ARTICLE)
+    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
     @ApiOperation("删除文章")
     @GetMapping("/delete")
-    public Result delete(@RequestParam Long[] ids){
+    public Result deleteArticle(@RequestParam Long[] ids){
 		articleService.deleteArticle(Arrays.asList(ids));
         return Result.ok();
     }

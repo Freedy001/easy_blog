@@ -59,6 +59,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils page = new PageUtils(params);
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
+            //分页查询
             List<ArticleInfoVo> articleList = baseMapper.queryArticleList(page);
             articleList.forEach(item -> {
                 //设置日期
@@ -83,7 +84,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     public PageUtils getBackArticleList(Map<String, Object> params) throws ExecutionException, InterruptedException {
         //没有修改他人的选项 就不要让他看到他人的文章
         PageUtils page = queryPage(params);
-        if (!AuthorityUtils.hasAuthority("article-operation-to-others", Local.PERMISSION_LOCAL.get())) {
+        if (!AuthorityUtils.hasAuthority("article-operation-to-others")) {
             ManagerEntity entity = Local.MANAGER_LOCAL.get();
             List<ArticleInfoVo> list = (List<ArticleInfoVo>) page.getList();
             List<ArticleInfoVo> infoVos = list.stream().filter(item -> item.getAuthorName().equals(entity.getNickname())).collect(Collectors.toList());

@@ -45,7 +45,6 @@ public class RolePermissionController {
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Integer id){
 		RolePermissionEntity rolePermission = rolePermissionService.getById(id);
-
         return Result.ok().put("rolePermission", rolePermission);
     }
 
@@ -53,7 +52,6 @@ public class RolePermissionController {
     @PostMapping("/save")
     public Result save(@RequestBody RolePermissionEntity rolePermission){
 		rolePermissionService.save(rolePermission);
-
         return Result.ok();
     }
 
@@ -61,7 +59,6 @@ public class RolePermissionController {
     @PostMapping("/update")
     public Result update(@RequestBody RolePermissionEntity rolePermission){
 		rolePermissionService.updateById(rolePermission);
-
         return Result.ok();
     }
 
@@ -69,7 +66,6 @@ public class RolePermissionController {
     @GetMapping("/delete")
     public Result delete(@RequestBody Integer[] ids){
 		rolePermissionService.removeByIds(Arrays.asList(ids));
-
         return Result.ok();
     }
 

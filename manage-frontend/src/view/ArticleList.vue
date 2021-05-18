@@ -153,7 +153,7 @@ async function getData(pageNum:any|null){
 		})
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: response.msg
 		})
 	}
@@ -212,7 +212,7 @@ async function save(form:any){
 		getData(page).then()
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: `添加失败！ reason-->${response.msg}`
 		})
 	}
@@ -234,7 +234,7 @@ async function doDel(id:any) {
 		getData(page).then()
 	} else {
 		proxy.$notify.error({
-			title: '错误',
+			title: '出差啦😢！',
 			message: `添加失败！ reason-->${response.msg}`
 		})
 	}

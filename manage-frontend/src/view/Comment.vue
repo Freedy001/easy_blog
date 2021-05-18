@@ -43,7 +43,7 @@
 					prop="content"
 			>
 			</el-table-column>
-			<el-table-column label="评论文章" width="200px">
+			<el-table-column label="评论文章">
 				<template #default="scope">
 					<a :href="`http://localhost:5000/#/article?id=${scope.row.article.id}`"
 					   style="color: #0b9aff;text-decoration: none">{{ scope.row.article.title }}</a>
@@ -107,7 +107,6 @@ import examine from '../assets/examine.svg'
 import close from '../assets/close.svg'
 import FullScreen from '../components/FullScreen.vue'
 import {useStore} from "vuex";
-
 const {proxy}: any = getCurrentInstance();
 defineComponent({
 	FullScreen,
@@ -134,8 +133,10 @@ onMounted(() => {
 	getComment()
 })
 
+//多选框选中的ids
 let ids:any=[];
 function handleSelectionChange(val:[any]) {
+	ids.length=0;
 	val.forEach(value => {
 		ids.push(value.id)
 	})
@@ -233,7 +234,14 @@ async function doDel(id: string) {
 }
 
 async function batchDel() {
-	console.log(ids)
+	let idsString:string='';
+	ids.forEach((value: string)=>{
+		idsString+=value+","
+	})
+	const response = await get(`/comment/delete?ids=${idsString}`);
+	if (response.code == 200) {
+		success("删除成功!")
+	}
 }
 
 function success(msg: string) {

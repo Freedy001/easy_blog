@@ -1,7 +1,7 @@
 <template>
 	<div class="post">
 		<div :style="{right:left?null:0}" class="img-box">
-			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="articleItem.articlePoster" alt="">
+			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="loadResource(articleItem.articlePoster)" alt="">
 		</div>
 		<div :style="{right:left?0:null,left:left?null:0}" class="info">
 			<!--			<div class="time">五月 05, 2021</div>-->
@@ -69,6 +69,7 @@
 import {defineProps, getCurrentInstance, ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
+import {loadResource} from "../http";
 defineProps(['articleItem', 'left'])
 const {proxy} = getCurrentInstance();
 const router = useRouter();
