@@ -391,7 +391,8 @@ let selectValue = ref()
 				height: 500px;
 				position: absolute;
 				top: 0;
-				left: 0;
+				left: 50%;
+				transform: translateX(-50%);
 			}
 
 			.show-box {

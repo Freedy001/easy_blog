@@ -12,5 +12,21 @@
         <result property="visitDuration" column="visit_duration"/>
     </resultMap>
 
+    <select id="visitorNumInPath7Days" resultType="java.lang.Integer">
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*0} and visit_time &gt;  ${time-86400000*1}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*1} and visit_time &gt;  ${time-86400000*2}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*2} and visit_time &gt;  ${time-86400000*3}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*3} and visit_time &gt;  ${time-86400000*4}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*4} and visit_time &gt;  ${time-86400000*5}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*5} and visit_time &gt;  ${time-86400000*6}
+        union all
+        select count(*) from blog_visitor where visit_time &lt;  ${time-86400000*6} and visit_time &gt;  ${time-86400000*7}
+    </select>
+
 
 </mapper>

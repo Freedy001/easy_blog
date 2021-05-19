@@ -11,6 +11,9 @@ public enum ResultCode {
     SUCCESS(200, "成功"),
     LOGIN_SUCCESS(201, "登录成功"),
 
+    /* 通知 */
+    NOTIFY(205,"重新加载配置"),
+
     /* 失败 */
     COMMON_FAIL(999, "失败"),
     UNKNOWN_EXCEPTION(500, "发生异常！"),

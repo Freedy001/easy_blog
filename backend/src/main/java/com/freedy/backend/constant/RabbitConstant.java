@@ -18,6 +18,6 @@ public class RabbitConstant {
     public static final String EMAIL_REPLAY_QUEUE_NAME="email.replay.sender.queue";
     public static final String EMAIL_REPLAY_ROUTING_KEY="email.replay.sender.routing.key";
 
-    public static final String IP_REGION_QUEUE_NAME="email.replay.sender.queue";
-    public static final String IP_REGION_ROUTING_KEY="email.replay.sender.routing.key";
+    public static final String IP_REGION_QUEUE_NAME="ip.query.region.queue";
+    public static final String IP_REGION_ROUTING_KEY="ip.query.region.routing.key";
 }

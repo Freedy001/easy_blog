@@ -31,8 +31,19 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      */
     Long getCount();
 
+    /**
+     * 获取指定用户的访问量
+     */
     Long getTotalVisit(@Param("authorId") Integer authorId);
 
+    /**
+     * 获取总共的访问量
+     */
+    Long getTotalVisitNum();
+
+    /**
+     * 获取指定用户的评论量
+     */
     Long getTotalComment(@Param("authorId") Integer authorId);
 
     /**
@@ -49,4 +60,15 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 获取文章标题
      */
     List<CommentAdminVo.Article> getTitles(List<Long> articleIds);
+
+
+    /**
+     * 获取所有文章的标题与分类id
+     */
+    List<ArticleEntity> getAllArticleTitleAndCategoryId();
+
+    /**
+     * 增加评论数量
+     */
+    void addCommentNum(@Param("articleId") Long articleId);
 }

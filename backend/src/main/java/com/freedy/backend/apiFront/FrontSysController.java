@@ -42,11 +42,7 @@ public class FrontSysController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
-    ValueOperations<String, String> ops;
 
-    public FrontSysController(StringRedisTemplate redisTemplate) {
-        ops = redisTemplate.opsForValue();
-    }
 
     @ApiOperation("订阅文章")
     @GetMapping("/subscribe")
@@ -77,18 +73,25 @@ public class FrontSysController {
     @ApiOperation("心跳接口,用于统计数据与通知客户端最新变化")
     @GetMapping("/heartbeat")
     public Result heartBeat(HttpServletRequest request) {
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
         String ipAddr = IPUtil.getRemoteIpAddr(request);
         //redis 存的类容是开始的时间加上新的时间
         String val = ops.get(RedisConstant.USER_IP_HEADER + ":" + ipAddr);
         if (StringUtils.hasText(val)) {
             String[] split = val.split("-");
-            ops.set(RedisConstant.USER_IP_HEADER + ":" + ipAddr,split[0]+"-"+new Date().getTime());
+            ops.set(RedisConstant.USER_IP_HEADER+ ":" + ipAddr,split[0]+"-"+new Date().getTime());
         }else {
             long time = new Date().getTime();
             ops.set(RedisConstant.USER_IP_HEADER + ":" + ipAddr, time +"-"+time);
         }
+        Boolean hasKey = redisTemplate.hasKey(RedisConstant.NOTIFY_HEADER);
+        if (hasKey!=null&&hasKey){
+            redisTemplate.delete(RedisConstant.NOTIFY_HEADER);
+            return Result.goNotify();
+        }
         return Result.ok();
     }
+
 
 
 }

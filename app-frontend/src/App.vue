@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, onMounted, ref} from "vue";
+import {defineComponent, onMounted, reactive, ref} from "vue";
 import LoadingTab from './components/LoadingTab.vue'
 import Menu from './components/Menu.vue'
 import MenuLogo from './components/Menu.vue'
@@ -56,9 +56,13 @@ async function getIndexSetting() {
 	}
 }
 //没5s 发送一次心跳让服务器知道此用户在线
-async function heartBeat() {
-	setInterval(()=>{
-		const sys = get('/sys/heartbeat');
+function heartBeat() {
+	setInterval(async()=>{
+		const sys = await get('/sys/heartbeat');
+		if (sys.code==205){
+			//重新加载设置
+			getIndexSetting().then();
+		}
 	},5000)
 }
 </script>
@@ -96,8 +100,8 @@ async function heartBeat() {
 		align-items: center;
 		transition: all .3s ease;
 		.line{
-			width: 30px;
 			height: 4px;
+			width: 30px;
 			background-color: rgb(114, 114, 114);
 			border-radius: 50px;
 			transition: all .3s ease;
@@ -105,8 +109,8 @@ async function heartBeat() {
 		&:hover{
 			flex-direction: row;
 			.line{
-				height: 30px;
 				width: 5px;
+				height: 30px;
 				background-color: rgb(9, 136, 146);
 			}
 		}

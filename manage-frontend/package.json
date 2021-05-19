@@ -10,6 +10,7 @@
     "@toast-ui/editor": "^2.5.2",
     "@toast-ui/editor-plugin-code-syntax-highlight": "^1.0.0",
     "axios": "^0.21.1",
+    "echarts": "^5.1.1",
     "element-plus": "^1.0.2-beta.41",
     "highlightjs": "^9.16.2",
     "jquery": "^3.6.0",

@@ -62,7 +62,6 @@ public class OperationLog {
             }else {
                 logEntity.setOperationName(autoGuess(methodName, args[0], pjp.getTarget()));
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -93,11 +92,13 @@ public class OperationLog {
         boolean confirm = methodName.toLowerCase(Locale.ROOT).contains("confirm");
         boolean upload = methodName.toLowerCase(Locale.ROOT).contains("upload");
         boolean create = methodName.toLowerCase(Locale.ROOT).contains("create");
+        boolean publish = methodName.toLowerCase(Locale.ROOT).contains("publish");
         boolean or = methodName.contains("Or");
         boolean draft = methodName.toLowerCase(Locale.ROOT).contains("draft");
         boolean setting = methodName.toLowerCase(Locale.ROOT).contains("setting");
         boolean article = methodName.toLowerCase(Locale.ROOT).contains("article");
         boolean user = methodName.toLowerCase(Locale.ROOT).contains("user");
+        boolean shorthand = methodName.toLowerCase(Locale.ROOT).contains("shorthand");
         boolean category = methodName.toLowerCase(Locale.ROOT).contains("category");
         boolean tag = methodName.toLowerCase(Locale.ROOT).contains("tag");
         boolean comment = methodName.toLowerCase(Locale.ROOT).contains("comment");
@@ -131,6 +132,7 @@ public class OperationLog {
             if (upload) builder.append("上传");
             if (replay) builder.append("回复了id为");
             if (create) builder.append("创建");
+            if (publish) builder.append("发表");
             if (confirm) builder.append("审核通过");
         }
         //*************************动词分割线******************************
@@ -172,8 +174,14 @@ public class OperationLog {
                         fieldName.contains("fatherCommentId")) {
                     //获取所有参数中带name或者title的 即为操作对象
                     field.setAccessible(true);
-                    String name = (String) field.get(arg);
-                    if (name != null) {
+                    Object targetName = field.get(arg);
+                    String name="";
+                    if (targetName instanceof String) {
+                        name = (String) targetName;
+                    }else if (targetName instanceof Long){
+                        name=Long.toString((Long) targetName);
+                    }
+                    if (StringUtils.hasText(name)) {
                         operatorObj.append(name);
                         break;
                     }
@@ -186,6 +194,7 @@ public class OperationLog {
         if (category) builder.append("分类");
         if (tag) builder.append("标签");
         if (comment) builder.append("评论");
+        if (shorthand) builder.append("速记");
         if (user) builder.append("用户");
         if (file) builder.append("文件");
         if (draft) builder.append("草稿");

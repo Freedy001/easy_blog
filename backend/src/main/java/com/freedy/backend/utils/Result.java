@@ -84,6 +84,13 @@ public class Result extends HashMap<String, Object> {
 		return result;
 	}
 
+	public static Result goNotify(){
+		Result result = new Result();
+		result.put("code",ResultCode.NOTIFY.getCode());
+		result.put("msg",ResultCode.NOTIFY.getMessage());
+		return result;
+	}
+
 	@Override
 	public Result put(String key, Object value) {
 		super.put(key, value);

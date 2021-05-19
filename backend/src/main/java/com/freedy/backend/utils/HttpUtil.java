@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class HttpUtil {
 
-    public static String get(String httpUrl) {
+    public static String get(String httpUrl, Integer... flag) {
         HttpURLConnection connection = null;
         InputStream is = null;
         BufferedReader br = null;
@@ -49,6 +49,18 @@ public class HttpUtil {
                     sbf.append("\r\n");
                 }
                 result = sbf.toString();
+            } else {
+                try {
+                    //格500ms重试
+                    Thread.sleep(500);
+                    if (flag==null){
+                        get(httpUrl, 1);
+                    }else if (flag[0] < 5){
+                        get(httpUrl, ++flag[0]);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

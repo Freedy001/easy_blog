@@ -2,6 +2,7 @@ package com.freedy.backend.api;
 
 import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
@@ -10,6 +11,7 @@ import com.freedy.backend.entity.vo.setting.SMTPSettingVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +34,9 @@ public class SettingController {
     @Autowired
     private LoadSetting loadSetting;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @PreAuthorize("hasAuthority('setting-common')")
     @ApiOperation("获取常规设置")
     @GetMapping("/getCommonSetting")
@@ -53,6 +58,8 @@ public class SettingController {
     public Result saveCommonSetting(@RequestBody CommonSettingVo settingVo){
         settingService.saveCommonSetting(settingVo);
         loadSetting.refreshSetting();
+        //通知前台页面
+        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER,"1");
         return Result.ok();
     }
 

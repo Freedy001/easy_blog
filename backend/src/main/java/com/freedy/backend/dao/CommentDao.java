@@ -50,4 +50,5 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      * 读取所有评论
      */
     void readAll(List<String> ids);
+
 }

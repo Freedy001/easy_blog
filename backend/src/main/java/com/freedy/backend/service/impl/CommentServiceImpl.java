@@ -27,8 +27,7 @@ import com.freedy.backend.dao.CommentDao;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
 
-import static com.freedy.backend.constant.RabbitConstant.EMAIL_EXCHANGE_NAME;
-import static com.freedy.backend.constant.RabbitConstant.EMAIL_REPLAY_ROUTING_KEY;
+import static com.freedy.backend.constant.RabbitConstant.*;
 
 
 @Service("commentService")
@@ -111,7 +110,6 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     @Override
     public void publishComment(CommentEntity comment) {
         comment.setHasRead(0);
-
         comment.setCreateTime(new Date().getTime());
         if (comment.getFatherCommentId() != null) {
             CommentEntity fatherEntity = baseMapper.selectById(comment.getFatherCommentId());
@@ -119,7 +117,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             //发送异步消息去发送邮件
             if (comment.getCommentStatus()==1) {
                 //发布状态的评论 以方式异步发送邮件通知对方
-                rabbitTemplate.convertAndSend(EMAIL_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
+                rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
             }
         } else {
             Integer topFlore;
@@ -138,6 +136,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             }
         }
         baseMapper.insert(comment);
+        //利用异步方式获取ip地区并保存数据库  这里使用异步的原因主要是因为地区查询接口有请求限制，可能会很慢从而使用户体验不好
+        rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME,IP_REGION_ROUTING_KEY,comment);
     }
 
     @Override

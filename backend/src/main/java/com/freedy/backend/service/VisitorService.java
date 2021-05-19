@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.VisitorEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +17,10 @@ import java.util.Map;
 public interface VisitorService extends IService<VisitorEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 查询过去七天每天的访问量
+     */
+    List<Integer> visitorNumInPath7Days(long time);
 }
 

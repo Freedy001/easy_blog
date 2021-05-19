@@ -6,6 +6,7 @@ package com.freedy.backend.enumerate;
  */
 public enum RecordEnum {
     ARTICLE,
+    SHORTHAND,
     DRAFT,
     LOGIN,
     LOGOUT,

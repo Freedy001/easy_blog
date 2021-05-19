@@ -88,7 +88,6 @@ body{
 	background: linear-gradient(30deg, #00ccff, #00b9ff, #3a9ff5, #1e8bfd);
 	background-size:1400% 300%;
 	animation:mymove 5s ease-in-out infinite alternate;
-
 }
 @keyframes mymove {
 	0%{
@@ -121,7 +120,6 @@ h2.tit{
 		color: var(--color-main);
 		cursor: pointer;
 		background: #e8f4ff;
-		cursor: pointer;
 		&:hover{
 			color: #fff;
 			background: var(--color-main);

@@ -31,8 +31,8 @@
 			</div>
 		</div>
 	</el-drawer>
-	<teleport to="body">
-		<div class="full-screen" v-if="showCard" @click="showCard=false">
+	<transition name="el-fade-in-linear">
+		<FullScreen :opacity="0" :index="3000" v-if="showCard" @click="showCard=false">
 			<el-upload
 					@click.stop=""
 					class="upload-demo"
@@ -45,12 +45,13 @@
 				<i class="el-icon-upload"></i>
 				<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
 			</el-upload>
-		</div>
-	</teleport>
+		</FullScreen>
+	</transition>
 </template>
 
 <script setup lang="ts">
 import {
+	defineComponent,
 	defineEmit,
 	defineProps,
 	getCurrentInstance,
@@ -61,6 +62,7 @@ import {
 	ref,
 	watch
 } from "vue";
+import FullScreen from './FullScreen.vue'
 import {ElMessage} from "element-plus";
 import {get, loadResource} from "../http";
 const {proxy}:any = getCurrentInstance();
@@ -72,6 +74,9 @@ let page=1
 let drawer=ref(false);
 defineProps(['isDrawer'])
 defineEmit(['clickCallback'])
+defineComponent({
+	FullScreen
+})
 watch(()=>proxy.isDrawer,(val)=>{
 	drawer.value=true;
 })

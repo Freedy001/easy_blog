@@ -1,6 +1,7 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.entity.vo.article.ArticleDraftVo;
@@ -76,5 +77,15 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 获取文章title
      */
     List<CommentAdminVo.Article> getArticleTitles(List<Long> articleIDs);
+
+    /**
+     * 统计所有文章信息
+     */
+    void articleStatistics(DashBoardVo dashBoardVo) throws ExecutionException, InterruptedException;
+
+    /**
+     * 增加评论文章的数量
+     */
+    void addCommentNum(Long articleId);
 }
 

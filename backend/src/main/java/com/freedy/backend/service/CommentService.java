@@ -46,5 +46,7 @@ public interface CommentService extends IService<CommentEntity> {
      * 批量审核通过
      */
     void confirmExaminations(List<Long> asList);
+
+
 }
 

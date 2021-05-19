@@ -55,6 +55,7 @@ public class HandleHeartBeatResult {
                     IpRegionDto ipRegionDto = JSON.parseObject(json, IpRegionDto.class);
                     entity.setRegion(ipRegionDto.getCountry()+"-"+ipRegionDto.getRegion()+"-"+ipRegionDto.getCity());
                     service.save(entity);
+                    redisTemplate.delete(key);
                 }
             }
         }

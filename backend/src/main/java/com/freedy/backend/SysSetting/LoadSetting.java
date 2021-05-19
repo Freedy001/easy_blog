@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class LoadSetting {
+    private String setupTime;
     private String blogTitle;
     private String logo;
     private String poster;

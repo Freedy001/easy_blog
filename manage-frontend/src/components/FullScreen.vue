@@ -1,6 +1,6 @@
 <!--suppress ALL -->
 <template>
-	<div class="full-screen" @click="$emit('clickOutSide')" :style="{'background-color':`rgba(0, 0, 0,${opacity})`}">
+	<div class="full-screen" @click="$emit('clickOutSide')" :style="{'background-color':`rgba(0, 0, 0,${opacity})`,'z-index':index}">
 		<div @click.stop="">
 			<slot></slot>
 		</div>
@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import {defineEmit, defineProps} from "vue";
 
-defineProps(['opacity'])
+defineProps(['opacity','index'])
 defineEmit(['clickOutSide'])
 </script>
 

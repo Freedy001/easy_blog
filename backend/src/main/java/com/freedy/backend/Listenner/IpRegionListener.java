@@ -5,10 +5,13 @@ import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.entity.dto.IpRegionDto;
 import com.freedy.backend.enumerate.EsType;
+import com.freedy.backend.service.ArticleService;
+import com.freedy.backend.service.CommentService;
 import com.freedy.backend.utils.HttpUtil;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,12 +23,21 @@ import java.io.IOException;
 @Component
 public class IpRegionListener {
 
+    @Autowired
+    private CommentService service;
+
+    @Autowired
+    private ArticleService articleService;
+
     @RabbitListener(queues = RabbitConstant.IP_REGION_QUEUE_NAME)
-    public void handle(Message message, Channel channel) throws IOException {
+    public void handle(CommentEntity comment,Message message, Channel channel) throws IOException {
         try {
-            String ipAddr=new String(message.getBody());
+            String ipAddr = comment.getIp();
             String json = HttpUtil.get("https://ip.taobao.com/outGetIpInfo?ip=" + ipAddr);
             IpRegionDto ipRegionDto = JSON.parseObject(json, IpRegionDto.class);
+            comment.setRegion(ipRegionDto.getCountry()+"-"+ipRegionDto.getRegion()+"-"+ipRegionDto.getCity());
+            articleService.addCommentNum(comment.getArticleId());
+            service.updateById(comment);
             //手动确定
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {

@@ -1,15 +1,15 @@
 package com.freedy.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.entity.*;
+import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
+import com.freedy.backend.service.*;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.constant.RabbitConstant;
-import com.freedy.backend.entity.ArticleTagRelationEntity;
-import com.freedy.backend.entity.ManagerEntity;
-import com.freedy.backend.entity.TagEntity;
 import com.freedy.backend.entity.dto.EsTypeDto;
 import com.freedy.backend.entity.vo.article.ArticleDraftVo;
 import com.freedy.backend.entity.vo.article.ArticleVo;
@@ -19,8 +19,6 @@ import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.middleWare.es.dao.ArticleRepository;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
-import com.freedy.backend.service.ArticleTagRelationService;
-import com.freedy.backend.service.TagService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +33,6 @@ import java.util.stream.Collectors;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.freedy.backend.dao.ArticleDao;
-import com.freedy.backend.entity.ArticleEntity;
-import com.freedy.backend.service.ArticleService;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -46,14 +42,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private final TagService tagService;
     private final ArticleTagRelationService relationService;
     private final RabbitTemplate rabbitTemplate;
-    @Autowired
-    private ArticleRepository articleRepository;
+    private final CategoryService categoryService;
+    private final VisitorService visitorService;
 
-    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, ThreadPoolExecutor executor) {
+    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService) {
         this.rabbitTemplate = rabbitTemplate;
         this.relationService = relationService;
         this.tagService = tagService;
         this.executor = executor;
+        this.categoryService = categoryService;
+        this.visitorService = visitorService;
     }
 
     private PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -140,7 +138,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             //将文章保存到es
             EsTypeDto dto = new EsTypeDto();
             dto.setId(entity.getId());
-            dto.setType(article.getId() == null?EsType.SAVE:EsType.UPDATE);
+            dto.setType(article.getId() == null ? EsType.SAVE : EsType.UPDATE);
             dto.setPublishTime(entity.getPublishTime());
             rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
                     RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
@@ -251,5 +249,61 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     public List<CommentAdminVo.Article> getArticleTitles(List<Long> articleIds) {
         return baseMapper.getTitles(articleIds);
     }
+
+    @Override
+    public void articleStatistics(DashBoardVo dashBoardVo) throws ExecutionException, InterruptedException {
+        CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
+            int count = visitorService.count();
+            dashBoardVo.setVisitNum(String.valueOf(count));
+        });
+        //所有分类
+        CompletableFuture<List<CategoryEntity>> f3 = CompletableFuture.supplyAsync(categoryService::list);
+        //所有文章
+        List<ArticleEntity> articleList = new LinkedList<>(baseMapper.getAllArticleTitleAndCategoryId());
+        //设置文章欢迎度
+        Object[][] articlePopular = new Object[articleList.size()+1][4];
+        for (int i = 0; i < articleList.size(); i++) {
+            ArticleEntity entity = articleList.get(i);
+            articlePopular[i+1][0] = entity.getTitle();
+            articlePopular[i+1][1] = entity.getLikeNum();
+            articlePopular[i+1][2] = entity.getCommentNum();
+            articlePopular[i+1][3] = entity.getVisitNum();
+        }
+        dashBoardVo.setArticlePopular(articlePopular);
+        dashBoardVo.setArticleNum(articleList.size());
+
+        List<CategoryEntity> categoryList = f3.get();
+        ArrayList<DashBoardVo.ArticleDistribution> articleDistributions = new ArrayList<>();
+        for (CategoryEntity categoryEntity : categoryList) {
+            DashBoardVo.ArticleDistribution distribution = new DashBoardVo.ArticleDistribution();
+            //设置分类名称
+            distribution.setName(categoryEntity.getCategoryName());
+            List<DashBoardVo.ArticleDistribution.Children> childrenList = new ArrayList<>();
+            //构建分类下的文章
+            for (int i = 0; i < articleList.size(); i++) {
+                ArticleEntity articleEntity = articleList.get(i);
+                //找到某个分类下的所有文章并将其构建成articleDistributions
+                if (categoryEntity.getId().equals(articleEntity.getArticleCategoryId())) {
+                    //找到文章
+                    DashBoardVo.ArticleDistribution.Children children = new DashBoardVo.ArticleDistribution.Children();
+                    children.setName(articleEntity.getTitle());
+                    //默认是以点赞数为文章的权重 最少是一
+                    children.setValue(articleEntity.getLikeNum()==0?1:Math.toIntExact(articleEntity.getLikeNum()));
+                    childrenList.add(children);
+                    articleList.remove(articleEntity);
+                }
+            }
+            distribution.setChildren(childrenList);
+            articleDistributions.add(distribution);
+        }
+        dashBoardVo.setArticleDistribution(articleDistributions);
+        f1.get();
+    }
+
+    @Override
+    public void addCommentNum(Long articleId) {
+        baseMapper.addCommentNum(articleId);
+    }
+
 
 }
