@@ -52,7 +52,7 @@ public class OperationLog {
         //构建操作日志实体类
         RecordLog recordLog = targetMethod.getDeclaredAnnotation(RecordLog.class);
         OperationLogEntity logEntity = new OperationLogEntity();
-        logEntity.setCreatTime(new Date().getTime());
+        logEntity.setCreatTime(System.currentTimeMillis());
         String nickname = Local.MANAGER_LOCAL.get().getNickname();
         logEntity.setOperator(nickname);
         logEntity.setIsSuccess(0);
@@ -165,7 +165,6 @@ public class OperationLog {
                 }
             }
             operatorObj.deleteCharAt(operatorObj.length() - 1);
-//            List<ArticleEntity> entities = s.listByIds(ids);
         } else {
             for (Field field : argClazz.getDeclaredFields()) {
                 String fieldName = field.getName();

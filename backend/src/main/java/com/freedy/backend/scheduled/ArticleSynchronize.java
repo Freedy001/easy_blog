@@ -47,7 +47,7 @@ public class ArticleSynchronize {
                     }
                 }else {
                     //数据不存在,判断是否到了发布时间 没到不管他
-                    if (item.getPublishTime()<new Date().getTime()){
+                    if (item.getPublishTime()<System.currentTimeMillis()){
                         //过了发布时间 需要同步到es中
                         log.info("开始上架文章 id:{}",item.getId());
                         articleRepository.save(item);

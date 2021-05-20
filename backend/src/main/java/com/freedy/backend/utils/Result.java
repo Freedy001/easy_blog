@@ -14,6 +14,9 @@ import com.freedy.backend.enumerate.ResultCode;
 import org.apache.http.HttpStatus;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 返回数据
@@ -23,7 +26,7 @@ import java.util.HashMap;
 public class Result extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
 
-	public Result setData(Object date){
+    public Result setData(Object date){
 		put("data",date);
 		return this;
 	}
@@ -84,10 +87,21 @@ public class Result extends HashMap<String, Object> {
 		return result;
 	}
 
-	public static Result goNotify(){
+	public static Result goNotify(List<String> notify) {
 		Result result = new Result();
-		result.put("code",ResultCode.NOTIFY.getCode());
-		result.put("msg",ResultCode.NOTIFY.getMessage());
+		List<ResultCode> resultCodes = notify.stream().map(ResultCode::valueOf).collect(Collectors.toList());
+		String code = resultCodes.stream().map(ResultCode::getStrCode).collect(Collectors.joining(","));
+		String msg = resultCodes.stream().map(ResultCode::getMessage).collect(Collectors.joining(","));
+		result.put("code", code);
+		result.put("msg",msg);
+		return result;
+	}
+
+	public static Result goNotify(String notify) {
+		Result result = new Result();
+		ResultCode resultCode = ResultCode.valueOf(notify);
+		result.put("code", resultCode.getCode());
+		result.put("msg",resultCode.getMessage());
 		return result;
 	}
 

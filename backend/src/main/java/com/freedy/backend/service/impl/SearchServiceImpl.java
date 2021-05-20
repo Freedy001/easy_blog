@@ -21,10 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.freedy.backend.constant.EsConstant.*;
 
@@ -48,16 +47,19 @@ public class SearchServiceImpl implements SearchService {
         boolQuery.should(QueryBuilders.termQuery(CATEGORY, queryString).boost(1));
         boolQuery.should(QueryBuilders.termQuery(TAG, queryString).boost(1));
         builder.query(boolQuery);
+        //高亮
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field(TITLE).field(CATEGORY)
                 .field(TAG).preTags(PRE_TAG).postTags(POST_TAG);
         builder.highlighter(highlightBuilder);
         builder.size(10);
+        //构建需要返回的字段
+        String[] queryFields = Arrays.stream(SuggestionVo.class.getDeclaredFields()).map(Field::getName).toArray(String[]::new);
+        builder.fetchSource(queryFields,null);
         articleRequest.source(builder);
         SearchResponse response = highLevelClient.search(articleRequest, RequestOptions.DEFAULT);
-        SearchHit[] hits = response.getHits().getHits();
         ArrayList<SuggestionVo> vos = new ArrayList<SuggestionVo>();
-        for (SearchHit hit : hits) {
+        for (SearchHit hit : response.getHits().getHits()) {
             SuggestionVo vo = new SuggestionVo();
             Map<String, HighlightField> fields = hit.getHighlightFields();
             //越往上优先级越大
@@ -90,24 +92,28 @@ public class SearchServiceImpl implements SearchService {
         boolQuery.should(QueryBuilders.matchQuery(DESC, searchString).boost(100));
         boolQuery.should(QueryBuilders.matchQuery(CONTENT, searchString).boost(1));
         builder.query(boolQuery);
+        //构建高亮
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field(TITLE).field(DESC).field(CATEGORY)
                 .field(TAG).field(CONTENT).preTags(PRE_TAG).postTags(POST_TAG);
         builder.highlighter(highlightBuilder);
+        //分页
         builder.size(10);
         builder.from((page - 1) * 10);
+        //查询指定字段
+        String[] queryFields = Arrays.stream(SearchResult.class.getDeclaredFields()).map(Field::getName).filter(item -> !"hitItem".equals(item)).toArray(String[]::new);
+        builder.fetchSource(queryFields, null);
         articleRequest.source(builder);
         SearchResponse response = highLevelClient.search(articleRequest, RequestOptions.DEFAULT);
-        SearchHit[] hits = response.getHits().getHits();
         List<SearchResult> searchResults = new ArrayList<>();
-        for (SearchHit hit : hits) {
+        for (SearchHit hit : response.getHits().getHits()) {
+            //构建SearchResult
             SearchResult vo = new SearchResult();
             ArticleEsModel esModel = JSON.parseObject(hit.getSourceAsString(), ArticleEsModel.class);
             BeanUtils.copyProperties(esModel, vo);
             vo.setId(esModel.getId().toString());
-            vo.setTitle(esModel.getTitle());
             vo.setPublishTime(DateUtils.formatTime(new Date(esModel.getPublishTime())));
-            //构建hitIte
+            //构建hitItem
             List<SearchResult.HitItem> hitItems = new ArrayList<>();
             hit.getHighlightFields().forEach((k, v) -> {
                 SearchResult.HitItem item = new SearchResult.HitItem();
@@ -121,6 +127,7 @@ public class SearchServiceImpl implements SearchService {
                         vo.setArticleCategory(hitContent);
                         break;
                     case TAG:
+                        //将命中的tag替换为带标签的tag
                         String hitTag = hitContent.replace("<mark>", "").replace("</mark>", "");
                         vo.getArticleTags().replaceAll(tag -> tag.equals(hitTag) ? hitContent : tag);
                         break;

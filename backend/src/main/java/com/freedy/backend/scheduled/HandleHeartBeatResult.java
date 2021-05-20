@@ -43,7 +43,7 @@ public class HandleHeartBeatResult {
                 String[] split = Objects.requireNonNull(ops.get(key)).split("-");
                 long startTime = Long.parseLong(split[0]);
                 long endTime = Long.parseLong(split[1]);
-                if (endTime < new Date().getTime() - 5 * 60 * 1000) {
+                if (endTime < System.currentTimeMillis() - 5 * 60 * 1000) {
                     //5分钟误差
                     //用户下线 在数据库中添加数据
                     VisitorEntity entity = new VisitorEntity();

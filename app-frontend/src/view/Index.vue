@@ -7,11 +7,10 @@
 				<img :src="loadResource($store.state.indexSetting.poster)" alt="">
 			</div>
 			<div class="triangle" :style="{'border-bottom': `400vh solid ${$store.state.indexSetting.indexColor}`}"></div>
-
 			<div class="cover-title">
 				<div class="time">{{ $store.state.indexSetting.indexArticle.publishTime }}</div>
 				<div class="title">
-					<a href="/#" data-v-241ea8f0="" class="title-a">{{$store.state.indexSetting.indexArticle.title}}</a>
+					<router-link :to="`/article?id=${$store.state.indexSetting.indexArticle.id}`" tag="a" data-v-241ea8f0="" class="title-a">{{$store.state.indexSetting.indexArticle.title}}</router-link>
 				</div>
 				<div class="describe">{{$store.state.indexSetting.indexArticle.articleDesc}}</div>
 			</div>
@@ -52,6 +51,15 @@ defineComponent({
 	LoadMore,
 	ToTop
 })
+watch(()=>store.state.notifyReloadArticle,()=>{
+	articleItem.length=0
+	isShow.value=true;
+	page=1;
+	getArticleList().then(()=>{
+		isShow.value = !hasMore.value;
+	})
+})
+
 let moveStyle = reactive<{ transform: string, transition: string | null }>({
 	transform: 'translate(0,-10vh)',
 	transition: null,

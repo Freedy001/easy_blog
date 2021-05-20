@@ -6,8 +6,7 @@ package com.freedy.backend.constant;
  */
 public class RedisConstant {
     public static final String USER_TOKEN_HEADER="user-token:";
-
     public static final String USER_IP_HEADER="heartbeat:";
-
+    //通知
     public static final String NOTIFY_HEADER="notify";
 }

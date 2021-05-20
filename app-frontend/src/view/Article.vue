@@ -11,9 +11,9 @@
 					<span class="author">{{ article.authorName }}</span>
 				</div>
 				<div class="info">
-					<span class="item">时间:2021年 4月 30日</span>
-					<span class="item">字数:1023</span>
-					<span class="item">喜欢数:1123</span>
+					<span class="item">时间: {{article.publishTime==null?0:article.publishTime}}</span>
+					<span class="item">字数:{{article.wordNum==null?0:article.wordNum}}</span>
+					<span class="item">喜欢数:{{article.likeNum==null?0:article.likeNum}}</span>
 				</div>
 			</div>
 		</teleport>
@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 // import 'github-markdown-css'
-import {defineComponent, onMounted, onUnmounted, reactive, ref} from "vue";
+import {defineComponent, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {get, loadResource} from "../http";
 import hljs from 'highlight.js';
@@ -54,7 +54,11 @@ defineComponent({
 	LoadMore,
 	ToTop
 })
-
+watch(()=>route.query.id,()=>{
+	loadArticle()
+	page=1
+	getComments()
+})
 interface IArticle {
 	id: number | string,
 	title: string,

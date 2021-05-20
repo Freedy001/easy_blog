@@ -65,19 +65,19 @@ public class DateUtils {
     }
 
     public static String formatRelevantTime(Long creatTime) {
-        long time = new Date().getTime();
+        long time = System.currentTimeMillis();
         if (time-creatTime<60*60*1000){
             //一小时内
-            return (time-creatTime)/60*1000+"分钟前";
+            return (time-creatTime)/(60*1000)+"分钟前";
         } else if (time-creatTime<60*60*24*1000) {
             //一天内
-            return (time-creatTime)/60*60*1000+"小时前";
+            return (time-creatTime)/(60*60*1000)+"小时前";
         } else if (time-creatTime< 60L*60*24*30*1000) {
             //一个月内
-            return (time-creatTime)/60*60*24*1000+"天前";
+            return (time-creatTime)/(60*60*24*1000)+"天前";
         }else if (time-creatTime< 60L*60*24*30*12*1000) {
             //一年月内
-            return (time-creatTime)/60*60*24*30*1000+"月前";
+            return (time-creatTime)/(60L*60*24*30*1000)+"月前";
         }else {
             return formatTime(creatTime);
         }

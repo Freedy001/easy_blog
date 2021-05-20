@@ -4,6 +4,7 @@ import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.enumerate.RecordEnum;
+import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
 import com.freedy.backend.entity.vo.setting.CommonSettingVo;
@@ -16,6 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.service.SettingService;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -42,7 +46,7 @@ public class SettingController {
     @GetMapping("/getCommonSetting")
     public Result getCommonSetting() {
         CommonSettingVo settingVo = new CommonSettingVo();
-        BeanUtils.copyProperties(loadSetting,settingVo);
+        BeanUtils.copyProperties(loadSetting, settingVo);
         CommonSettingVo.IndexArticle article = new CommonSettingVo.IndexArticle();
         String[] split = loadSetting.getIndexArticleIdAndTitle().split(",", 2);
         article.setId(split[0]);
@@ -55,28 +59,28 @@ public class SettingController {
     @RecordLog(type = RecordEnum.SETTING)
     @ApiOperation("保存常规设置")
     @PostMapping("/saveCommon")
-    public Result saveCommonSetting(@RequestBody CommonSettingVo settingVo){
+    public Result saveCommonSetting(@RequestBody CommonSettingVo settingVo) {
         settingService.saveCommonSetting(settingVo);
         loadSetting.refreshSetting();
         //通知前台页面
-        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER,"1");
+        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(), ResultCode.NOTIFY_INDEX_SETTING.name(),5, TimeUnit.SECONDS);
         return Result.ok();
     }
 
     @PreAuthorize("hasAuthority('setting-smtp')")
     @ApiOperation("获取smtp设置")
     @GetMapping("/getSMTPSetting")
-    public Result getSMTPSetting(){
+    public Result getSMTPSetting() {
         SMTPSettingVo settingVo = new SMTPSettingVo();
-        BeanUtils.copyProperties(loadSetting,settingVo);
+        BeanUtils.copyProperties(loadSetting, settingVo);
         return Result.ok().setData(settingVo);
     }
 
     @PreAuthorize("hasAuthority('setting-smtp')")
-    @RecordLog(type = RecordEnum.SETTING,logMsg = "修改smtp设置")
+    @RecordLog(type = RecordEnum.SETTING, logMsg = "修改smtp设置")
     @ApiOperation("保存smtp设置")
     @PostMapping("/saveSMTP")
-    public Result saveSMTPSetting(@RequestBody SMTPSettingVo smtpSettingVo){
+    public Result saveSMTPSetting(@RequestBody SMTPSettingVo smtpSettingVo) {
         settingService.saveSMTP(smtpSettingVo);
         loadSetting.refreshSetting();
         return Result.ok();
@@ -85,9 +89,9 @@ public class SettingController {
     @PreAuthorize("hasAuthority('setting-comment')")
     @ApiOperation("获取评论设置")
     @GetMapping("/getCommentSetting")
-    public Result getCommentSetting(){
+    public Result getCommentSetting() {
         CommentSettingVo settingVo = new CommentSettingVo();
-        BeanUtils.copyProperties(loadSetting,settingVo);
+        BeanUtils.copyProperties(loadSetting, settingVo);
         return Result.ok().setData(settingVo);
     }
 
@@ -95,7 +99,7 @@ public class SettingController {
     @RecordLog(type = RecordEnum.SETTING)
     @ApiOperation("保存评论设置")
     @PostMapping("/saveComment")
-    public Result saveCommentSetting(@RequestBody CommentSettingVo commentSettingVo){
+    public Result saveCommentSetting(@RequestBody CommentSettingVo commentSettingVo) {
         settingService.saveComment(commentSettingVo);
         loadSetting.refreshSetting();
         return Result.ok();
@@ -104,7 +108,7 @@ public class SettingController {
     @PreAuthorize("hasAnyAuthority('setting-common','setting-smtp','setting-comment')")
     @ApiOperation("刷新设置")
     @GetMapping("/refresh")
-    public Result refresh(){
+    public Result refresh() {
         loadSetting.refreshSetting();
         return Result.ok();
     }

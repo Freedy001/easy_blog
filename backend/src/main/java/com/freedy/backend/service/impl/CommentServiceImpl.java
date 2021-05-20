@@ -110,7 +110,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     @Override
     public void publishComment(CommentEntity comment) {
         comment.setHasRead(0);
-        comment.setCreateTime(new Date().getTime());
+        comment.setCreateTime(System.currentTimeMillis());
         if (comment.getFatherCommentId() != null) {
             CommentEntity fatherEntity = baseMapper.selectById(comment.getFatherCommentId());
             comment.setFlore(fatherEntity.getFlore());

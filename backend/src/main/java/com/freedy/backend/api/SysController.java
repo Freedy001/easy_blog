@@ -42,7 +42,7 @@ public class SysController {
     public Result getDashboardData() throws Exception {
         DashBoardVo boardVo = new DashBoardVo();
         //设置建立时间
-        long timeLong = new Date().getTime() - Long.parseLong(setupTime);
+        long timeLong = System.currentTimeMillis() - Long.parseLong(setupTime);
         boardVo.setEstablishmentTime((timeLong/(60*60*24*1000))+"天");
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             //设置评论数
@@ -51,7 +51,7 @@ public class SysController {
         }, executor);
         CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> {
             //访客统计
-            List<Integer> visitorNum=visitorService.visitorNumInPath7Days(new Date().getTime());
+            List<Integer> visitorNum=visitorService.visitorNumInPath7Days(System.currentTimeMillis());
             boardVo.setVisitorNum(visitorNum);
         }, executor);
         //设置文章的统计信息

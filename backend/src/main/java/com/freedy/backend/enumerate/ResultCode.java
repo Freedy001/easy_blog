@@ -12,7 +12,8 @@ public enum ResultCode {
     LOGIN_SUCCESS(201, "登录成功"),
 
     /* 通知 */
-    NOTIFY(205,"重新加载配置"),
+    NOTIFY_INDEX_SETTING(205,"重新加载配置"),
+    NOTIFY_ARTICLE_UPDATE(206,"文章更新"),
 
     /* 失败 */
     COMMON_FAIL(999, "失败"),

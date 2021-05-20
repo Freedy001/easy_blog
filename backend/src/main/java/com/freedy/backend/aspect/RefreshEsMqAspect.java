@@ -29,7 +29,7 @@ public class RefreshEsMqAspect {
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         try {
             log.debug("starting..........");
-            Object[] args = pjp.getArgs();//List<Long> articleId
+            Object[] args = pjp.getArgs();
             Object result = pjp.proceed(args);
             Long[] articleId = (Long[]) args[0];
             for (Long id : articleId) {

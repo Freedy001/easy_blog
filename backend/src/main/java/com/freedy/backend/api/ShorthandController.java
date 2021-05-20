@@ -26,7 +26,7 @@ public class ShorthandController {
     @PostMapping("/publish")
     public Result publishShorthand(@RequestBody ShorthandEntity entity){
         entity.setManagerId(Local.MANAGER_LOCAL.get().getId());
-        entity.setCreateTime(new Date().getTime());
+        entity.setCreateTime(System.currentTimeMillis());
         service.save(entity);
         return Result.ok();
     }

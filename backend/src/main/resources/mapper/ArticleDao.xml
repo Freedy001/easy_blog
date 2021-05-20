@@ -65,6 +65,10 @@
         update blog_article set comment_num=comment_num+1 where id=#{articleId}
     </insert>
 
+    <update id="updateArticleStatus">
+        update blog_db.blog_article set blog_db.blog_article.article_status = #{articleStatus} where id = #{id}
+    </update>
+
     <select id="queryArticleList"
             resultMap="ArticleInfoMap"
             parameterType="com.freedy.backend.utils.PageUtils">

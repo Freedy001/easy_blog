@@ -61,7 +61,7 @@ public interface ArticleService extends IService<ArticleEntity> {
     /**
      * 获取前台文章列表
      */
-    PageUtils getFrontArticleList(Map<String, Object> params) throws ExecutionException, InterruptedException;
+    PageUtils getFrontArticleList(Map<String, Object> params) throws Exception;
 
     /**
      * 获取要保存到es里面的model
@@ -87,5 +87,13 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 增加评论文章的数量
      */
     void addCommentNum(Long articleId);
+
+    /**
+     * 修改文章状态
+     * @param id 文章id
+     * @param articleStatus 修改后的状态
+     */
+    void updateArticleStatus(Long id, Integer articleStatus);
+
 }
 

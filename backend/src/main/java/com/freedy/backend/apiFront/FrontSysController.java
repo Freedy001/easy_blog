@@ -22,7 +22,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Freedy
@@ -63,6 +67,7 @@ public class FrontSysController {
                         Long.parseLong(loadSetting.getIndexArticleIdAndTitle().split(",")[0]))
         );
         CommonSettingVo.IndexArticle indexArticle = new CommonSettingVo.IndexArticle();
+        indexArticle.setId(article.getId().toString());
         indexArticle.setTitle(article.getTitle());
         indexArticle.setArticleDesc(article.getArticleDesc());
         indexArticle.setPublishTime(DateUtils.formatChineseDate(article.getPublishTime()));
@@ -79,19 +84,19 @@ public class FrontSysController {
         String val = ops.get(RedisConstant.USER_IP_HEADER + ":" + ipAddr);
         if (StringUtils.hasText(val)) {
             String[] split = val.split("-");
-            ops.set(RedisConstant.USER_IP_HEADER+ ":" + ipAddr,split[0]+"-"+new Date().getTime());
-        }else {
-            long time = new Date().getTime();
-            ops.set(RedisConstant.USER_IP_HEADER + ":" + ipAddr, time +"-"+time);
+            ops.set(RedisConstant.USER_IP_HEADER + ":" + ipAddr, split[0] + "-" + System.currentTimeMillis());
+        } else {
+            long time = System.currentTimeMillis();
+            ops.set(RedisConstant.USER_IP_HEADER + ":" + ipAddr, time + "-" + time);
         }
-        Boolean hasKey = redisTemplate.hasKey(RedisConstant.NOTIFY_HEADER);
-        if (hasKey!=null&&hasKey){
-            redisTemplate.delete(RedisConstant.NOTIFY_HEADER);
-            return Result.goNotify();
+        Set<String> keys = redisTemplate.keys(RedisConstant.NOTIFY_HEADER + "*");
+        if (keys!=null&&keys.size() > 0) {
+            //有通知 需要通知前端
+            List<String> notifyList = keys.stream().map(ops::get).collect(Collectors.toList());
+            return Result.goNotify(notifyList);
         }
         return Result.ok();
     }
-
 
 
 }

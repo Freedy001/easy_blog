@@ -17,17 +17,17 @@
 				       type="text" class="search-input">
 				<transition enter-active-class="slide-in-top1" leave-active-class="slide-out-top1">
 					<div class="pop" id="pop" v-if="showPop">
-						<div class="search-item" v-for="item in suggest">
+						<div class="search-item" v-for="item in suggest" @click="$router.push(`/search?searchString=${item.title}`);$emit('searchCb')">
 							<div class="value">
 								<div class="content">
 									<el-tooltip placement="left" :content="item.logoExplain" effect="light">
-										<img :src="loadResource(item.logo)" style="width: 25px;height: 25px;object-fit: cover" alt="">
+										<img :src="item.logo" style="width: 25px;height: 25px;object-fit: cover" alt="">
 									</el-tooltip>
 									<div v-html="item.content"></div>
 								</div>
 								<span>来自:<b style="font-size: 12px">{{ item.title }}</b></span>
 							</div>
-							<div class="jump">
+							<div class="jump" @click.stop="$router.push(`/article?id=${item.id}`);$emit('searchCb')">
 								<span>jump to</span>
 								<img :src="enter" alt="">
 							</div>
@@ -48,8 +48,10 @@ import articleDesc from "../assets/icon/articleDesc.svg";
 import articleTags from "../assets/icon/articleTags.svg";
 import content from "../assets/icon/content.svg";
 import title from "../assets/icon/title.svg";
+import enter from "../assets/icon/enter.svg";
 import {loadResource} from "../http";
 import {useRoute} from "vue-router";
+
 defineProps(['showLogo'])
 defineEmit(['searchCb'])
 const route = useRoute();
@@ -61,6 +63,7 @@ interface ISuggest {
 	logo: any
 	logoExplain: string
 }
+
 //以下是获取建议
 let search = ref()
 let showPop = ref(false)
@@ -75,7 +78,7 @@ watch(queryString, (val) => {
 	}
 	timeout = setTimeout(async () => {
 		showPop.value = false
-		if (queryString.value !== ''&&queryString.value !==route.query.searchString) {
+		if (queryString.value !== '' && queryString.value !== route.query.searchString) {
 			const response = await get(`/search/getSuggestions?queryString=${val}`);
 			if (response.code == 200) {
 				const resSuggest: Array<ISuggest> = response.data
@@ -109,6 +112,7 @@ watch(queryString, (val) => {
 
 //以下都是修改样式
 let focusStyle = reactive<any>({})
+
 function changeStyle() {
 	if (!showPop.value) {
 		focusStyle['border-top'] = "2px solid #4e71f2";
@@ -122,7 +126,7 @@ watch(showPop, (val) => {
 	if (val) {
 		focusStyle['border-bottom'] = "none";
 		focusStyle['border-bottom-left-radius'] = "0";
-	}else {
+	} else {
 		outChangeStyle()
 		focusStyle['border-bottom-left-radius'] = "10px";
 	}
@@ -136,16 +140,17 @@ function outChangeStyle() {
 		focusStyle['border-bottom'] = "2px solid #dedede";
 	}
 }
-onMounted(()=>{
-	document.body.onclick=()=>{
-		showPop.value=false
+
+onMounted(() => {
+	document.body.onclick = () => {
+		showPop.value = false
 	}
-	if (route.query.searchString){
-		queryString.value=route.query.searchString
+	if (route.query.searchString) {
+		queryString.value = route.query.searchString
 	}
 })
-watch(()=>route.query.searchString,()=>{
-	queryString.value=route.query.searchString
+watch(() => route.query.searchString, () => {
+	queryString.value = route.query.searchString
 })
 </script>
 
@@ -171,7 +176,7 @@ watch(()=>route.query.searchString,()=>{
 		display: flex;
 
 		.input-pop {
-
+				position: relative;
 			.search-input {
 				width: 800px;
 				height: 48px;
@@ -194,6 +199,7 @@ watch(()=>route.query.searchString,()=>{
 			}
 
 			.pop {
+				position: absolute;
 				width: 800px;
 				height: 500px;
 				background-color: rgb(255, 255, 255);
@@ -243,13 +249,14 @@ watch(()=>route.query.searchString,()=>{
 					.jump {
 						position: relative;
 						border: 1px solid #c6c6c6;
-						padding: 0 12px 0 12px;
-						height: 25px;
+						padding: 0 5px 0 5px;
+						height: 20px;
 						align-items: center;
 						border-radius: 5px;
 						background-color: white;
 						display: none;
 						margin-right: 10px;
+						transition: all .3s ease;
 
 						span {
 							margin: 5px;
@@ -260,11 +267,18 @@ watch(()=>route.query.searchString,()=>{
 
 						img {
 							position: absolute;
-							bottom: 3px;
-							right: 3px;
+							bottom: -2px;
+							right: 1px;
 							width: 8px;
 							height: 12px;
 							color: #797979;
+						}
+
+						&:hover {
+							transform: scale(1.05);
+							span{
+								color: #000000;
+							}
 						}
 					}
 

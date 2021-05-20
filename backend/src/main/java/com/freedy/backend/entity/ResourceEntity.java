@@ -23,7 +23,7 @@ public class ResourceEntity {
     @ApiModelProperty("静态资源地址")
     private String resourceUrl;
     @ApiModelProperty("创建时间")
-    private Long createTime=new Date().getTime();
+    private Long createTime=System.currentTimeMillis();
 
     public ResourceEntity(String resourceUrl) {
         this.resourceUrl = resourceUrl;

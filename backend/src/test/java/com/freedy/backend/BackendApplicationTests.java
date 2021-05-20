@@ -70,4 +70,9 @@ class BackendApplicationTests {
         sender.sendHtml("985948228@qq.com","test","<h1>love you haha</h1>");
     }
 
+    @Test
+    public void test3(){
+        redisTemplate.opsForValue().set("123","321");
+    }
+
 }

@@ -1,13 +1,12 @@
 package com.freedy.backend.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.entity.*;
 import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
+import com.freedy.backend.exception.ArgumentErrorException;
 import com.freedy.backend.service.*;
-import com.freedy.backend.utils.AuthorityUtils;
-import com.freedy.backend.utils.DateUtils;
-import com.freedy.backend.utils.Local;
-import com.freedy.backend.utils.PageUtils;
+import com.freedy.backend.utils.*;
 import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.dto.EsTypeDto;
@@ -19,15 +18,27 @@ import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.middleWare.es.dao.ArticleRepository;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -35,7 +46,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.freedy.backend.dao.ArticleDao;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.freedy.backend.constant.EsConstant.INDEX;
 
+
+/**
+ * @author Freedy
+ */
 @Service("articleService")
 public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> implements ArticleService {
     private final ThreadPoolExecutor executor;
@@ -44,14 +60,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private final RabbitTemplate rabbitTemplate;
     private final CategoryService categoryService;
     private final VisitorService visitorService;
+    private final RestHighLevelClient highLevelClient;
 
-    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService) {
+    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService, RestHighLevelClient highLevelClient) {
         this.rabbitTemplate = rabbitTemplate;
         this.relationService = relationService;
         this.tagService = tagService;
         this.executor = executor;
         this.categoryService = categoryService;
         this.visitorService = visitorService;
+        this.highLevelClient = highLevelClient;
     }
 
     private PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -62,7 +80,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             articleList.forEach(item -> {
                 //设置日期
                 Date date = new Date();
-                if (!item.getPublishTime().equals("0")) {
+                if (!"0".equals(item.getPublishTime())) {
                     date.setTime(Long.parseLong(item.getPublishTime()));
                     item.setPublishTime(DateUtils.formatTime(date));
                 }
@@ -94,30 +112,49 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageUtils getFrontArticleList(Map<String, Object> params) throws ExecutionException, InterruptedException {
-        PageUtils page = queryPage(params);
-        List<ArticleInfoVo> list = (List<ArticleInfoVo>) page.getList();
-        List<ArticleInfoVo> infoVos = list.stream().filter(item -> item.getArticleStatus() >= 3 &&
-                DateUtils.formatTime(item.getPublishTime()).getTime() < new Date().getTime())
-                .collect(Collectors.toList());
-        page.setList(infoVos);
-        return page;
+    public PageUtils getFrontArticleList(Map<String, Object> params) throws Exception {
+        int limit;
+        int page;
+        try {
+            limit = Integer.parseInt((String) params.get(Constant.LIMIT));
+            page = Integer.parseInt((String) params.get(Constant.PAGE));
+        } catch (NumberFormatException e) {
+            throw new ArgumentErrorException();
+        }
+        SearchRequest request = new SearchRequest(INDEX);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.from((page - 1) * limit);
+        builder.size(limit);
+        builder.sort("publishTime", SortOrder.DESC);
+        //构建需要返回的字段
+        builder.fetchSource(null, new String[]{"content"});
+        request.source(builder);
+        //查询结果
+        SearchResponse search = highLevelClient.search(request, RequestOptions.DEFAULT);
+        List<ArticleInfoVo> infoVoList = new ArrayList<>();
+        SearchHits hits = search.getHits();
+        for (SearchHit hit : hits.getHits()) {
+            ArticleEsModel esModel = JSON.parseObject(hit.getSourceAsString(), ArticleEsModel.class);
+            ArticleInfoVo vo = new ArticleInfoVo();
+            BeanUtils.copyProperties(esModel, vo);
+            vo.setId(esModel.getId().toString());
+            infoVoList.add(vo);
+        }
+        return new PageUtils(infoVoList, Math.toIntExact(hits.getTotalHits().value), limit, page);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     public void saveArticle(ArticleVo article) throws ExecutionException, InterruptedException {
         if (article.getId() != null &&
                 !article.getAuthorId().equals(Local.MANAGER_LOCAL.get().getId()) &&
                 !AuthorityUtils.hasAuthority("article-operation-to-others")
         ) throw new NoPermissionsException();
-
-        log.debug(article.toString());
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
-        //获取作者消息
         if (article.getId() == null) {
+            //获取作者消息
             entity.setAuthorId(authorId);
         }
         entity.setArticleStatus(article.getIsOverhead() ?
@@ -125,9 +162,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         entity.setArticleComment(article.getIsComment() ?
                 EntityConstant.ARTICLE_CAN_COMMENT : EntityConstant.ARTICLE_CAN_NOT_COMMENT);
         if (article.getId() == null) {
-            entity.setCreateTime(new Date().getTime());
+            entity.setCreateTime(System.currentTimeMillis());
         }
-        entity.setUpdateTime(new Date().getTime());
+        entity.setUpdateTime(System.currentTimeMillis());
         //保存文章
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             if (article.getId() == null) {
@@ -178,7 +215,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                     .eq("article_id", entity.getId()));
             if (relationEntityList.size() > 0)
                 relationService.saveBatch(relationEntityList);
-
         });
         f3.get();
     }
@@ -205,13 +241,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         if (entity.getId() != null) {
             //有id表示文章已经存在 这时要将文章状态转换为草稿状态 即未发布状态
             entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
-            entity.setUpdateTime(new Date().getTime());
+            entity.setUpdateTime(System.currentTimeMillis());
             baseMapper.updateById(entity);
         } else {
             //文章不存在创建文章
             entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
-            entity.setCreateTime(new Date().getTime());
-            entity.setUpdateTime(new Date().getTime());
+            entity.setCreateTime(System.currentTimeMillis());
+            entity.setUpdateTime(System.currentTimeMillis());
             //获取作者名称
             entity.setAuthorId(Local.MANAGER_LOCAL.get().getId());
             baseMapper.insert(entity);
@@ -219,7 +255,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     public void deleteArticle(List<Long> articleId) {
         relationService.removeRelationByArticleIds(articleId);
         baseMapper.deleteBatchIds(articleId);
@@ -261,13 +297,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         //所有文章
         List<ArticleEntity> articleList = new LinkedList<>(baseMapper.getAllArticleTitleAndCategoryId());
         //设置文章欢迎度
-        Object[][] articlePopular = new Object[articleList.size()+1][4];
+        Object[][] articlePopular = new Object[articleList.size() + 1][4];
         for (int i = 0; i < articleList.size(); i++) {
             ArticleEntity entity = articleList.get(i);
-            articlePopular[i+1][0] = entity.getTitle();
-            articlePopular[i+1][1] = entity.getLikeNum();
-            articlePopular[i+1][2] = entity.getCommentNum();
-            articlePopular[i+1][3] = entity.getVisitNum();
+            articlePopular[i + 1][0] = entity.getTitle();
+            articlePopular[i + 1][1] = entity.getLikeNum();
+            articlePopular[i + 1][2] = entity.getCommentNum();
+            articlePopular[i + 1][3] = entity.getVisitNum();
         }
         dashBoardVo.setArticlePopular(articlePopular);
         dashBoardVo.setArticleNum(articleList.size());
@@ -288,7 +324,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                     DashBoardVo.ArticleDistribution.Children children = new DashBoardVo.ArticleDistribution.Children();
                     children.setName(articleEntity.getTitle());
                     //默认是以点赞数为文章的权重 最少是一
-                    children.setValue(articleEntity.getLikeNum()==0?1:Math.toIntExact(articleEntity.getLikeNum()));
+                    children.setValue(articleEntity.getLikeNum() == 0 ? 1 : Math.toIntExact(articleEntity.getLikeNum()));
                     childrenList.add(children);
                     articleList.remove(articleEntity);
                 }
@@ -303,6 +339,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Override
     public void addCommentNum(Long articleId) {
         baseMapper.addCommentNum(articleId);
+    }
+
+    @Override
+    public void updateArticleStatus(Long id, Integer articleStatus) {
+        baseMapper.updateArticleStatus(id,articleStatus);
     }
 
 

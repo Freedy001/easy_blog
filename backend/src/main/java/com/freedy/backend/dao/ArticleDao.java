@@ -71,4 +71,9 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 增加评论数量
      */
     void addCommentNum(@Param("articleId") Long articleId);
+
+    /**
+     * 修改状态
+     */
+    void updateArticleStatus(@Param("id") Long id, @Param("articleStatus") Integer articleStatus);
 }

@@ -1,6 +1,6 @@
 package com.freedy.backend.apiFront;
 
-import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.MarkDown;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.utils.Result;
@@ -10,8 +10,10 @@ import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import com.freedy.backend.service.ArticleService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,8 +39,7 @@ public class FrontArticleController {
 
     @ApiOperation("列出前台所有文章")
     @GetMapping("/list")
-    @Cacheable(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,sync = true)
-    public Result getArticleList(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
+    public Result getArticleList(@RequestParam Map<String, Object> params) throws Exception {
         PageUtils page=articleService.getFrontArticleList(params);
         return Result.ok().setData(page);
     }
@@ -53,7 +54,13 @@ public class FrontArticleController {
         ArticleEsModel esModel = optional.get();
         String html = MarkDown.render(esModel.getContent());
         esModel.setContent(html);
-        return  Result.ok().setData(esModel);
+        HashMap<Object, Object> model = Arrays.stream(BeanUtils.getPropertyDescriptors(esModel.getClass()))
+                .filter(itm -> !"class".equals(itm.getName()))
+                .collect(HashMap::new,
+                        (map, pd) -> map.put(pd.getName(), ReflectionUtils.invokeMethod(pd.getReadMethod(), esModel)),
+                        HashMap::putAll);
+        model.put("publishTime",DateUtils.formatChineseDate(esModel.getPublishTime()));
+        return  Result.ok().setData(model);
     }
 
 }

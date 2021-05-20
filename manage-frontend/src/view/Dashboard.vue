@@ -2,11 +2,17 @@
 	<div class="root">
 		<div class="card-row first">
 			<el-card class="box-card" shadow="hover">
-				<h1>文章</h1>
+				<div class="title">
+					<h1>文章</h1>
+					<img :src="plus" alt="" @click="$router.push('/index/article')">
+				</div>
 				<span>{{ analyzeData.articleNum }}</span>
 			</el-card>
 			<el-card class="box-card" shadow="hover">
+				<div class="title">
 				<h1>评论</h1>
+					<img :src="answerLogo" alt="" @click="$router.push('/index/comment')">
+				</div>
 				<span>{{ analyzeData.commentNum }}</span>
 			</el-card>
 			<el-card class="box-card" shadow="hover">
@@ -57,8 +63,12 @@
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
+import answerLogo from '../assets/answer.svg'
+import plus from '../assets/plus.svg'
+
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {get, post} from "../http";
+import {ElMessage} from "element-plus";
 const {proxy}:any = getCurrentInstance();
 let shotHand = ref('')
 let isLoading = ref(false)
@@ -120,7 +130,7 @@ onMounted(() => {
 	});
 	getOperation();
 })
-
+let flag=true
 function articleDistribute() {
 	let chartDom: any = document.getElementById('articleDistribute');
 	let myChart = echarts.init(chartDom);
@@ -129,7 +139,7 @@ function articleDistribute() {
 		title: {
 			text: "文章分布",
 			textStyle: {
-				fontSize: 35,
+				fontSize: 30,
 				color: '#4b4b4b'
 			}
 		},
@@ -143,14 +153,8 @@ function articleDistribute() {
 			},
 			data: data,
 			radius: [0, '90%'],
-			// label: {
-			// 	rotate: 'radial',
-			// 	normal:{
-			// 		position:'inner'
-			// 	},
-			// },
 			levels: [{}, {
-				r0: 0,
+				r0: 30,
 				r: 130,
 			},  {
 				r0: 160,
@@ -171,6 +175,21 @@ function articleDistribute() {
 			}
 		}
 	};
+	myChart.on('click', function (params) {
+		if (params.treePathInfo.length==3&&flag){
+			ElMessage({
+				dangerouslyUseHTMLString: true,
+				showClose:true,
+				duration:2000,
+				message: `
+<div>
+	<strong>去 ${params.treePathInfo[2].name} 看看？</strong>
+	<a href="/#/article?articleName=${params.treePathInfo[2].name}" style="color: #3a9ff5;text-decoration: none">go</a>
+</div>`
+			});
+			console.log(params.treePathInfo[2])
+		}
+	});
 	myChart.setOption(option);
 }
 
@@ -190,7 +209,11 @@ function articlePopular() {
 
 	let option = {
 		title: {
-			text: '某地区蒸发量和降水量'
+			text: "欢迎度",
+			textStyle: {
+				fontSize: 30,
+				color: '#4b4b4b'
+			}
 		},
 		tooltip: {
 			trigger: 'axis'
@@ -291,11 +314,24 @@ function visitor() {
 	}
 	option = {
 		title: {
-			text: "过去七天的访客"
+			text: "过去七天的访客",
+			textStyle: {
+				fontSize: 30,
+				color: '#4b4b4b'
+			}
 		},
 		tooltip: {
 			trigger: 'axis',
 			formatter: '访客数:{c0}个'
+		},
+		toolbox: {
+			show: true,
+			feature: {
+				dataView: {show: true, readOnly: false},
+				magicType: {show: true, type: ['line', 'bar']},
+				restore: {show: true},
+				saveAsImage: {show: true}
+			}
 		},
 		xAxis: {
 			type: 'category',
@@ -328,13 +364,21 @@ function visitor() {
 .card-row.first {
 	.box-card {
 		width: 22%;
-
 		h1 {
 			font-weight: lighter;
 			font-size: 20px;
 			margin-bottom: 20px;
 		}
+		.title{
+			display: flex;
+			justify-content: space-between;
 
+			img {
+				width: 20px;
+				height: 20px;
+				cursor: pointer;
+			}
+		}
 		span {
 			font-weight: bold;
 			font-size: 25px;
@@ -350,7 +394,14 @@ function visitor() {
 	}
 
 	.textarea {
-		height: 400px;
+		height: 415px;
+		resize:none;
+		:deep(.el-textarea){
+			margin-top: 15px;
+		}
+		:deep(.el-textarea__inner){
+			resize: none;
+		}
 
 		div {
 			font-size: 18px;

@@ -55,14 +55,20 @@ async function getIndexSetting() {
 		store.commit('setIndexSetting',data)
 	}
 }
-//没5s 发送一次心跳让服务器知道此用户在线
+//每5s 发送一次心跳让服务器知道此用户在线
 function heartBeat() {
 	setInterval(async()=>{
 		const sys = await get('/sys/heartbeat');
-		if (sys.code==205){
-			//重新加载设置
-			getIndexSetting().then();
-		}
+		const split = sys.code.split(',');
+		split.forEach((item: any)=>{
+			if (sys.code == 205) {
+				//重新加载设置
+				getIndexSetting().then();
+			}
+			if (sys.code == 206) {
+				store.commit('notifyReloadArticle')
+			}
+		})
 	},5000)
 }
 </script>
