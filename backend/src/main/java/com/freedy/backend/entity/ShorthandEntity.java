@@ -1,5 +1,7 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
@@ -12,6 +14,7 @@ import lombok.Data;
 @ApiModel("Setting实体类")
 @TableName("blog_shorthand")
 public class ShorthandEntity {
+    @TableId(type = IdType.AUTO)
     private Long id;
     private String content;
     private Long createTime;

@@ -29,6 +29,7 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogDao, Operat
         List<OperationVo> operationVoList = page.getRecords().stream().map(item -> {
             OperationVo operationVo = new OperationVo();
             BeanUtils.copyProperties(item, operationVo);
+            operationVo.setId(item.getId().toString());
             operationVo.setOperationStatus(item.getIsSuccess() == null ? "失败" : item.getIsSuccess() == 0 ? "成功" : "失败");
             operationVo.setCreatTime(DateUtils.formatRelevantTime(item.getCreatTime()));
             return operationVo;

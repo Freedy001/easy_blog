@@ -1,5 +1,6 @@
 package com.freedy.backend.utils;
 
+import com.vladsch.flexmark.ast.Text;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.emoji.EmojiExtension;
 import com.vladsch.flexmark.ext.emoji.EmojiImageType;
@@ -10,8 +11,13 @@ import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Arrays;
 
 /**
@@ -19,9 +25,10 @@ import java.util.Arrays;
  * @date 2021/5/11 11:16
  */
 public class MarkDown {
-    private static final MutableDataSet options;
+    private static final MutableDataSet OPTIONS;
+
     static {
-        options=new MutableDataSet().set(Parser.EXTENSIONS, Arrays.asList(
+        OPTIONS = new MutableDataSet().set(Parser.EXTENSIONS, Arrays.asList(
                 AutolinkExtension.create(),
                 EmojiExtension.create(),
                 StrikethroughExtension.create(),
@@ -44,14 +51,20 @@ public class MarkDown {
                 .set(EmojiExtension.USE_IMAGE_TYPE, EmojiImageType.IMAGE_ONLY);
         // other options
     }
-
-
-
     public static String render(String markdownText) {
-        Parser parser = Parser.builder(options).build();
-        HtmlRenderer renderer = HtmlRenderer.builder(options).build();
+        Parser parser = Parser.builder(OPTIONS).build();
+        HtmlRenderer renderer = HtmlRenderer.builder(OPTIONS).build();
         // You can re-use parser and renderer instances
         Node document = parser.parse(markdownText);
         return renderer.render(document);
     }
+
+
+    public static Integer countWords(String text){
+       return text.replaceAll("[`\r\n~·!@#$%^&*()\\t_+=-\\[\\]{}\\\\|;:'\",./<>?，。、《》？；‘：“【】！￥…（）—\\-=]", " ")
+        .replaceAll("\\w+", "#").replaceAll(" +", "").length();
+    }
+
+
+
 }

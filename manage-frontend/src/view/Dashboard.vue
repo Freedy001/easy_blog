@@ -39,19 +39,21 @@
 			<el-card class="box-card" shadow="hover">
 				<h1>操作记录</h1>
 				<div class="operation-log">
-					<div class="operation-item" v-for="log in operationLog">
-						<div class="operation-name">
-							<div class="info"><span>{{ log.operationName }}</span></div>
-							<span class="time">{{ log.creatTime }}</span>
-						</div>
-						<div class="operator">
-							<div class="info">
-								<div class="dot" :style="{'background-color':log.operationStatus=='成功'?'#4fc719':'#ff3232'}"></div>
-								<span :style="{'color':log.operationStatus=='成功'?'#4fc719':'#ff3232'}">{{ log.operationStatus }}</span>
+					<transition-group name="el-fade-in-linear">
+						<div class="operation-item" v-for="log in operationLog" :key="log.id">
+							<div class="operation-name">
+								<div class="info"><span>{{ log.operationName }}</span></div>
+								<span class="time">{{ log.creatTime }}</span>
 							</div>
-							<span>{{ log.operator }}</span>
+							<div class="operator">
+								<div class="info">
+									<div class="dot" :style="{'background-color':log.operationStatus=='成功'?'#4fc719':'#ff3232'}"></div>
+									<span :style="{'color':log.operationStatus==='成功'?'#4fc719':'#ff3232'}">{{ log.operationStatus }}</span>
+								</div>
+								<span>{{ log.operator }}</span>
+							</div>
 						</div>
-					</div>
+					</transition-group>
 				</div>
 			</el-card>
 		</div>
@@ -65,7 +67,6 @@
 import * as echarts from 'echarts'
 import answerLogo from '../assets/answer.svg'
 import plus from '../assets/plus.svg'
-
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {get, post} from "../http";
 import {ElMessage} from "element-plus";
@@ -100,14 +101,13 @@ async function publish() {
 }
 
 
-let operationLog = reactive<Array<any>>([]);
+let operationLog =ref([]);
 
 //获取操作日志
 async function getOperation() {
 	const response = await get('/operationLog/getOperationLog?page=1&limit=20&sidx=creat_time&order=desc');
 	if (response.code == 200) {
-		const list: [any] = response.data.list;
-		list.forEach(value => operationLog.push(value))
+		operationLog.value=response.data.list;
 	}
 }
 
@@ -128,7 +128,10 @@ onMounted(() => {
 		articlePopular();
 		visitor();
 	});
-	getOperation();
+	getOperation().then();
+	setInterval(()=>{
+		getOperation().then();
+	},5000)
 })
 let flag=true
 function articleDistribute() {

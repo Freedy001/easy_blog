@@ -11,9 +11,17 @@
 					<span class="author">{{ article.authorName }}</span>
 				</div>
 				<div class="info">
-					<span class="item">时间: {{article.publishTime==null?0:article.publishTime}}</span>
-					<span class="item">字数:{{article.wordNum==null?0:article.wordNum}}</span>
-					<span class="item">喜欢数:{{article.likeNum==null?0:article.likeNum}}</span>
+					<span class="item">时间: {{ article.publishTime == null ? 0 : article.publishTime }}</span>
+					<span class="item">字数:{{ article.wordNum == null ? 0 : article.wordNum }}</span>
+					<span class="item">喜欢数:{{ article.likeNum == null ? 0 : article.likeNum }}</span>
+					<div :style="likeStyle" class="like" :class="{'bounce-top':showWave,'click':clickClass}">
+						<div class="before" :style="likeStyle"></div>
+						<div class="after" :style="likeStyle"></div>
+					</div>
+					<div :style="likeStyle" @click="like" @mouseenter="enterLike" @mouseleave="leaveLike" class="like">
+						<div class="before" :style="likeStyle"></div>
+						<div class="after" :style="likeStyle"></div>
+					</div>
 				</div>
 			</div>
 		</teleport>
@@ -46,6 +54,7 @@ import CommentList from '../components/CommentList.vue'
 import LoadMore from "../components/LoadMore.vue";
 import ToTop from "../components/ToTop.vue";
 import {ElMessage} from "element-plus";
+
 const route = useRoute();
 const router = useRouter();
 defineComponent({
@@ -54,11 +63,62 @@ defineComponent({
 	LoadMore,
 	ToTop
 })
-watch(()=>route.query.id,()=>{
+watch(() => route.query.id, () => {
 	loadArticle()
-	page=1
+	page = 1
 	getComments()
 })
+
+let likeStyle = reactive({
+	"background-color": "rgb(205,205,205)"
+})
+//红心波浪
+let showWave = ref(false)
+//点赞时触发
+let clickClass = ref(false)
+//点赞时触发 禁止鼠标移开导致的样式改变
+let enableLeave = true
+function enterLike() {
+	showWave.value = true
+	likeStyle["background-color"] = "tomato"
+}
+function leaveLike() {
+	if (enableLeave) {
+		showWave.value = false
+		likeStyle["background-color"] = "rgb(205,205,205)"
+	}
+}
+let timeout:any;
+async function like() {
+	if (timeout){
+		clearTimeout(timeout);
+		clickClass.value = false
+	}
+	if (route.query.id) {
+		const promise = await get(`/article/likeArticle?id=${route.query.id}`);
+		if (promise.code == 200) {
+			article.likeNum++;
+			localStorage.setItem(route.query.id + "", "like");
+			enableLeave = false
+			likeStyle["background-color"] = "tomato"
+			clickClass.value = true
+			showWave.value = true
+			timeout = setTimeout(() => {
+				clickClass.value = false
+			}, 2000);
+		}
+	}
+}
+onMounted(()=>{
+	if (localStorage.getItem(route.query.id + "")){
+		enableLeave = false
+		likeStyle["background-color"] = "tomato"
+		showWave.value = true
+	}
+})
+
+
+
 interface IArticle {
 	id: number | string,
 	title: string,
@@ -77,12 +137,12 @@ onMounted(async () => {
 	loadArticle().then()
 	getComments().then()
 })
-let hasMore=ref(true)
-let isShow=ref(false)
+let hasMore = ref(true)
+let isShow = ref(false)
 //滚动加载评论
-let doScroll:any = (srcElement: any) => {
+let doScroll: any = (srcElement: any) => {
 	const scroll: HTMLElement = srcElement.scrollingElement
-	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50)&&hasMore.value) {
+	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50) && hasMore.value) {
 		isShow.value = true
 		page++;
 		getComments().then(() => {
@@ -137,23 +197,23 @@ async function loadArticle() {
  * 清除样式 防止干扰其他页面
  */
 onBeforeRouteLeave((to, from, next) => {
-	setTimeout(()=>{
+	setTimeout(() => {
 		const cssLink: HTMLCollectionOf<Element> = document.getElementsByClassName("md-css");
 		const length = cssLink.length;
 		for (let i = 0; i < length; i++) {
 			cssLink[0].remove()
 		}
-	},300)
+	}, 300)
 	next();
 })
 
 interface ICommentItem {
 	id: string | number,
-	parentName:string|null
+	parentName: string | null
 	username: string,
 	content: string
 	creatTime: string,
-	child:Array<ICommentItem>
+	child: Array<ICommentItem>
 }
 
 let commentItem = reactive<Array<ICommentItem>>([])
@@ -169,8 +229,8 @@ async function getComments() {
 		const response = await get(`/comment/getList?articleId=${id}&page=${page}&limit=10`);
 		if (response.code == 200) {
 			const data: Array<ICommentItem> = response.data.list
-			if (data.length==0){
-				hasMore.value=false
+			if (data.length == 0) {
+				hasMore.value = false
 			}
 			data.forEach((value, index) => {
 				commentItem.push(value)
@@ -182,19 +242,19 @@ async function getComments() {
 /**
  * 评论成功的回调
  */
-async function commentCB(data:any) {
-		commentItem.length = 0
-		getComments().then(()=>{
-			const element: any = document.getElementById("CommentList")
-			window.scrollTo({
-				top: element.offsetTop,
-				behavior: "smooth"
-			});
-			ElMessage({
-				showClose: true,
-				message: '评论发布成功😎😎!'
-			});
-		})
+async function commentCB(data: any) {
+	commentItem.length = 0
+	getComments().then(() => {
+		const element: any = document.getElementById("CommentList")
+		window.scrollTo({
+			top: element.offsetTop,
+			behavior: "smooth"
+		});
+		ElMessage({
+			showClose: true,
+			message: '评论发布成功😎😎!'
+		});
+	})
 }
 </script>
 
@@ -202,6 +262,7 @@ async function commentCB(data:any) {
 .kenburns-top-right {
 	animation: kenburns-top-right 5s ease-out both;
 }
+
 @keyframes kenburns-top-right {
 	0% {
 		transform: scale(1) translate(0, 0);
@@ -212,9 +273,11 @@ async function commentCB(data:any) {
 		transform-origin: right top;
 	}
 }
-.slide-in-bck-top{
+
+.slide-in-bck-top {
 	animation: slide-in-bck-top 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
+
 @keyframes slide-in-bck-top {
 	0% {
 		transform: translateZ(700px) translateY(-300px);
@@ -230,10 +293,54 @@ async function commentCB(data:any) {
 	color: black;
 }
 
+.bounce-top {
+	animation: ping 1.5s ease-in-out infinite both;
+}
+
+@keyframes ping {
+	0% {
+		transform: scale(0.2) rotate(-45deg);
+		opacity: 0.8;
+	}
+	80% {
+		transform: scale(2.2) rotate(-45deg);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(3.2) rotate(-45deg);
+		opacity: 0;
+	}
+}
+
+.click {
+	cursor: none;
+	animation: clickLike 2s linear both;
+}
+
+@keyframes clickLike {
+	0% {
+		transform: scale(0.5) rotate(-45deg);
+		opacity: 1;
+	}
+	25% {
+		transform: translate(-50vw, 100px) scale(1) rotate(-45deg);
+		opacity: 1;
+	}
+	75% {
+		transform: translate(-50vw, 100px) scale(200) rotate(-45deg);
+		opacity: 0.5;
+	}
+	100% {
+		transform: translate(-50vw, 100px) scale(300) rotate(-45deg);
+		opacity: 0;
+	}
+}
+
 .markdown-body {
 	overflow: hidden;
 	padding-top: 400px;
 }
+
 .title {
 	width: 100%;
 	height: 360px;
@@ -289,8 +396,8 @@ async function commentCB(data:any) {
 	.info {
 		position: absolute;
 		width: 40vw;
-		left: 60vw;
-		top: 330px;
+		right: 30px;
+		top: 325px;
 		height: 30px;
 		z-index: 500;
 		display: flex;
@@ -301,7 +408,42 @@ async function commentCB(data:any) {
 		.item {
 			margin: 10px;
 		}
+
+		.like {
+			position: absolute;
+			margin-left: 5px;
+			margin-top: 3px;
+			right: -15px;
+			width: 12px;
+			height: 12px;
+			transform: rotate(-45deg);
+			cursor: pointer;
+			transition: all .3s ease;
+		}
+
+		.before {
+			content: "";
+			position: absolute;
+			top: -6px;
+			left: 0;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			transition: all .3s ease;
+		}
+
+		.after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 6px;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			transition: all .3s ease;
+		}
 	}
+
 }
 
 .comment-header {

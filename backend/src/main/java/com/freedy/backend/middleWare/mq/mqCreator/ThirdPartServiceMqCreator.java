@@ -12,19 +12,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThirdPartServiceMqCreator {
     @Bean
-    public Exchange EmailExchange() {
+    public Exchange emailExchange() {
         return new DirectExchange(RabbitConstant.THIRD_PART_EXCHANGE_NAME,
                 true, false);
     }
 
     @Bean
-    public Queue EmailQueue() {
+    public Queue emailQueue() {
         return new Queue(RabbitConstant.EMAIL_REPLAY_QUEUE_NAME,
                 true, false, false);
     }
 
     @Bean
-    public Binding EmailBinding() {
+    public Binding emailBinding() {
         return new Binding(RabbitConstant.EMAIL_REPLAY_QUEUE_NAME,
                 Binding.DestinationType.QUEUE,
                 RabbitConstant.THIRD_PART_EXCHANGE_NAME,
@@ -33,17 +33,32 @@ public class ThirdPartServiceMqCreator {
     }
 
     @Bean
-    public Queue IpQueue() {
+    public Queue ipQueue() {
         return new Queue(RabbitConstant.IP_REGION_QUEUE_NAME,
                 true, false, false);
     }
 
     @Bean
-    public Binding IpBinding() {
+    public Binding ipBinding() {
         return new Binding(RabbitConstant.IP_REGION_QUEUE_NAME,
                 Binding.DestinationType.QUEUE,
                 RabbitConstant.THIRD_PART_EXCHANGE_NAME,
                 RabbitConstant.IP_REGION_ROUTING_KEY,
+                null);
+    }
+
+    @Bean
+    public Queue articleLikeQueue() {
+        return new Queue(RabbitConstant.ARTICLE_LIKE_QUEUE_NAME,
+                true, false, false);
+    }
+
+    @Bean
+    public Binding articleLikeBinding() {
+        return new Binding(RabbitConstant.ARTICLE_LIKE_QUEUE_NAME,
+                Binding.DestinationType.QUEUE,
+                RabbitConstant.THIRD_PART_EXCHANGE_NAME,
+                RabbitConstant.ARTICLE_LIKE_ROUTING_KEY,
                 null);
     }
 }

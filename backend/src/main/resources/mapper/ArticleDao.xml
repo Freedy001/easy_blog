@@ -31,6 +31,7 @@
         <result property="visitNum" column="visit_num"/>
         <result property="commentNum" column="comment_num"/>
         <result property="likeNum" column="like_num"/>
+        <result property="wordNum" column="word_num"/>
         <result property="authorName" column="nickname"/>
         <result property="content" column="content"/>
         <result property="articlePoster" column="article_poster"/>
@@ -39,34 +40,16 @@
         </collection>
     </resultMap>
 
-    <sql id="joinCondition">
-        left join blog_category as category on article.article_category_id=category.id
-        left join blog_article_tag_relation relation on article.id = relation.article_id
-        left join blog_tag tag on tag.id = relation.tag_id
-        left join blog_manager manager on article.author_id=manager.id
-    </sql>
-
-    <sql id="selectColumns">
-        select article.id,
-               article.title,
-               article.article_status,
-               category.category_name,
-               article.article_desc,
-               article.comment_num,
-               article.visit_num,
-               article.like_num,
-               manager.nickname,
-               article.publish_time,
-               article.content,
-               tag.tag_name,
-               article.article_poster
-    </sql>
     <insert id="addCommentNum">
         update blog_article set comment_num=comment_num+1 where id=#{articleId}
     </insert>
 
     <update id="updateArticleStatus">
         update blog_db.blog_article set blog_db.blog_article.article_status = #{articleStatus} where id = #{id}
+    </update>
+    
+    <update id="likeArticle">
+        update blog_db.blog_article set like_num = like_num+1 where id=#{id}
     </update>
 
     <select id="queryArticleList"
@@ -77,7 +60,10 @@
         article.article_desc,article.comment_num,article.visit_num,article.like_num,
         manager.nickname,article.publish_time,article.update_time,article.article_poster,tag.tag_name
         from (select * from blog_article order by create_time desc limit #{key_offset},#{pageSize})as article
-        <include refid="joinCondition"></include>
+        left join blog_category as category on article.article_category_id=category.id
+        left join blog_article_tag_relation relation on article.id = relation.article_id
+        left join blog_tag tag on tag.id = relation.tag_id
+        left join blog_manager manager on article.author_id=manager.id
     </select>
 
     <select id="getCount" resultType="java.lang.Long">
@@ -91,7 +77,6 @@
         where author_id = #{authorId}
     </select>
 
-
     <select id="getTotalVisitNum" resultType="java.lang.Long">
         select sum(visit_num) from blog_db.blog_article
     </select>
@@ -103,16 +88,48 @@
     </select>
 
     <select id="getEsModel" resultMap="EsModelMap">
-        <include refid="selectColumns"/>
+        select article.id,
+               article.title,
+               article.article_status,
+               category.category_name,
+               article.article_desc,
+               article.comment_num,
+               article.visit_num,
+               article.like_num,
+               article.word_num,
+               manager.nickname,
+               article.publish_time,
+               article.content,
+               tag.tag_name,
+               article.article_poster
         from (select * from blog_article where id=#{id})as article
-        <include refid="joinCondition"/>
+        left join blog_category as category on article.article_category_id=category.id
+        left join blog_article_tag_relation relation on article.id = relation.article_id
+        left join blog_tag tag on tag.id = relation.tag_id
+        left join blog_manager manager on article.author_id=manager.id
     </select>
 
     <select id="getEsArticleList" resultMap="EsModelMap">
         <bind name="key_offset" value="(page-1)*limit"></bind>
-        <include refid="selectColumns"/>
+        select article.id,
+        article.title,
+        article.article_status,
+        category.category_name,
+        article.article_desc,
+        article.comment_num,
+        article.visit_num,
+        article.like_num,
+        article.word_num,
+        manager.nickname,
+        article.publish_time,
+        article.content,
+        tag.tag_name,
+        article.article_poster
         from (select * from blog_article limit #{key_offset},#{limit})as article
-        <include refid="joinCondition"/>
+        left join blog_category as category on article.article_category_id=category.id
+        left join blog_article_tag_relation relation on article.id = relation.article_id
+        left join blog_tag tag on tag.id = relation.tag_id
+        left join blog_manager manager on article.author_id=manager.id
     </select>
 
     <select id="getTitles" resultType="com.freedy.backend.entity.vo.comment.CommentAdminVo$Article">

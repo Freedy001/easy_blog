@@ -59,7 +59,7 @@ async function getIndexSetting() {
 function heartBeat() {
 	setInterval(async()=>{
 		const sys = await get('/sys/heartbeat');
-		const split = sys.code.split(',');
+		const split = (""+sys.code).split(',');
 		split.forEach((item: any)=>{
 			if (sys.code == 205) {
 				//重新加载设置

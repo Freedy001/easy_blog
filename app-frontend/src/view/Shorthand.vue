@@ -1,10 +1,11 @@
 <template>
 	<div class="root">
 		<div class="container">
-			<div class="item shorthand" @mouseenter="enter(i)" @mouseleave="leave(i)" v-for="(item,i) in 10">
-				<p>日复一日，何时结束！</p>
+			<div class="item shorthand" @mouseenter="enter(i)" @mouseleave="leave(i)" v-for="(item,i) in dataList">
+				<p>{{item.content}}</p>
+				<p>{{item.managerId}}</p>
 				<div class="time">
-					<span>1 months ago</span>
+					<span>{{item.createTime}}</span>
 				</div>
 			</div>
 		</div>
@@ -13,13 +14,26 @@
 
 <script setup lang="ts">
 
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, ref} from "vue";
+import {get} from "../http";
+
+onMounted(()=>{
+	getShortHand()
+})
+let dataList=ref();
+async function getShortHand() {
+	const response = await get('/shorthand/list');
+	if (response.code==200){
+		dataList.value=response.data.list
+	}
+}
+
+//下面都是样式
 let scale=reactive<any>({})
 const ele:any = document.getElementsByClassName("shorthand");
 function enter(index:number) {
 	ele[index].style.transform="scale(1.03)"
 }
-
 function leave(index:number) {
 	ele[index].style.transform="scale(1)"
 }

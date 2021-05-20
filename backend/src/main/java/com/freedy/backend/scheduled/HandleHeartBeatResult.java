@@ -35,7 +35,7 @@ public class HandleHeartBeatResult {
      * 每10分钟统计一次信息
      */
     @Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
-    private void Handle() {
+    private void handle() {
         Set<String> keys = redisTemplate.keys(RedisConstant.USER_IP_HEADER + "*");
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         if (keys != null && keys.size() != 0) {

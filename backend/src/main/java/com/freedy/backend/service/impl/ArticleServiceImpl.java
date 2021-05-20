@@ -165,6 +165,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             entity.setCreateTime(System.currentTimeMillis());
         }
         entity.setUpdateTime(System.currentTimeMillis());
+        //设置文章字数
+        entity.setWordNum(Long.valueOf(MarkDown.countWords(entity.getContent())));
         //保存文章
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             if (article.getId() == null) {
@@ -183,40 +185,36 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         }, executor);
         //创建用户新建的标签
         List<TagEntity> newTags = new ArrayList<>();
-        CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> {
-            List<String> notExistedTag = article.getNotExistedTag();
-            if (notExistedTag.size() > 0) {
-                notExistedTag.forEach(item -> {
-                    TagEntity tagEntity = new TagEntity();
-                    tagEntity.setTagName(item);
-                    tagEntity.setPriority(EntityConstant.PRIORITY_NORMAL);
-                    tagEntity.setCreatorId(authorId);
-                    newTags.add(tagEntity);
-                });
-                tagService.createTagsByName(newTags);
-            }
-        }, executor);
+        List<String> notExistedTag = article.getNotExistedTag();
+        if (notExistedTag.size() > 0) {
+            notExistedTag.forEach(item -> {
+                TagEntity tagEntity = new TagEntity();
+                tagEntity.setTagName(item);
+                tagEntity.setPriority(EntityConstant.PRIORITY_NORMAL);
+                tagEntity.setCreatorId(authorId);
+                newTags.add(tagEntity);
+            });
+            tagService.createTagsByName(newTags);
+        }
         //创建标签与文章的关系
-        CompletableFuture<Void> f3 = CompletableFuture.allOf(f1, f2).thenRun(() -> {
-            List<ArticleTagRelationEntity> relationEntityList = new ArrayList<>();
-            newTags.forEach(item -> {
-                ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
-                relationEntity.setTagId(item.getId());
-                relationEntity.setArticleId(entity.getId());
-                relationEntityList.add(relationEntity);
-            });
-            article.getExistedTags().forEach(item -> {
-                ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
-                relationEntity.setTagId(item);
-                relationEntity.setArticleId(entity.getId());
-                relationEntityList.add(relationEntity);
-            });
-            relationService.remove(new QueryWrapper<ArticleTagRelationEntity>()
-                    .eq("article_id", entity.getId()));
-            if (relationEntityList.size() > 0)
-                relationService.saveBatch(relationEntityList);
+        List<ArticleTagRelationEntity> relationEntityList = new ArrayList<>();
+        newTags.forEach(item -> {
+            ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
+            relationEntity.setTagId(item.getId());
+            relationEntity.setArticleId(entity.getId());
+            relationEntityList.add(relationEntity);
         });
-        f3.get();
+        f1.get();
+        article.getExistedTags().forEach(item -> {
+            ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
+            relationEntity.setTagId(item);
+            relationEntity.setArticleId(entity.getId());
+            relationEntityList.add(relationEntity);
+        });
+        relationService.remove(new QueryWrapper<ArticleTagRelationEntity>()
+                .eq("article_id", entity.getId()));
+        if (relationEntityList.size() > 0)
+            relationService.saveBatch(relationEntityList);
     }
 
     @Override
@@ -343,7 +341,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
 
     @Override
     public void updateArticleStatus(Long id, Integer articleStatus) {
-        baseMapper.updateArticleStatus(id,articleStatus);
+        baseMapper.updateArticleStatus(id, articleStatus);
+    }
+
+    @Override
+    public void likeArticle(Long id) {
+        baseMapper.likeArticle(id);
     }
 
 

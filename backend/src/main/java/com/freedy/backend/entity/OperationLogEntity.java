@@ -1,5 +1,7 @@
 package com.freedy.backend.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,6 +16,7 @@ import lombok.Data;
 @TableName("blog_operation_log")
 public class OperationLogEntity {
     @ApiModelProperty("id")
+    @TableId(type = IdType.AUTO)
     private Long id;
     @ApiModelProperty("操作名称")
     private String operationName;

@@ -32,12 +32,12 @@ public class ArticleSynchronize {
      */
     //todo 修改corn表达式
     //@Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
-    //@Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     public void synchronizeArticleEveryThreeClock(){
         log.info("开始检查ES与数据库中文章的数据!");
         int count = articleService.count();
-        for (int i = 0; i < count/10+1; i++) {
-            List<ArticleEsModel> ids=articleService.getEsArticleList(i+1,10);
+        for (int i = 0; i < count/100+1; i++) {
+            List<ArticleEsModel> ids=articleService.getEsArticleList(i+1,100);
             ids.forEach(item->{
                 Optional<ArticleEsModel> optional = articleRepository.findById(item.getId());
                 if (optional.isPresent()){

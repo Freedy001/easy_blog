@@ -1,5 +1,6 @@
 package com.freedy.backend.apiFront;
 
+import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.MarkDown;
 import com.freedy.backend.utils.PageUtils;
@@ -10,6 +11,7 @@ import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import com.freedy.backend.service.ArticleService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -36,6 +39,9 @@ public class FrontArticleController {
 
     @Autowired
     private ArticleRepository repository;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @ApiOperation("列出前台所有文章")
     @GetMapping("/list")
@@ -61,6 +67,13 @@ public class FrontArticleController {
                         HashMap::putAll);
         model.put("publishTime",DateUtils.formatChineseDate(esModel.getPublishTime()));
         return  Result.ok().setData(model);
+    }
+
+    @ApiOperation("给文章点赞")
+    @GetMapping("/likeArticle")
+    public Result likeArticle(@RequestParam Long id){
+        rabbitTemplate.convertAndSend(RabbitConstant.THIRD_PART_EXCHANGE_NAME,RabbitConstant.ARTICLE_LIKE_ROUTING_KEY, id);
+        return Result.ok();
     }
 
 }

@@ -12,6 +12,8 @@ import lombok.Data;
 @Data
 @ApiModel("操作日志实体类")
 public class OperationVo {
+    @ApiModelProperty("id")
+    private String id;
     @ApiModelProperty("操作名称")
     private String operationName;
     @ApiModelProperty("操作者")

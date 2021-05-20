@@ -76,4 +76,10 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 修改状态
      */
     void updateArticleStatus(@Param("id") Long id, @Param("articleStatus") Integer articleStatus);
+
+    /**
+     * 给指定文章点赞
+     * @param id 文章id
+     */
+    void likeArticle(Long id);
 }

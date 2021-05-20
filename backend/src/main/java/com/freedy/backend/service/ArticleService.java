@@ -95,5 +95,10 @@ public interface ArticleService extends IService<ArticleEntity> {
      */
     void updateArticleStatus(Long id, Integer articleStatus);
 
+    /**
+     * 给指定文章点赞
+     * @param id 文章id
+     */
+    void likeArticle(Long id);
 }
 

@@ -57,7 +57,7 @@ public class FrontSysController {
         return Result.ok();
     }
 
-    @ApiOperation("获取首页文章")
+    @ApiOperation("获取首页设置")
     @GetMapping("/getIndexSetting")
     public Result getIndexSetting() {
         CommonSettingVo settingVo = new CommonSettingVo();
@@ -95,6 +95,11 @@ public class FrontSysController {
             List<String> notifyList = keys.stream().map(ops::get).collect(Collectors.toList());
             return Result.goNotify(notifyList);
         }
+        return Result.ok();
+    }
+
+    @GetMapping("/")
+    public Result test(){
         return Result.ok();
     }
 

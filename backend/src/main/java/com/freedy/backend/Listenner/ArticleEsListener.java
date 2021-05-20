@@ -11,6 +11,11 @@ import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import com.freedy.backend.service.ArticleService;
 import lombok.extern.slf4j.Slf4j;
 import com.rabbitmq.client.Channel;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +48,8 @@ public class ArticleEsListener {
     private ArticleService articleService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RestHighLevelClient highLevelClient;
 
     @RabbitListener(queues = RabbitConstant.ES_QUEUE_NAME)
     public void handle(EsTypeDto entity, Message message, Channel channel) throws IOException {
@@ -109,6 +117,35 @@ public class ArticleEsListener {
             e.printStackTrace();
         }
     }
+
+    @RabbitListener(queues = ARTICLE_LIKE_QUEUE_NAME)
+    public void handleLike(Message message, Channel channel) throws Exception{
+        try {
+            Long id = Long.parseLong(new String(message.getBody()));
+            articleService.likeArticle(id);
+            GetRequest getRequest = new GetRequest();
+            getRequest.index("article");
+            getRequest.id(String.valueOf(id));
+            getRequest.fetchSourceContext(new FetchSourceContext(true, new String[]{"likeNum"}, null));
+            //查询出文章点赞数
+            Map<String, Object> likeNumMap = highLevelClient.get(getRequest, RequestOptions.DEFAULT).getSourceAsMap();
+            Integer likeNum = (Integer) likeNumMap.get("likeNum");
+            likeNumMap.put("likeNum",likeNum+1);
+            UpdateRequest request = new UpdateRequest();
+            request.index("article");
+            request.id(String.valueOf(id));
+            request.doc(likeNumMap);
+            // 更新文章点赞数
+            highLevelClient.update(request,RequestOptions.DEFAULT);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
+            e.printStackTrace();
+        }
+
+    }
+
+
 
 
 }
