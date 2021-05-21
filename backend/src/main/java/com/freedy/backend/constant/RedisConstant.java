@@ -9,4 +9,7 @@ public class RedisConstant {
     public static final String USER_IP_HEADER="heartbeat:";
     //通知
     public static final String NOTIFY_HEADER="notify";
+    //订阅
+    public static final String SUBSCRIBE_HEADER="subscriber-varietyCode:";
+
 }

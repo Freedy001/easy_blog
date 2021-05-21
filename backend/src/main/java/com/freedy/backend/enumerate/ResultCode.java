@@ -41,7 +41,9 @@ public enum ResultCode {
     NO_ARTICLE(3002, "没有找到文章"),
     NO_ID(3003, "没有id参数"),
     ARGUMENT_ERROR(3004, "参数不正确"),
-    OUT_OF_LIMIT(3005, "字数超出限制");
+    OUT_OF_LIMIT(3005, "字数超出限制"),
+    VERIFY_ERROR(3006, "邮箱认证失败"),
+    EMAIL_ALREADY_EXIST(3007, "邮箱已经存在");
 
     private final Integer code;
     private final String message;

@@ -55,6 +55,7 @@ import CommentList from '../components/CommentList.vue'
 import UserInfo from '../components/UserInfo.vue'
 import LoadMore from "../components/LoadMore.vue";
 import ToTop from "../components/ToTop.vue";
+// import 'highlight.js/styles/androidstudio.css'
 import {ElMessage} from "element-plus";
 const route = useRoute();
 const router = useRouter();
@@ -70,7 +71,54 @@ watch(() => route.query.id, () => {
 	page = 1
 	getComments()
 })
-let userInfo=reactive({})
+onMounted(()=>{
+	let AutocJs = require('autocjs');
+
+// 创建 Outline 实例
+	let navigation = new AutocJs({
+		// 文章正文 DOM 节点的 ID 选择器
+		article: '#article',
+		// 要收集的标题选择器
+		selector: 'h1,h2,h3,h4,h5,h6',
+		// 侧边栏导航的标题
+		title: '文章导读',
+		// 文章导读导航的位置
+		// outside - 以侧边栏菜单形式显示（默认值）
+		// inside - 在文章正文一开始的地方显示
+		position: 'outside',
+		// 标题图标链接的 URL 地址
+		// （默认）没有设置定制，点击链接页面滚动到标题位置
+		// 设置了链接地址，则不会滚动定位
+		anchorURL: '',
+		// 链接的显示位置
+		// front - 在标题最前面（默认值）
+		// back - 在标题后面
+		anchorAt: 'front',
+		// 是否生成文章导读导航
+		isGenerateOutline: true,
+		// 是否在文章导读导航中显示段落章节编号
+		isGenerateOutlineChapterCode: true,
+		// 是否在正文的文章标题中显示段落章节编号
+		isGenerateHeadingChapterCode: false,
+		// 是否在正文的文章标题中创建锚点
+		isGenerateHeadingAnchor: true
+	});
+
+// 可以在创建导航后，重置配置信息，重新生成新的导航
+	navigation.reload({
+		// 调整位直接在文章内生成导航
+		position: 'outside',
+		// 并且在文章标题前显示段落的章节层次索引值
+		isGenerateHeadingChapterCode: true
+	})
+
+})
+
+
+
+
+
+let userInfo=reactive<any>({})
 function handleUserInfo(name:any,event:any){
 	userInfo.nickname=name;
 	userInfo.x=event.clientX
@@ -139,7 +187,7 @@ interface IArticle {
 	"likeNum": string,
 }
 
-let article = reactive<IArticle>({})
+let article = reactive<IArticle|any>({})
 onMounted(async () => {
 	loadStyle()
 	loadArticle().then()
@@ -297,10 +345,6 @@ async function commentCB(data: any) {
 	}
 }
 
-::v-global(.markdown-body .hljs) {
-	color: black;
-}
-
 .bounce-top {
 	animation: ping 1.5s ease-in-out infinite both;
 }
@@ -342,6 +386,10 @@ async function commentCB(data: any) {
 		transform: translate(-50vw, 100px) scale(300) rotate(-45deg);
 		opacity: 0;
 	}
+}
+
+::v-global(.markdown-body .hljs) {
+	color: black;
 }
 
 .markdown-body {

@@ -3,3 +3,5 @@ export function copyProperties(source:any,dest:any) {
         dest[key]=source[key];
     })
 }
+
+

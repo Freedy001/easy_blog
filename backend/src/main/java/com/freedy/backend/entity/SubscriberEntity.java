@@ -1,6 +1,7 @@
 package com.freedy.backend.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -22,4 +23,8 @@ public class SubscriberEntity {
     private String subscriberEmail;
     @ApiModelProperty("创建时间")
     private Long createTime;
+
+    //uuid唯一标识
+    @TableField(exist = false)
+    private String UUID;
 }

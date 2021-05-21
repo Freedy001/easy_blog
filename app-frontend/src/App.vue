@@ -183,7 +183,7 @@ function heartBeat() {
 	&::-webkit-scrollbar {
 		/*滚动条整体样式*/
 		width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
-		height: 1px;
+		height: 0;
 	}
 
 	&::-webkit-scrollbar-thumb {
