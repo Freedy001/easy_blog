@@ -8,7 +8,7 @@
 				</div>
 				<div class="content">
 					<span class="block">{{ article.title }}</span>
-					<span class="author">{{ article.authorName }}</span>
+					<span class="author" @click="handleUserInfo(article.authorName,$event)">{{ article.authorName }}</span>
 				</div>
 				<div class="info">
 					<span class="item">时间: {{ article.publishTime == null ? 0 : article.publishTime }}</span>
@@ -40,6 +40,7 @@
 			<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
 		</div>
 		<ToTop @scroll="doScroll"></ToTop>
+		<UserInfo :startX="userInfo.x" :stratY="userInfo.y" :nickname="userInfo.nickname"></UserInfo>
 	</div>
 </template>
 
@@ -51,24 +52,32 @@ import {get, loadResource} from "../http";
 import hljs from 'highlight.js';
 import Comment from '../components/Comment.vue'
 import CommentList from '../components/CommentList.vue'
+import UserInfo from '../components/UserInfo.vue'
 import LoadMore from "../components/LoadMore.vue";
 import ToTop from "../components/ToTop.vue";
 import {ElMessage} from "element-plus";
-
 const route = useRoute();
 const router = useRouter();
 defineComponent({
 	Comment,
 	CommentList,
 	LoadMore,
-	ToTop
+	ToTop,
+	UserInfo
 })
 watch(() => route.query.id, () => {
 	loadArticle()
 	page = 1
 	getComments()
 })
+let userInfo=reactive({})
+function handleUserInfo(name:any,event:any){
+	userInfo.nickname=name;
+	userInfo.x=event.clientX
+	userInfo.y=event.clientY
+}
 
+//以下是喜欢样式
 let likeStyle = reactive({
 	"background-color": "rgb(205,205,205)"
 })
@@ -116,7 +125,6 @@ onMounted(()=>{
 		showWave.value = true
 	}
 })
-
 
 
 interface IArticle {
@@ -314,7 +322,7 @@ async function commentCB(data: any) {
 
 .click {
 	cursor: none;
-	animation: clickLike 2s linear both;
+	animation: clickLike 1.5s linear both;
 }
 
 @keyframes clickLike {
@@ -390,6 +398,12 @@ async function commentCB(data: any) {
 			font-family: "Open Sans", sans-serif;
 			font-weight: 700;
 			margin-top: 50px;
+			&:hover{
+				cursor: pointer;
+				text-decoration-line: underline;
+				text-decoration-color: #3a9ff5;
+				color: #0b9aff;
+			}
 		}
 	}
 

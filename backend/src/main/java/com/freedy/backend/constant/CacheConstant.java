@@ -6,9 +6,11 @@ package com.freedy.backend.constant;
  */
 public class CacheConstant {
     //缓存前缀
-    private static final String PREFIX="EASY-BLOG:";
+    private static final String PREFIX="EASY-BLOG-CACHE:";
     //文章缓存名
     public static final String ARTICLE_CACHE_NAME=PREFIX+"article";
     //评论缓存名
     public static final String COMMENT_CACHE_NAME=PREFIX+"comment";
+    //评论缓存名
+    public static final String OPERATION_CACHE_NAME=PREFIX+"operation";
 }

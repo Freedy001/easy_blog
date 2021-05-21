@@ -133,7 +133,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
 
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     public void createOrUpdateManager(NewUserVo manager) throws ExecutionException, InterruptedException {
         if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
             //没有管理用户权限的的 权限

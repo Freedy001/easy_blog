@@ -26,7 +26,6 @@ import {ref} from "vue";
 let email=ref()
 
 async function subscribe() {
-	console.log('11111')
 	// const response = get('');
 }
 </script>

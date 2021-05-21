@@ -690,6 +690,7 @@ async function userDelete(id:number) {
 
 		.box-card.left {
 			width: 49%;
+			height: 660px;
 			display: flex;
 			flex-direction: column;
 			justify-content: center;

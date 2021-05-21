@@ -8,11 +8,15 @@ import com.freedy.backend.dao.ShorthandDao;
 import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.entity.ShorthandEntity;
 import com.freedy.backend.entity.TagEntity;
+import com.freedy.backend.entity.vo.ShorthandItemVo;
 import com.freedy.backend.service.ShorthandService;
+import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.utils.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,11 +27,12 @@ import java.util.Map;
 public class ShorthandServiceImpl extends ServiceImpl<ShorthandDao, ShorthandEntity>  implements ShorthandService {
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        IPage<ShorthandEntity> page = this.page(
-                new Query<ShorthandEntity>().getPage(params),
-                new QueryWrapper<ShorthandEntity>()
-        );
-        return new PageUtils(page);
+        PageUtils page = new PageUtils(params);
+        List<ShorthandItemVo> infos=baseMapper.getShorthandInfoList(page);
+        infos.forEach(item->item.setPublishTime(DateUtils.formatRelevantTime(item.getCreateTime())));
+        page.setList(infos);
+        page.setTotalCount(count());
+        return page;
     }
 
 }

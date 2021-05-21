@@ -74,7 +74,7 @@ class BackendApplicationTests {
 
     @Test
     public void test1() {
-        Set<String> keys = redisTemplate.keys("*");
+        Set<String> keys = redisTemplate.keys("EASY*");
         redisTemplate.delete(keys);
     }
 

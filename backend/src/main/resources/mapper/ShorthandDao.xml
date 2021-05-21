@@ -3,5 +3,9 @@
 
 <mapper namespace="com.freedy.backend.dao.ShorthandDao">
 
-
+    <select id="getShorthandInfoList" resultType="com.freedy.backend.entity.vo.ShorthandItemVo">
+        select s.*,m.nickname from blog_shorthand s
+        left join blog_manager m on s.manager_id=m.id
+        limit ${(currPage-1)*pageSize},#{pageSize}
+    </select>
 </mapper>

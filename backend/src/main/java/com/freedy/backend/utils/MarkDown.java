@@ -51,6 +51,12 @@ public class MarkDown {
                 .set(EmojiExtension.USE_IMAGE_TYPE, EmojiImageType.IMAGE_ONLY);
         // other options
     }
+
+    /**
+     * 将markdown文本渲染成html文本
+     * @param markdownText markdown文本
+     * @return html文本
+     */
     public static String render(String markdownText) {
         Parser parser = Parser.builder(OPTIONS).build();
         HtmlRenderer renderer = HtmlRenderer.builder(OPTIONS).build();
@@ -59,12 +65,14 @@ public class MarkDown {
         return renderer.render(document);
     }
 
-
+    /**
+     * 粗略统计输入文本的字数
+     * @param text 输入文本
+     * @return 字数
+     */
     public static Integer countWords(String text){
        return text.replaceAll("[`\r\n~·!@#$%^&*()\\t_+=-\\[\\]{}\\\\|;:'\",./<>?，。、《》？；‘：“【】！￥…（）—\\-=]", " ")
         .replaceAll("\\w+", "#").replaceAll(" +", "").length();
     }
-
-
 
 }

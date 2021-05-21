@@ -5,6 +5,7 @@ export default createStore({
     state: {
         indexSetting:{},
         notifyReloadArticle:0,
+        userCard:{}
     },
     mutations: {
         setIndexSetting(state,value){

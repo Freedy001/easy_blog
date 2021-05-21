@@ -3,8 +3,10 @@ package com.freedy.backend.api;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.entity.ShorthandEntity;
 import com.freedy.backend.enumerate.RecordEnum;
+import com.freedy.backend.exception.WordOutOfLimitException;
 import com.freedy.backend.service.ShorthandService;
 import com.freedy.backend.utils.Local;
+import com.freedy.backend.utils.MarkDown;
 import com.freedy.backend.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,8 @@ public class ShorthandController {
     @RecordLog(type = RecordEnum.SHORTHAND)
     @PostMapping("/publish")
     public Result publishShorthand(@RequestBody ShorthandEntity entity){
+        if (MarkDown.countWords(entity.getContent())>300)
+            throw new WordOutOfLimitException();
         entity.setManagerId(Local.MANAGER_LOCAL.get().getId());
         entity.setCreateTime(System.currentTimeMillis());
         service.save(entity);

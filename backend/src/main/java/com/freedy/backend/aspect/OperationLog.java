@@ -1,6 +1,7 @@
 package com.freedy.backend.aspect;
 
 import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.entity.OperationLogEntity;
 import com.freedy.backend.service.OperationLogService;
 import com.freedy.backend.utils.Local;
@@ -10,7 +11,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -42,12 +46,14 @@ public class OperationLog {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @Around("@annotation(com.freedy.backend.aspect.annotation.RecordLog)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         Object[] args = pjp.getArgs();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method targetMethod = signature.getMethod();
-        String methodName = targetMethod.getName();
         //这时候不能异步执行 否则会导致查不到操作id
         //构建操作日志实体类
         RecordLog recordLog = targetMethod.getDeclaredAnnotation(RecordLog.class);
@@ -60,14 +66,19 @@ public class OperationLog {
             if (StringUtils.hasText(recordLog.logMsg())){
                 logEntity.setOperationName(recordLog.logMsg());
             }else {
-                logEntity.setOperationName(autoGuess(methodName, args[0], pjp.getTarget()));
+                logEntity.setOperationName(autoGuess(targetMethod.getName(), args[0], pjp.getTarget()));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         logEntity.setOperationType(recordLog.type().name());
         try {
-            return pjp.proceed(args);
+            Object proceed = pjp.proceed(args);
+            //删除缓存
+            Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");
+            if (cacheKeys!=null&&cacheKeys.size()>0)
+                redisTemplate.delete(Objects.requireNonNull(cacheKeys));
+            return proceed;
         } catch (Throwable throwable) {
             logEntity.setIsSuccess(1);
             throw new RuntimeException(throwable);

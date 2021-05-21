@@ -28,6 +28,7 @@
 			<el-card class="box-card textarea" shadow="hover">
 				<h1>速记</h1>
 				<el-input
+						maxlength="300"
 						type="textarea"
 						:rows="10"
 						:show-word-limit="true"

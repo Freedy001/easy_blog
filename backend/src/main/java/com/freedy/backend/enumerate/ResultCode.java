@@ -40,7 +40,9 @@ public enum ResultCode {
     NO_PERMISSION(3001, "没有权限"),
     NO_ARTICLE(3002, "没有找到文章"),
     NO_ID(3003, "没有id参数"),
-    ARGUMENT_ERROR(3004, "参数不正确");
+    ARGUMENT_ERROR(3004, "参数不正确"),
+    OUT_OF_LIMIT(3005, "字数超出限制");
+
     private final Integer code;
     private final String message;
 
