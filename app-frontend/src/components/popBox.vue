@@ -1,7 +1,7 @@
 <!--suppress JSUnresolvedVariable -->
 <template>
 	<FullScreen v-if="opacity" :opacity="opacityNum" @clickOutSide="handleDismiss">
-		<el-card shadow="hover" :style="cardStyle" :class="sizeClass">
+		<el-card  shadow="hover" :style="cardStyle" :class="sizeClass">
 			<slot></slot>
 		</el-card>
 	</FullScreen>
@@ -11,6 +11,7 @@
 //入场动画
 import {defineComponent, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
 import FullScreen from "./FullScreen.vue";
+import {addDarkClass} from "../utils/common";
 defineProps(['startX', 'startY','size'])
 const {proxy}: any = getCurrentInstance();
 defineComponent({
@@ -18,6 +19,7 @@ defineComponent({
 })
 //加载size
 let sizeClass=reactive({})
+
 //入场动画
 let startAnimate = ref(false);
 //出场动画
@@ -30,9 +32,7 @@ watch(() => proxy.startX, () => {
 	cardStyle['top'] = proxy.startY + 'px'
 	opacityNum.value = 0.3
 	sizeClass[`startAnimate${proxy.size}`]=true
-	// startAnimate.value = true
 	opacity.value = true
-	console.log(sizeClass)
 })
 
 function handleDismiss() {
@@ -41,8 +41,6 @@ function handleDismiss() {
 	// endAnimate.value = true
 	setTimeout(() => {
 		opacity.value = false
-		// startAnimate.value = false
-		// endAnimate.value = false
 		sizeClass[`startAnimate${proxy.size}`]=false
 		sizeClass[`endAnimate${proxy.size}`]=false
 	}, 500)

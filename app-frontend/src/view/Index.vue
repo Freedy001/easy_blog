@@ -17,7 +17,7 @@
 		</div>
 	</teleport>
 	<div class="content">
-		<div class="line"></div>
+		<div :class="darkModeClass('line')"></div>
 		<transition-group
 				enter-active-class="fade-in-right"
 				leave-active-class="fade-out-left"
@@ -45,7 +45,9 @@ import LoadMore from "../components/LoadMore.vue";
 import {get, loadResource} from "../http";
 import ToTop from "../components/ToTop.vue";
 import {useStore} from "vuex";
+import {darkModeClass} from "../utils/common";
 const store = useStore();
+
 defineComponent({
 	SimpleArticleContainer,
 	LoadMore,
@@ -250,6 +252,16 @@ async function getArticleList() {
 		background: #eaeaea;
 		z-index: -99;
 	}
+
+	.line-dark {
+		content: "";
+		width: 1px;
+		height: calc(100% + 100px);
+		position: absolute;
+		left: 50%;
+		background: #2d2d2d;
+	}
 }
+
 
 </style>

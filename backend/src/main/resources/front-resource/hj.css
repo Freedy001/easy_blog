@@ -1,0 +1,113 @@
+/*
+
+Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
+
+*/
+
+.markdown-body .hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: #F0F0F0;
+    font-size: 15px;
+    border-radius: 10px;
+}
+.markdown-body .hljs::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #bdbdbd;
+}
+.markdown-body .hljs::-webkit-scrollbar {
+     /*滚动条整体样式*/
+     width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
+     height: 10px;
+ }
+
+
+
+/* Base color: saturation 0; */
+
+.markdown-body .hljs,
+.markdown-body .hljs-subst {
+    color: #444;
+}
+
+.markdown-body .hljs-comment {
+    color: #888888;
+}
+
+.markdown-body .hljs-keyword,
+.markdown-body .hljs-attribute,
+.markdown-body .hljs-selector-tag,
+.markdown-body .hljs-meta-keyword,
+.markdown-body .hljs-doctag,
+.markdown-body .hljs-name {
+    font-weight: bold;
+}
+
+
+/* User color: hue: 0 */
+
+.markdown-body .hljs-type,
+.markdown-body .hljs-string,
+.markdown-body .hljs-number,
+.markdown-body .hljs-selector-id,
+.markdown-body .hljs-selector-class,
+.markdown-body .hljs-quote,
+.markdown-body .hljs-template-tag,
+.markdown-body .hljs-deletion {
+    color: #880000;
+}
+
+.markdown-body .hljs-title,
+.markdown-body .hljs-section {
+    color: #880000;
+    font-weight: bold;
+}
+
+.markdown-body .hljs-regexp,
+.markdown-body .hljs-symbol,
+.markdown-body .hljs-variable,
+.markdown-body .hljs-template-variable,
+.markdown-body .hljs-link,
+.markdown-body .hljs-selector-attr,
+.markdown-body .hljs-selector-pseudo {
+    color: #BC6060;
+}
+
+
+/* Language color: hue: 90; */
+
+.markdown-body .hljs-literal {
+    color: #78A960;
+}
+
+.markdown-body .hljs-built_in,
+.markdown-body .hljs-bullet,
+.markdown-body .hljs-code,
+.markdown-body .hljs-addition {
+    color: #397300;
+}
+
+
+/* Meta color: hue: 200 */
+
+.markdown-body .hljs-meta {
+    color: #1f7199;
+}
+
+.markdown-body .hljs-meta-string {
+    color: #4d99bf;
+}
+
+
+/* Misc effects */
+
+.markdown-body .hljs-emphasis {
+    font-style: italic;
+}
+
+.markdown-body .hljs-strong {
+    font-weight: bold;
+}

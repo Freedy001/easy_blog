@@ -1,5 +1,5 @@
 <template>
-	<div class="root">
+	<div class="root" :class="addDarkClass()" >
 		<div class="container">
 			<div class="item shorthand" @mouseenter="enter(i)" @mouseleave="leave(i)" v-for="(item,i) in dataList"
 			     :key="item.createTime">
@@ -19,6 +19,7 @@ import UserInfo from '../components/UserInfo.vue'
 import FullScreen from '../components/FullScreen.vue'
 import {onMounted, reactive, ref} from "vue";
 import {get} from "../http";
+import {addDarkClass} from "../utils/common";
 let x=ref(0);
 let y=ref(0);
 let userId=ref()
@@ -106,6 +107,24 @@ function leave(index: number) {
 					font-style: italic;
 				}
 
+			}
+		}
+	}
+}
+
+.root.dark{
+	background-color: #0d1117;
+	.container {
+		.item {
+			background-color: #161b22;
+			.time {
+				color: #848484;
+				.nickName {
+					color: #737bbd;
+					&:hover{
+						text-decoration-line: underline;
+					}
+				}
 			}
 		}
 	}

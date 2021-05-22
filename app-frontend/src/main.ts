@@ -6,7 +6,7 @@ import ElementPlus from 'element-plus';
 import 'element-plus/lib/theme-chalk/index.css';
 import './icon/font_2533377_hayk73dqjy8/iconfont'
 import hljs from 'highlight.js';
-import 'animate.css'
+
 
 let vueApp = createApp(App);
 vueApp.use(router)

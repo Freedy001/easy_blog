@@ -1,10 +1,11 @@
 <template>
-	<div class="root" @click="tip=''">
-		<div class="input-box">
-			<input id="t1" type="text" v-model="comment.username" placeholder="Name">
-			<input id="t2" type="text" v-model="comment.email" placeholder="Email">
+	<div class="root" :class="addDarkClass()" @click="tip=''">
+		<div class="input-box" :class="addDarkClass()">
+			<input autocomplete="off" id="t1" type="text" v-model="comment.username" placeholder="Name">
+			<input autocomplete="off" id="t2" type="text" v-model="comment.email" placeholder="Email">
 		</div>
-		<textarea :placeholder="myplaceholder==null?'What do you want to say...':myplaceholder" v-model="comment.content" class="textarea"></textarea>
+		<textarea :class="addDarkClass()" :placeholder="myplaceholder==null?'What do you want to say...':myplaceholder"
+		          v-model="comment.content" class="textarea"></textarea>
 		<div class="bottom">
 			<el-popover
 					placement="top"
@@ -14,7 +15,8 @@
 					v-model:visible="visible"
 			>
 				<template #reference>
-					<button type="button" :class="{'el-button':true,'shake-horizontal':tip!==''}" @click.stop="submit">SUBMIT</button>
+					<button type="button"  :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}" @click.stop="submit">SUBMIT
+					</button>
 				</template>
 			</el-popover>
 			<div class="hint red">
@@ -28,11 +30,12 @@
 import {defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {post} from "../http";
-defineProps(['fatherCommentId','myplaceholder'])
+import {addDarkClass} from "../utils/common";
+
+defineProps(['fatherCommentId', 'myplaceholder'])
 defineEmit(['commentCB'])
 const {proxy}: any = getCurrentInstance();
 const router = useRoute();
-
 
 let comment = reactive({
 	articleId: '',
@@ -51,9 +54,9 @@ async function submit() {
 	} else {
 		const id = router.query.id;
 		if (id) {
-			const data={
+			const data = {
 				articleId: id,
-				fatherCommentId:proxy.fatherCommentId,
+				fatherCommentId: proxy.fatherCommentId,
 				username: comment.username,
 				email: comment.email,
 				content: comment.content
@@ -64,7 +67,7 @@ async function submit() {
 				localStorage.setItem("email", comment.email)
 				visible.value = true
 				comment.content = ''
-				proxy.$emit('commentCB',data)
+				proxy.$emit('commentCB', data)
 			}
 		}
 	}
@@ -83,6 +86,7 @@ onMounted(() => {
 })
 
 
+
 </script>
 
 <!--suppress CssInvalidPseudoSelector -->
@@ -92,8 +96,8 @@ onMounted(() => {
 	width: 800px;
 	font-size: 14px;
 	font-family: eafont, Hiragino Sans GB, Hiragino Sans GB W3, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif;
-	border: 1px solid #eee;
-	border-radius: 6px;
+	border: 1px solid #474747;
+	border-radius: 10px;
 	padding: 15px 12px;
 	transition: all .3s;
 	display: flex;
@@ -109,16 +113,26 @@ onMounted(() => {
 		input {
 			width: 50%;
 			height: 38px;
-			font-size: 14px;
 			margin: 0 10px 0 10px;
+			border: 2px solid #e8e8e8;
+			border-radius: 5px;
+			transition: all .3s ease;
 			background: none;
 			outline: none;
-			border: none;
+			text-indent: 16px;
+			font-size: 15px;
+
+			&::-webkit-input-placeholder {
+				color: #a1a1a1;
+				font-size: 15px;
+				text-indent: 16px
+			}
 		}
 
 		input:focus {
-			border: none;
 			outline: none;
+			margin: 0 10px 0 10px;
+			border: 2px solid #0b9aff;
 		}
 	}
 
@@ -127,6 +141,23 @@ onMounted(() => {
 		width: 97%;
 		height: 180px;
 		resize: none;
+		outline: none;
+		border: 2px solid #e8e8e8;
+		border-radius: 5px;
+		transition: all .3s ease;
+		text-indent: 20px;
+		font-size: 16px;
+		line-height: 25px;
+
+		&:focus {
+			border: 2px solid #0b9aff;
+		}
+
+		&::-webkit-input-placeholder {
+			color: #a1a1a1;
+			font-size: 18px;
+			text-indent: 16px
+		}
 	}
 
 	.bottom {
@@ -140,9 +171,60 @@ onMounted(() => {
 		}
 	}
 }
+
+.root.dark {
+	border: 1px solid #3b3b3b;
+	.input-box.dark {
+		input {
+			border: 2px solid #454545;
+			color: #eeeeee;
+
+			&::-webkit-input-placeholder {
+				color: #d5d5d5;
+				font-size: 15px;
+				text-indent: 16px
+			}
+		}
+
+		input:focus {
+			border: 2px solid #2f4368;
+		}
+	}
+
+	.textarea.dark {
+		color: #eeeeee;
+		border: 2px solid #454545;
+		background-color: #0d1117;
+
+		&:focus {
+			border: 2px solid #2f4368;
+		}
+
+		&::-webkit-input-placeholder {
+			color: #d5d5d5;
+			font-size: 18px;
+			text-indent: 16px
+		}
+	}
+}
+
 .shake-horizontal {
 	animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
 }
+
+.el-button{
+	margin-left: 10px;
+	transition: all .3s ease;
+	&:hover{
+		background-color: #273753;
+	}
+}
+
+.button-dark{
+	color: #c4c4c4;
+	background-color: #0d1117;
+}
+
 @keyframes shake-horizontal {
 	0%,
 	100% {

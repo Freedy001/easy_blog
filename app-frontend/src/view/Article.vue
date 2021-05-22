@@ -1,4 +1,4 @@
-<!--suppress JSUnresolvedVariable -->
+<!--suppress ALL -->
 <template>
 	<div class="root">
 		<teleport to="body">
@@ -25,13 +25,19 @@
 				</div>
 			</div>
 		</teleport>
-		<article class="markdown-body" v-html="article.content">
-		</article>
-		<Comment :id="$route.query.id" @commentCB="commentCB"></Comment>
-		<div class="comment-header">
+		<div class="article-container" :class="{'to-center':!showToc,'to-right':showToc}">
+			<article class="markdown-body" id="markdown" v-html="article.content">
+			</article>
+		</div>
+		<transition enter-active-class="slide-in-left" leave-active-class="slide-out-left">
+			<div class="table-of-content" :class="addDarkClass()" v-show="showToc" id="toc"></div>
+		</transition>
+		<Comment :id="$route.query.id" class="comment-component" @commentCB="commentCB"></Comment>
+		<div class="comment-header" v-if="article.commentNum!=0">
 			<span id="CommentList">Comment List</span>
 			<span>({{ article.commentNum }})</span>
 		</div>
+		<div v-else class="no-comment">呜呜呜😭~没有评论,你赶紧评论一个吧！</div>
 		<transition-group enter-active-class="slide-in-bck-top">
 			<CommentList class="comment-list" @commentCB="commentCB" :commentItem="item" :key="item.id"
 			             v-for="item in commentItem"></CommentList>
@@ -39,13 +45,11 @@
 		<div>
 			<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
 		</div>
-		<ToTop @scroll="doScroll"></ToTop>
 		<UserInfo :startX="userInfo.x" :stratY="userInfo.y" :nickname="userInfo.nickname"></UserInfo>
 	</div>
 </template>
 
 <script setup lang="ts">
-// import 'github-markdown-css'
 import {defineComponent, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {get, loadResource} from "../http";
@@ -54,75 +58,32 @@ import Comment from '../components/Comment.vue'
 import CommentList from '../components/CommentList.vue'
 import UserInfo from '../components/UserInfo.vue'
 import LoadMore from "../components/LoadMore.vue";
-import ToTop from "../components/ToTop.vue";
-// import 'highlight.js/styles/androidstudio.css'
+import FullScreenLoading from "../components/FullScreenChanging.vue";
 import {ElMessage} from "element-plus";
+import {addDarkClass, copyProperties, isDarkMode} from "../utils/common";
+import {useStore} from "vuex";
 const route = useRoute();
 const router = useRouter();
 defineComponent({
 	Comment,
 	CommentList,
 	LoadMore,
-	ToTop,
-	UserInfo
+	UserInfo,
+	FullScreenLoading
 })
 watch(() => route.query.id, () => {
 	loadArticle()
 	page = 1
 	getComments()
 })
-onMounted(()=>{
-	let AutocJs = require('autocjs');
+let isOk=ref()
+//用户介绍
+let userInfo = reactive<any>({})
 
-// 创建 Outline 实例
-	let navigation = new AutocJs({
-		// 文章正文 DOM 节点的 ID 选择器
-		article: '#article',
-		// 要收集的标题选择器
-		selector: 'h1,h2,h3,h4,h5,h6',
-		// 侧边栏导航的标题
-		title: '文章导读',
-		// 文章导读导航的位置
-		// outside - 以侧边栏菜单形式显示（默认值）
-		// inside - 在文章正文一开始的地方显示
-		position: 'outside',
-		// 标题图标链接的 URL 地址
-		// （默认）没有设置定制，点击链接页面滚动到标题位置
-		// 设置了链接地址，则不会滚动定位
-		anchorURL: '',
-		// 链接的显示位置
-		// front - 在标题最前面（默认值）
-		// back - 在标题后面
-		anchorAt: 'front',
-		// 是否生成文章导读导航
-		isGenerateOutline: true,
-		// 是否在文章导读导航中显示段落章节编号
-		isGenerateOutlineChapterCode: true,
-		// 是否在正文的文章标题中显示段落章节编号
-		isGenerateHeadingChapterCode: false,
-		// 是否在正文的文章标题中创建锚点
-		isGenerateHeadingAnchor: true
-	});
-
-// 可以在创建导航后，重置配置信息，重新生成新的导航
-	navigation.reload({
-		// 调整位直接在文章内生成导航
-		position: 'outside',
-		// 并且在文章标题前显示段落的章节层次索引值
-		isGenerateHeadingChapterCode: true
-	})
-
-})
-
-
-
-
-
-let userInfo=reactive<any>({})
-function handleUserInfo(name:any,event:any){
-	userInfo.nickname=name;
-	userInfo.x=event.clientX
-	userInfo.y=event.clientY
+function handleUserInfo(name: any, event: any) {
+	userInfo.nickname = name;
+	userInfo.x = event.clientX
+	userInfo.y = event.clientY
 }
 
 //以下是喜欢样式
@@ -135,19 +96,23 @@ let showWave = ref(false)
 let clickClass = ref(false)
 //点赞时触发 禁止鼠标移开导致的样式改变
 let enableLeave = true
+
 function enterLike() {
 	showWave.value = true
 	likeStyle["background-color"] = "tomato"
 }
+
 function leaveLike() {
 	if (enableLeave) {
 		showWave.value = false
 		likeStyle["background-color"] = "rgb(205,205,205)"
 	}
 }
-let timeout:any;
+
+let timeout: any;
+
 async function like() {
-	if (timeout){
+	if (timeout) {
 		clearTimeout(timeout);
 		clickClass.value = false
 	}
@@ -166,15 +131,15 @@ async function like() {
 		}
 	}
 }
-onMounted(()=>{
-	if (localStorage.getItem(route.query.id + "")){
+
+onMounted(() => {
+	if (localStorage.getItem(route.query.id + "")) {
 		enableLeave = false
 		likeStyle["background-color"] = "tomato"
 		showWave.value = true
 	}
 })
-
-
+//以下是加载文章
 interface IArticle {
 	id: number | string,
 	title: string,
@@ -187,26 +152,12 @@ interface IArticle {
 	"likeNum": string,
 }
 
-let article = reactive<IArticle|any>({})
+let article = reactive<IArticle | any>({})
 onMounted(async () => {
 	loadStyle()
 	loadArticle().then()
 	getComments().then()
 })
-let hasMore = ref(true)
-let isShow = ref(false)
-//滚动加载评论
-let doScroll: any = (srcElement: any) => {
-	const scroll: HTMLElement = srcElement.scrollingElement
-	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50) && hasMore.value) {
-		isShow.value = true
-		page++;
-		getComments().then(() => {
-			isShow.value = !hasMore.value;
-		})
-	}
-}
-
 /**
  * 加载样式
  */
@@ -214,16 +165,37 @@ function loadStyle() {
 	const head = document.getElementsByTagName('head')[0];
 	const mdLink = document.createElement('link');
 	const hjLink = document.createElement('link');
-	mdLink.href = loadResource('/css/md.css')
+	mdLink.href = loadResource(isDarkMode()?'/resource/md-dark.css':'/resource/md.css')
 	mdLink.setAttribute("rel", "stylesheet")
 	mdLink.setAttribute("class", "md-css")
-	hjLink.href = loadResource('/css/hj.css')
+	hjLink.href = loadResource(isDarkMode()?'/resource/hj-dark.css':'/resource/hj.css')
 	hjLink.setAttribute("rel", "stylesheet")
 	hjLink.setAttribute("class", "md-css")
 	head.appendChild(mdLink);
 	head.appendChild(hjLink);
 }
+const store = useStore();
+watch(()=>store.state.darkMode,()=>{
+	clearStyle()
+	loadStyle()
+})
+/**
+ * 清除样式 防止干扰其他页面
+ */
+function clearStyle() {
+	const cssLink: HTMLCollectionOf<Element> = document.getElementsByClassName("md-css");
+	const length = cssLink.length;
+	for (let i = 0; i < length; i++) {
+		cssLink[0].remove()
+	}
+}
 
+onBeforeRouteLeave((to, from, next) => {
+	setTimeout(()=>{
+		clearStyle()
+	},300)
+	next();
+})
 /**
  * 文章
  */
@@ -233,15 +205,8 @@ async function loadArticle() {
 		const response = await get(`/article/get?id=${id}`);
 		if (response.code === 200) {
 			const data: IArticle = response.data
-			article.id = data.id
-			article.title = data.title
-			article.content = data.content
-			article.publishTime = data.publishTime
-			article.articlePoster = data.articlePoster
-			article.wordNum = data.wordNum
-			article.likeNum = data.likeNum
-			article.commentNum = data.commentNum
-			article.authorName = data.authorName
+			copyProperties(data, article)
+			generateTOC();
 			setTimeout(() => {
 				hljs.highlightAll()
 			}, 100)
@@ -249,19 +214,105 @@ async function loadArticle() {
 	}
 }
 
+let hasMore = ref(true)
+let isShow = ref(false)
+let articleContainer = reactive({})
+let showToc = ref(false)
 /**
- * 清除样式 防止干扰其他页面
+ * 生成文章目录
  */
-onBeforeRouteLeave((to, from, next) => {
+function generateTOC() {
 	setTimeout(() => {
-		const cssLink: HTMLCollectionOf<Element> = document.getElementsByClassName("md-css");
-		const length = cssLink.length;
-		for (let i = 0; i < length; i++) {
-			cssLink[0].remove()
+		//评论组件
+		const comment = document.getElementsByClassName("comment-component");
+		//文章组件
+		const markdown = document.getElementById("markdown");
+		const childrenEle = markdown.children;
+		const tocContainer = document.createElement('ul');
+		let scrollTopObj = [];
+		for (let i = 0; i < childrenEle.length; i++) {
+			const currentEle: HTMLElement = childrenEle[i];
+			const tagName = currentEle.tagName;
+			if (tagName == 'H1' || tagName == 'H2' || tagName == 'H3' || tagName == 'H4' || tagName == 'H5' || tagName == 'H6') {
+				//当标签时h1-h6时,为其生成目录
+				const eleItem = document.createElement('li');
+				const level = tagName.match(/\d/)[0];
+				const div = document.createElement('div')
+				//将类容用span包围
+				div.innerHTML = currentEle.innerHTML
+				//并加上类名
+				div.className = 'level' + level
+				eleItem.appendChild(div)
+				eleItem.setAttribute("class", "li-" + i)
+				//将结果记录下来 方便后面的回显
+				scrollTopObj[i] = currentEle.offsetTop
+				//设置点击 滚动到指定地方的事件
+				eleItem.addEventListener('click', () => {
+					window.scrollTo({
+						top: currentEle.offsetTop,
+						behavior: "smooth"
+					});
+				})
+				tocContainer.appendChild(eleItem)
+			}
 		}
-	}, 300)
-	next();
-})
+		const toc = document.getElementById("toc");
+		toc.appendChild(tocContainer)
+		//*************************以上是生成目录*************************
+		let prev = Date.now();
+		let prevNode;
+		//设置目录高亮的回显
+		document.body.onscroll = ({srcElement}: any) => {
+			const scroll: HTMLElement = srcElement.scrollingElement
+			let now = Date.now();
+			//节流
+			if (now - prev > 50) {
+				//do sth...
+				try {
+					//调整位置
+					if (scroll.scrollTop > 280) {
+						showToc.value = true;
+					} else {
+						showToc.value = false;
+					}
+					if (scroll.scrollTop>comment[0].offsetTop-scroll.clientHeight){
+						showToc.value = false;
+					}
+					//滚动加载评论
+					if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50) && hasMore.value) {
+						isShow.value = true
+						page++;
+						getComments().then(() => {
+							isShow.value = !hasMore.value;
+						})
+					}
+
+					scrollTopObj.forEach((item: HTMLElement, index) => {
+						if (item > scroll.scrollTop - 50 && item < scroll.scrollTop + 50) {
+							//当满足条件时回显 目录高亮
+							if (prevNode) {
+								prevNode.style.color = '#2c3e50'
+							}
+							const item = document.querySelector(`.li-${index}`);
+							prevNode = item;
+							item.style.color = '#3eaf7c'
+							toc.scrollTo({
+								top: item.offsetTop,
+								behavior: "smooth"
+							})
+							//通过异常机制退出循环
+							throw new Error("LoopTerminates");
+						}
+					})
+				} catch (e) {
+					if (e.message !== "LoopTerminates") throw e;
+				}
+				prev = Date.now();
+			}
+		}
+
+	}, 500)
+}
 
 interface ICommentItem {
 	id: string | number,
@@ -271,11 +322,8 @@ interface ICommentItem {
 	creatTime: string,
 	child: Array<ICommentItem>
 }
-
 let commentItem = reactive<Array<ICommentItem>>([])
-
 let page = 1;
-
 /**
  * 加载评论
  */
@@ -388,15 +436,6 @@ async function commentCB(data: any) {
 	}
 }
 
-::v-global(.markdown-body .hljs) {
-	color: black;
-}
-
-.markdown-body {
-	overflow: hidden;
-	padding-top: 400px;
-}
-
 .title {
 	width: 100%;
 	height: 360px;
@@ -446,7 +485,8 @@ async function commentCB(data: any) {
 			font-family: "Open Sans", sans-serif;
 			font-weight: 700;
 			margin-top: 50px;
-			&:hover{
+
+			&:hover {
 				cursor: pointer;
 				text-decoration-line: underline;
 				text-decoration-color: #3a9ff5;
@@ -516,6 +556,203 @@ async function commentCB(data: any) {
 	font-size: 20px;
 	text-decoration: none;
 }
+.no-comment{
+	text-align: center;
+	margin: 100px auto;
+	width: 850px;
+	font-size: 20px;
+}
 
+
+.article-container {
+	width: calc(100vw - 325px);
+	margin: 0;
+	position: relative;
+
+	.markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		max-width: 980px;
+		margin: 0 auto;
+		padding: 450px 0 100px 0;
+	}
+}
+
+@media (max-width: 767px) {
+	.markdown-body {
+		padding: 15px;
+	}
+}
+
+.table-of-content {
+	position: fixed;
+	width: 285px;
+	height: calc(100vh - 120px);
+	top: 100px;
+	overflow: auto;
+	left: 0;
+	font-size: 1em;
+	font-weight: 400;
+	display: inline-block;
+	color: #2c3e50;
+	border-left: .25rem solid transparent;
+	padding: 10px;
+	line-height: 1.4;
+	background-color: #ffffff;
+	border-radius: 10px;
+	overscroll-behavior: contain;
+	user-select: none;
+	&::-webkit-scrollbar-thumb {
+		/*滚动条里面小方块*/
+		border-radius: 10px;
+		box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.45);
+		background: #999999;
+	}
+
+	&::-webkit-scrollbar {
+		/*滚动条整体样式*/
+		width: 3px; /*高宽分别对应横竖滚动条的尺寸*/
+		height: 10px;
+	}
+
+	:deep(ul) {
+		list-style-type: none;
+		line-height: 1.7;
+		display: block;
+		margin-block-start: 1em;
+		margin-block-end: 1em;
+	}
+
+	:deep(li) {
+		cursor: pointer;
+		&:hover {
+			color: #43AF78;
+		}
+
+		:deep(span) {
+			display: block;
+		}
+	}
+
+	:deep(.level1) {
+		font-size: 20px;
+		font-weight: 1000;
+	}
+
+	:deep(.level2) {
+		margin-left: 10px;
+		font-weight: revert;
+	}
+
+	:deep(.level3) {
+		margin-left: 20px;
+		font-weight: normal;
+	}
+
+	:deep(.level4) {
+		margin-left: 30px;
+		font-weight: lighter;
+	}
+
+	:deep(.level5) {
+		margin-left: 40px;
+		font-weight: lighter;
+	}
+
+	:deep(.level6) {
+		margin-left: 50px;
+		font-weight: lighter;
+	}
+}
+
+.table-of-content.dark{
+	color: #a0c4ff;
+	background-color: #0d1117;
+	&::-webkit-scrollbar-thumb {
+		/*滚动条里面小方块*/
+		border-radius: 10px;
+		box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.45);
+		background: #999999;
+	}
+
+	:deep(li) {
+		cursor: pointer;
+		&:hover {
+			color: #43AF78;
+		}
+
+		:deep(span) {
+			display: block;
+		}
+	}
+
+}
+
+@font-face{
+	font-family: 'JetBrains Mono';
+	src: url('../assets/JetBrainsMono-Regular.woff2') format('woff2'),
+	url('../assets/JetBrainsMono-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+#markdown{
+	:deep(.hljs){
+		font-family: 'JetBrains Mono';
+	}
+}
+//目录移动动画
+.slide-in-left {
+	animation: slide-in-left 0.5s ease both;
+}
+@keyframes slide-in-left {
+	0% {
+		transform: translateX(-300px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+.slide-out-left {
+	animation: slide-out-left 0.5s ease both;
+}
+@keyframes slide-out-left {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(-300px);
+		opacity: 0;
+	}
+}
+//文章移动动画
+.to-center{
+	animation: to-center 0.5s ease both;
+}
+@keyframes to-center {
+	0% {
+		transform: translateX(0);
+		left: 325px;
+	}
+	100% {
+		left: 50%;
+		transform: translateX(-50%);
+	}
+}
+.to-right{
+	animation: to-right 0.5s ease both;
+}
+@keyframes to-right {
+	0% {
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	100% {
+		transform: translateX(0);
+		left: 325px;
+	}
+}
 
 </style>

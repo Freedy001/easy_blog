@@ -1,36 +1,42 @@
 <!--suppress ALL -->
 <template>
-	<div class="full-screen" @click="$emit('clickOutSide')" :style="{'background-color':`rgba(0, 0, 0,${dynamicOpacity})`,'z-index':index}">
-		<div @click.stop="">
+	<div class="full-screen" @click="$emit('clickOutSide')"
+	     :style="{'background-color':`rgba(0, 0, 0,${dynamicOpacity})`,'z-index':proxy.index}">
+		<div @click.stop="" class="stop">
 			<slot></slot>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {defineEmit, defineProps, getCurrentInstance, onMounted, ref, watch} from "vue";
-defineProps(['opacity','index'])
+import {defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
+defineProps(['opacity', 'index', 'opacityImmediately'])
 defineEmit(['clickOutSide'])
-const {proxy}:any = getCurrentInstance();
+const {proxy}: any = getCurrentInstance();
 //动态透明度
-let dynamicOpacity=ref(0)
-watch(()=>proxy.opacity,()=>{
+let dynamicOpacity = ref(0)
+
+watch(() => proxy.opacity, () => {
 	animate()
 })
-onMounted(()=>{
-	animate()
+onMounted(() => {
+	const immediately = proxy.opacityImmediately;
+	if (immediately) {
+			dynamicOpacity.value=immediately;
+	} else {
+		animate()
+	}
 })
 
 function animate() {
-	const number = (proxy.opacity-dynamicOpacity.value)/100;
-	let interval = setInterval(()=>{
-		dynamicOpacity.value+=number
-	},5);
-	setTimeout(()=>{
+	const number = (proxy.opacity - dynamicOpacity.value) / 100;
+	let interval = setInterval(() => {
+		dynamicOpacity.value += number
+	}, 5);
+	setTimeout(() => {
 		clearInterval(interval)
-	},500)
+	}, 500)
 }
-
 
 
 </script>
@@ -39,7 +45,7 @@ function animate() {
 .full-screen {
 	width: 100%;
 	height: 100%;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
 	z-index: 1000;

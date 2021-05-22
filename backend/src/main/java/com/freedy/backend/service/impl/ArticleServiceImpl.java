@@ -138,6 +138,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             ArticleInfoVo vo = new ArticleInfoVo();
             BeanUtils.copyProperties(esModel, vo);
             vo.setId(esModel.getId().toString());
+            vo.setPublishTime(DateUtils.formatChineseDate(esModel.getPublishTime()));
             infoVoList.add(vo);
         }
         return new PageUtils(infoVoList, Math.toIntExact(hits.getTotalHits().value), limit, page);

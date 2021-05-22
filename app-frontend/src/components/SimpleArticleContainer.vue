@@ -1,10 +1,9 @@
 <template>
 	<div class="post">
-		<div :style="{right:left?null:0}" class="img-box">
+		<div :style="{right:left?null:0}" class="img-box" :class="addDarkClass()" >
 			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="loadResource(articleItem.articlePoster)" alt="">
 		</div>
-		<div :style="{right:left?0:null,left:left?null:0}" class="info">
-			<!--			<div class="time">五月 05, 2021</div>-->
+		<div :style="{right:left?0:null,left:left?null:0}" class="info" :class="addDarkClass()">
 			<div class="time">{{ articleItem.publishTime }}</div>
 			<div class="title">
 				<router-link class="title-content" @click="handleJump" tag="a" to="">{{ articleItem.title }}</router-link></div>
@@ -70,6 +69,7 @@ import {defineProps, getCurrentInstance, ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {loadResource} from "../http";
+import {addDarkClass} from "../utils/common";
 defineProps(['articleItem', 'left'])
 const {proxy} = getCurrentInstance();
 const router = useRouter();
@@ -98,25 +98,29 @@ function handleJump(){
 		border: 1px solid #f3fafd;
 		transition: all 0.3s;
 		position: absolute;
-		//right: 0;
+		border-radius: 10px;
 		img {
 			display: inline-block;
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
+			border-radius: 10px;
 		}
+	}
+
+	.img-box.dark{
+		border: 1px solid #2d2d2d;
 	}
 
 	.info {
 		padding: 80px 100px 0 80px;
 		margin: 0;
 		border: 1px solid #eaeaea;
-		border-radius: 6px;
+		border-radius: 10px;
 		text-align: left;
 		width: 550px;
 		height: 400px;
 		right: 0;
-		//left: 0;
 		position: absolute;
 		box-sizing: border-box;
 
@@ -194,6 +198,27 @@ function handleJump(){
 			bottom: 30px;
 		}
 	}
+
+	.info.dark{
+		border: 1px solid #2d2d2d;
+
+		.time {
+			color: #999;
+		}
+
+		.title{
+			a{
+				color: #f3f3f3;
+			}
+		}
+
+		.describe {
+			margin-top: 10px;
+			font-size: 14px;
+			color: #a3a3a3;
+		}
+	}
+
 }
 
 </style>

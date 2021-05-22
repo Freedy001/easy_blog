@@ -7,9 +7,9 @@
 			Your browser does not support the video tag.
 		</video>
 		<div class="card">
-			<el-card class="box-card">
+			<el-card class="box-card" :class="addDarkClass()">
 				<transition-group enter-active-class="slide-in-right" leave-active-class="slide-out-left">
-					<div class="first" v-if="firstPage===1">
+					<div class="first" :class="addDarkClass()" v-if="firstPage===1">
 						<h1>Hi,感谢你发现了我</h1>
 						<p>心里藏着小星星，生活才能亮晶晶！</p>
 						<span class="tip">如果你喜欢我的博客的话,可以订阅啊😉</span>
@@ -21,18 +21,19 @@
 							</el-button>
 						</div>
 					</div>
-					<div class="second" v-if="firstPage===2">
+					<div class="second" :class="addDarkClass()" v-if="firstPage===2">
 						<h1>邮箱验证</h1>
 						<p>为了保证邮箱的正确性，请输入我给你发送的验证码</p>
+						<span v-if="onError" style="color: red;font-size: 12px;position: absolute; left: 20px ;bottom: 35px">你貌似没有输入验证啊！</span>
 						<div class="email-input">
 							<input type="text" placeholder="验证码" v-model="verifyCode" @keypress.enter="verify">
-							<el-button round :loading="verifyLoading" @click="verify">订阅</el-button>
+							<el-button round :class="{onError:onError}" :loading="verifyLoading" @click="verify">订阅</el-button>
 						</div>
-						<span class="tip">没收到？<el-button @click="subscribe" :loading="reSendLoading" round>
+						<span class="tip">没收到？<el-button @click="reSend" :loading="reSendLoading" round>
 						<div class="timeout" :style="runTime">{{ timeout }}s后</div>再发一条
 					</el-button></span>
 					</div>
-					<div class="third" v-if="firstPage===3">
+					<div class="third" :class="addDarkClass()" v-if="firstPage===3">
 						<h1>心里藏着小星星，生活才能亮晶晶！</h1>
 						<h2>您已经订阅了</h2>
 					</div>
@@ -45,20 +46,23 @@
 <script setup lang="ts">
 import {get, loadResource} from "../http";
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
+import {addDarkClass} from "../utils/common";
 const proxy:any = getCurrentInstance()?.proxy;
 let reSendLoading = ref(true)
-let timeout = ref(60)
+let timeout = ref(10)
 let runTime = reactive<any>({})
-const interval = setInterval(() => {
-	if (--timeout.value == 0) {
-		clearInterval(interval)
-		reSendLoading.value = false
-		runTime['display'] = 'none'
-	}
-}, 1000);
+function timeoutFun() {
+	const interval = setInterval(() => {
+		if (--timeout.value == 0) {
+			clearInterval(interval)
+			reSendLoading.value = false
+			runTime['display'] = 'none'
+		}
+	}, 1000);
+}
+timeoutFun()
 let firstPage = ref(1)
 //上面都是样式
-
 let emailLoading = ref(false)
 let email = ref()
 let onError=ref(false)
@@ -93,6 +97,13 @@ let verifyLoading = ref(false)
 let verifyCode = ref()
 //验证邮箱
 async function verify() {
+	if (!verifyCode.value){
+		onError.value=true;
+		setTimeout(()=>{
+			onError.value=false;
+		},3000)
+		return;
+	}
 	verifyLoading.value=true
 	const response = await get(`/sys/verify?code=${verifyCode.value}&UUID=${uuid}`);
 	if (response.code==200){
@@ -106,6 +117,14 @@ onMounted(()=>{
 		firstPage.value=3
 	}
 })
+
+function reSend() {
+	runTime['display'] = 'inline'
+	reSendLoading.value = true
+	timeout.value=60
+	timeoutFun()
+	subscribe()
+}
 
 </script>
 
@@ -192,6 +211,37 @@ onMounted(()=>{
 		}
 	}
 
+	.box-card.dark {
+		background-color: rgba(13, 17, 23, 0.54);
+		border: 1px solid #161b22;
+		color: #dedede;
+		.email-input {
+			input {
+				border: 1px solid #494949;
+				background-color: rgba(22, 27, 34, 0.66);
+				color: #dedede;
+
+				&::-webkit-input-placeholder {
+					color: #a1a1a1;
+				}
+
+				&:focus {
+					border: 1px solid #8e95b8;
+				}
+			}
+
+			.el-button {
+				background-color: rgba(22, 27, 34, 0.66);
+				color: #dedede;
+				border: 1px solid #494949;
+				transition: all .1s ease;
+				&:hover {
+					background-color: rgba(51, 59, 99, 0.9);
+				}
+			}
+		}
+	}
+
 	.first {
 		position: absolute;
 		width: 400px;
@@ -250,6 +300,26 @@ onMounted(()=>{
 
 	}
 
+	.second.dark{
+		.tip {
+			margin: 20px 0 0;
+			text-align: center;
+			display: block;
+			.el-button {
+				background-color: rgba(22, 27, 34, 0.66);
+				color: #dedede;
+
+				&:hover {
+					background-color: rgba(51, 59, 99, 0.9);
+				}
+				.timeout {
+					color: #10e5ff;
+				}
+			}
+		}
+	}
+
+
 	.third{
 		position: absolute;
 		width: 435px;
@@ -272,7 +342,12 @@ onMounted(()=>{
 		}
 
 	}
+
+	.third.dark{
+		border: 1px solid #fae500;
+	}
 }
+
 
 .slide-in-right {
 	animation: slide-in-right 0.5s ease both;
