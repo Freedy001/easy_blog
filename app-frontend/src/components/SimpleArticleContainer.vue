@@ -9,7 +9,7 @@
 				<router-link class="title-content" @click="handleJump" tag="a" to="">{{ articleItem.title }}</router-link></div>
 			<div class="describe">{{ articleItem.articleDesc }}</div>
 			<div class="stuff">
-				<el-tooltip content="分类" placement="top" effect="light">
+				<el-tooltip content="分类" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div>
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-category01"></use>
@@ -17,7 +17,7 @@
 						<span>{{ articleItem.articleCategory }}</span>
 					</div>
 				</el-tooltip>
-				<el-tooltip content="标签" placement="top" effect="light">
+				<el-tooltip content="标签" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div class="tag">
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-biaoqian"></use>
@@ -27,7 +27,7 @@
 				</el-tooltip>
 			</div>
 			<div class="stuff">
-				<el-tooltip content="字数" placement="top" effect="light">
+				<el-tooltip content="字数" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div>
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-ziti1"></use>
@@ -35,7 +35,7 @@
 						<span>{{ articleItem.wordNum }}</span>
 					</div>
 				</el-tooltip>
-				<el-tooltip content="观看数" placement="top" effect="light">
+				<el-tooltip content="观看数" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div>
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-huahanAPP-icon--"></use>
@@ -43,7 +43,7 @@
 						<span>{{ articleItem.visitNum }}</span>
 					</div>
 				</el-tooltip>
-				<el-tooltip content="喜欢数" placement="top" effect="light">
+				<el-tooltip content="喜欢数" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div>
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-xihuan"></use>
@@ -51,7 +51,7 @@
 						<span>{{ articleItem.likeNum }}</span>
 					</div>
 				</el-tooltip>
-				<el-tooltip content="作者" placement="top" effect="light">
+				<el-tooltip content="作者" placement="top" :effect="isDarkMode()?'dark':'light'">
 					<div class="tag">
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-author"></use>
@@ -69,7 +69,7 @@ import {defineProps, getCurrentInstance, ref, watch} from "vue";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {loadResource} from "../http";
-import {addDarkClass} from "../utils/common";
+import {addDarkClass, isDarkMode} from "../utils/common";
 defineProps(['articleItem', 'left'])
 const {proxy} = getCurrentInstance();
 const router = useRouter();

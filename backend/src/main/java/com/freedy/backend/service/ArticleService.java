@@ -100,5 +100,11 @@ public interface ArticleService extends IService<ArticleEntity> {
      * @param id 文章id
      */
     void likeArticle(Long id);
+
+    /**
+     * 获取关于页面
+     */
+    ArticleEntity getAbout();
+
 }
 

@@ -224,15 +224,15 @@ let showToc = ref(false)
 function generateTOC() {
 	setTimeout(() => {
 		//评论组件
-		const comment = document.getElementsByClassName("comment-component");
+		const comment:any  = document.getElementsByClassName("comment-component");
 		//文章组件
-		const markdown = document.getElementById("markdown");
-		const childrenEle = markdown.children;
-		const tocContainer = document.createElement('ul');
-		let scrollTopObj = [];
+		const markdown:any  = document.getElementById("markdown");
+		const childrenEle:any = markdown.children;
+		const tocContainer:any  = document.createElement('ul');
+		let scrollTopObj: any = [];
 		for (let i = 0; i < childrenEle.length; i++) {
 			const currentEle: HTMLElement = childrenEle[i];
-			const tagName = currentEle.tagName;
+			const tagName:any  = currentEle.tagName;
 			if (tagName == 'H1' || tagName == 'H2' || tagName == 'H3' || tagName == 'H4' || tagName == 'H5' || tagName == 'H6') {
 				//当标签时h1-h6时,为其生成目录
 				const eleItem = document.createElement('li');
@@ -256,11 +256,11 @@ function generateTOC() {
 				tocContainer.appendChild(eleItem)
 			}
 		}
-		const toc = document.getElementById("toc");
+		const toc:any  = document.getElementById("toc");
 		toc.appendChild(tocContainer)
 		//*************************以上是生成目录*************************
 		let prev = Date.now();
-		let prevNode;
+		let prevNode:any ;
 		//设置目录高亮的回显
 		document.body.onscroll = ({srcElement}: any) => {
 			const scroll: HTMLElement = srcElement.scrollingElement
@@ -287,13 +287,13 @@ function generateTOC() {
 						})
 					}
 
-					scrollTopObj.forEach((item: HTMLElement, index) => {
+					scrollTopObj.forEach((item :any , index:any ) => {
 						if (item > scroll.scrollTop - 50 && item < scroll.scrollTop + 50) {
 							//当满足条件时回显 目录高亮
 							if (prevNode) {
 								prevNode.style.color = '#2c3e50'
 							}
-							const item = document.querySelector(`.li-${index}`);
+							const item:any  = document.querySelector(`.li-${index}`);
 							prevNode = item;
 							item.style.color = '#3eaf7c'
 							toc.scrollTo({
@@ -556,6 +556,7 @@ async function commentCB(data: any) {
 	font-size: 20px;
 	text-decoration: none;
 }
+
 .no-comment{
 	text-align: center;
 	margin: 100px auto;

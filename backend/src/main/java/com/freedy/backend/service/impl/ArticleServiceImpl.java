@@ -2,6 +2,7 @@ package com.freedy.backend.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.entity.*;
 import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
 import com.freedy.backend.exception.ArgumentErrorException;
@@ -30,7 +31,9 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -61,6 +64,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private final CategoryService categoryService;
     private final VisitorService visitorService;
     private final RestHighLevelClient highLevelClient;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService, RestHighLevelClient highLevelClient) {
         this.rabbitTemplate = rabbitTemplate;
@@ -151,15 +156,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                 !article.getAuthorId().equals(Local.MANAGER_LOCAL.get().getId()) &&
                 !AuthorityUtils.hasAuthority("article-operation-to-others")
         ) throw new NoPermissionsException();
+        if (article.getId() != null && article.getId() == 1) {
+            //清除缓存
+            redisTemplate.delete(Objects.requireNonNull(redisTemplate.keys(CacheConstant.ABOUT_CACHE_NAME + "*")));
+        }
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
         if (article.getId() == null) {
             //获取作者消息
             entity.setAuthorId(authorId);
+            entity.setArticleStatus(article.getIsOverhead() ? EntityConstant.ARTICLE_Overhead : EntityConstant.ARTICLE_UNPUBLISHED);
+        } else {
+            entity.setArticleStatus(article.getIsOverhead() ? EntityConstant.ARTICLE_Overhead : null);
         }
-        entity.setArticleStatus(article.getIsOverhead() ?
-                EntityConstant.ARTICLE_Overhead : EntityConstant.ARTICLE_PUBLISHED);
         entity.setArticleComment(article.getIsComment() ?
                 EntityConstant.ARTICLE_CAN_COMMENT : EntityConstant.ARTICLE_CAN_NOT_COMMENT);
         if (article.getId() == null) {
@@ -167,22 +177,32 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         }
         entity.setUpdateTime(System.currentTimeMillis());
         //设置文章字数
-        entity.setWordNum(Long.valueOf(MarkDown.countWords(entity.getContent())));
+        if (entity.getContent() != null) entity.setWordNum(Long.valueOf(MarkDown.countWords(entity.getContent())));
         //保存文章
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             if (article.getId() == null) {
                 baseMapper.insert(entity);
+                //将文章保存到es
+                EsTypeDto dto = new EsTypeDto();
+                dto.setId(entity.getId());
+                dto.setType(EsType.SAVE);
+                dto.setPublishTime(entity.getPublishTime());
+                rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                        RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
+                        dto);
             } else {
                 baseMapper.updateById(entity);
+                //只有在发布时间晚于现在才发消息
+                if (entity.getPublishTime() > System.currentTimeMillis()) {
+                    EsTypeDto dto = new EsTypeDto();
+                    dto.setId(entity.getId());
+                    dto.setType(EsType.UPDATE);
+                    dto.setPublishTime(entity.getPublishTime());
+                    rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                            RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
+                            dto);
+                }
             }
-            //将文章保存到es
-            EsTypeDto dto = new EsTypeDto();
-            dto.setId(entity.getId());
-            dto.setType(article.getId() == null ? EsType.SAVE : EsType.UPDATE);
-            dto.setPublishTime(entity.getPublishTime());
-            rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
-                    RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
-                    dto);
         }, executor);
         //创建用户新建的标签
         List<TagEntity> newTags = new ArrayList<>();
@@ -348,6 +368,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Override
     public void likeArticle(Long id) {
         baseMapper.likeArticle(id);
+    }
+
+
+    @Override
+    @Cacheable(cacheNames = CacheConstant.ABOUT_CACHE_NAME)
+    public ArticleEntity getAbout() {
+        return getOne(new QueryWrapper<ArticleEntity>().lambda().eq(ArticleEntity::getId, 1));
     }
 
 

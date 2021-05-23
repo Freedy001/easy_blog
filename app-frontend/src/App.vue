@@ -1,7 +1,7 @@
 <template>
 	<LoadingTab v-if="isLoading"></LoadingTab>
 	<div class="logo-and-menu">
-		<img @click="$router.push('/')" :src="loadResource($store.state.indexSetting.logo)" alt="">
+		<img @click="$router.push('/')" :src="loadResource($store.state.indexSetting.logo)" alt=" ">
 		<div class="icon" @click="isShowMenu=!isShowMenu">
 			<div class="line"></div>
 			<div class="line"></div>
@@ -52,7 +52,7 @@ onMounted(() => {
 })
 watch(() => store.state.darkMode, modeChange)
 
-function modeChange(val) {
+function modeChange(val:boolean) {
 	if (val) {
 		document.body.style.backgroundColor='#0d1117'
 		document.body.style.color='#b8b8b8'
@@ -211,7 +211,7 @@ function heartBeat() {
 	margin: 0;
 	padding: 0;
 	&::selection {
-		background: rgba(60, 252, 30, 0.5);
+		background: rgb(132, 239, 112);
 		color: #000000;
 	}
 

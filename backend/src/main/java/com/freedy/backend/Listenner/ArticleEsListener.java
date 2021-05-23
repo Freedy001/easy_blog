@@ -57,13 +57,14 @@ public class ArticleEsListener {
             //保存消息到es
             if (entity.getType() == EsType.SAVE) preparePublish(entity);
             if (entity.getType() == EsType.UPDATE) {
+                if (entity.getId()==1) return;
                 log.debug("修改文章{}",entity.getId());
-                //通知前端下架页面
-                redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER+ UUID.randomUUID(),
-                        ResultCode.NOTIFY_ARTICLE_UPDATE.name(),5, TimeUnit.SECONDS);
                 articleRepository.deleteById(entity.getId());
                 articleService.updateArticleStatus(entity.getId(), EntityConstant.ARTICLE_UNPUBLISHED);
                 preparePublish(entity);
+                //通知前端下架页面
+                redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER+ UUID.randomUUID(),
+                        ResultCode.NOTIFY_ARTICLE_UPDATE.name(),5, TimeUnit.SECONDS);
             }
             if (entity.getType() == EsType.DELETE) {
                 log.debug("删除文章{}",entity.getId());
@@ -105,12 +106,19 @@ public class ArticleEsListener {
             Long id = entity.getId();
             ArticleEsModel esModel = articleService.getEsArticle(id);
             if (esModel != null && (esModel.getPublishTime() - 1000 * 61 < System.currentTimeMillis())) {
-                //最终确认
                 articleRepository.save(esModel);
+                //修改发布状态
+                articleService.updateArticleStatus(entity.getId(), EntityConstant.ARTICLE_PUBLISHED);
+                //邮件通知
+                esModel.setContent(null);
+                esModel.setArticleDesc(null);
+                rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME,EMAIL_REPLAY_ROUTING_KEY,esModel);
+                //通知前台
                 redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER+ UUID.randomUUID(),
                         ResultCode.NOTIFY_ARTICLE_UPDATE.name(),5, TimeUnit.SECONDS);
                 log.debug("文章{}上架成功", id);
             }
+                //最终确认
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (IOException e) {
             channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);

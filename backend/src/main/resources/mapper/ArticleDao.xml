@@ -64,6 +64,7 @@
         left join blog_article_tag_relation relation on article.id = relation.article_id
         left join blog_tag tag on tag.id = relation.tag_id
         left join blog_manager manager on article.author_id=manager.id
+        where article.id != 1
     </select>
 
     <select id="getCount" resultType="java.lang.Long">

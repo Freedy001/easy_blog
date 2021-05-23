@@ -106,18 +106,17 @@
 					           style="margin-top: 30px">保存</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="其他设置" name="4">
+			<el-tab-pane label="关于页面" name="4">
 				<div class="other">
 					<div class="item">
-						<h1>附件存储位置</h1>
-						<el-select v-model="selectValue" placeholder="请选择">
-							<el-option
-									v-for="item in options"
-									:key="item.value"
-									:label="item.label"
-									:value="item.value">
-							</el-option>
-						</el-select>
+						<div class="about">
+							<h1>关于</h1>
+							<el-button type="primary" @click="$router.push('/index/article?id=1')" round>去编辑</el-button>
+						</div>
+						<div class="root">
+							<article class="markdown-body" id="markdown" v-html="article.content">
+							</article>
+						</div>
 					</div>
 				</div>
 			</el-tab-pane>
@@ -133,28 +132,23 @@ import {defineComponent, getCurrentInstance, onMounted, reactive, ref, watch} fr
 import {get, getFrontApi, loadResource, post} from "../http";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import {ElMessage} from "element-plus";
+import {copyProperties} from "../util/Common.ts";
+import {useRoute} from "vue-router";
 const {proxy}:any = getCurrentInstance();
 defineComponent({
 	ImgDrawer
 })
+const route = useRoute();
 onMounted(()=>{
 	initCommonValue();
 	initSMTPValue();
 	initCommentValue();
+	if (route.query.toForth){
+		activeName.value="4"
+	}
 })
 let showDrawer = ref(0)
 let activeName = ref("1")
-watch(activeName, (val) => {
-	if (val == "1") {
-
-	} else if (val == "2") {
-
-	} else if (val == "3") {
-
-	} else if (val == "4") {
-
-	}
-})
 
 //***************************常规设置***********************************
 interface ICommon {
@@ -342,15 +336,14 @@ async function savaComment() {
 	}
 }
 //********************************其他设置**************************************
-let options = reactive([{
-	value: '选项1',
-	label: '本地'
-}, {
-	value: '选项1',
-	label: '阿里云'
-}])
-let selectValue = ref()
-
+let article = reactive<any>({})
+onMounted(async () => {
+	const response = await getFrontApi('/frontend/article/get?id=1')
+	if (response.code == 200) {
+		copyProperties(response.data, article)
+		console.log(article)
+	}
+})
 
 </script>
 
@@ -443,6 +436,20 @@ let selectValue = ref()
 			color: #535353;
 			margin-bottom: 10px;
 		}
+	}
+
+	.about{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.markdown-body {
+		box-sizing: border-box;
+		min-width: 200px;
+		max-width: 760px;
+		margin: 0 auto;
+		padding: 50px 0 100px 0;
 	}
 }
 </style>

@@ -9,6 +9,8 @@ public class CacheConstant {
     private static final String PREFIX="EASY-BLOG-CACHE:";
     //文章缓存名
     public static final String ARTICLE_CACHE_NAME=PREFIX+"article";
+    //缓存关于
+    public static final String ABOUT_CACHE_NAME=PREFIX+"about";
     //评论缓存名
     public static final String COMMENT_CACHE_NAME=PREFIX+"comment";
     //评论缓存名

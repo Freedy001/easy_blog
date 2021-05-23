@@ -8,33 +8,32 @@
 
 <script setup lang="ts">
 import {defineEmit, getCurrentInstance, onMounted, ref} from "vue";
+
 defineEmit(['scroll'])
-const {proxy}:any = getCurrentInstance();
+const {proxy}: any = getCurrentInstance();
 let show = ref(false)
 let click = ref(false)
 onMounted(() => {
-	setTimeout(()=>{
-		document.body.onscroll =({srcElement}: any) => {
-			proxy.$emit('scroll',srcElement)
+	setTimeout(() => {
+		document.body.onscroll = ({srcElement}: any) => {
+			proxy.$emit('scroll', srcElement)
 			const scroll: HTMLElement = srcElement.scrollingElement
 			show.value = scroll.scrollTop > scroll.clientHeight;
 		}
-	},500)
+	}, 500)
 })
+
 function backTop() {
 	click.value = true
+	window.scrollTo({
+		top: 0,
+		behavior: "smooth"
+	});
 	setTimeout(() => {
-		window.scrollTo({
-			top: 0,
-			behavior: "smooth"
-		});
-		setTimeout(() => {
-			show.value = false
-			click.value = false
-		}, 500)
+		show.value = false
+		click.value = false
 	}, 500)
 }
-
 
 
 </script>
@@ -65,44 +64,15 @@ function backTop() {
 }
 
 .bounce-out-top {
-	animation: bounce-out-top 1s ease-in-out both;
+	animation: bounce-out-top 1s ease both;
 }
 
 @keyframes bounce-out-top {
 	0% {
 		transform: translateY(0);
-		animation-timing-function: ease-out;
-	}
-	5% {
-		transform: translateY(-30px);
-		animation-timing-function: ease-in;
-	}
-	15% {
-		transform: translateY(0);
-		animation-timing-function: ease-out;
-	}
-	25% {
-		transform: translateY(-38px);
-		animation-timing-function: ease-in;
-	}
-	38% {
-		transform: translateY(0);
-		animation-timing-function: ease-out;
-	}
-	52% {
-		transform: translateY(-75px);
-		animation-timing-function: ease-in;
-	}
-	70% {
-		transform: translateY(0);
-		animation-timing-function: ease-out;
-	}
-	85% {
-		opacity: 1;
 	}
 	100% {
 		transform: translateY(-2000px);
-		opacity: 1;
 	}
 }
 

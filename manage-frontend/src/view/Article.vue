@@ -6,7 +6,7 @@
 			<h1>{{ $store.state.articleTitle === '' ? '新文章' : $store.state.articleTitle }}</h1>
 			<div>
 				<el-button type="danger" @click="saveDraft">保存草稿</el-button>
-				<el-button type="primary" @click="drawer = !drawer">发布</el-button>
+				<el-button type="primary" @click="publishArticle">发布</el-button>
 			</div>
 		</div>
 		<el-input v-model="$store.state.articleTitle" placeholder="请输入标题"></el-input>
@@ -92,7 +92,11 @@ async function save(form:any){
 			message: '保存成功!',
 			type: 'success'
 		})
-		await router.push('/index/articleList');
+		if (route.query.id=='1'){
+			await router.push('/index/setting?toForth=true');
+		}else {
+			await router.push('/index/articleList');
+		}
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -121,6 +125,24 @@ async function saveDraft(){
 			title: '出差啦😢！',
 			message: `保存到草稿！ reason-->${response.msg}`
 		})
+	}
+}
+
+function publishArticle() {
+	if (route.query.id=='1'){
+		//id为1时 是关于页面
+		save({
+			publishTime:new Date(),
+			tagValue:[],
+			authorId: 1,
+			title:'',
+			isComment:false,
+			isOverhead:false,
+			desc:'',
+			url:'',
+		})
+	}else {
+		drawer.value = !drawer.value
 	}
 }
 onMounted(()=>{

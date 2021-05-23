@@ -71,7 +71,7 @@ onMounted(()=>{
 		transform: rotateZ(0);
 	}
 	100% {
-		transform: rotateZ(7200deg);
+		transform: rotateZ(360deg);
 	}
 }
 
@@ -84,7 +84,7 @@ onMounted(()=>{
 		transform: rotateZ(0);
 	}
 	100% {
-		transform: rotateZ(720deg);
+		transform: rotateZ(360deg);
 	}
 }
 

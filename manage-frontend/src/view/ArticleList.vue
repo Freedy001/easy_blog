@@ -74,8 +74,7 @@
 	</el-table>
 	<ArticleSettingDrawer :id="articleId"
 	                      :isOpenDrawer="drawer"
-	                      @saveCallback="save"
-	                      @content="getContent">
+	                      @saveCallback="save">
 
 	</ArticleSettingDrawer>
 </div>

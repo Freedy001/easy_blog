@@ -39,18 +39,20 @@ public class ArticleSynchronize {
         for (int i = 0; i < count/100+1; i++) {
             List<ArticleEsModel> ids=articleService.getEsArticleList(i+1,100);
             ids.forEach(item->{
-                Optional<ArticleEsModel> optional = articleRepository.findById(item.getId());
-                if (optional.isPresent()){
-                    if (!optional.get().equals(item)){
-                        log.info("数据不一致，开始同步 id:{}",item.getId());
-                        articleRepository.save(item);
-                    }
-                }else {
-                    //数据不存在,判断是否到了发布时间 没到不管他
-                    if (item.getPublishTime()<System.currentTimeMillis()){
-                        //过了发布时间 需要同步到es中
-                        log.info("开始上架文章 id:{}",item.getId());
-                        articleRepository.save(item);
+                if (item.getId()!=1){
+                    Optional<ArticleEsModel> optional = articleRepository.findById(item.getId());
+                    if (optional.isPresent()) {
+                        if (!optional.get().equals(item)) {
+                            log.info("数据不一致，开始同步 id:{}", item.getId());
+                            articleRepository.save(item);
+                        }
+                    } else {
+                        //数据不存在,判断是否到了发布时间 没到不管他
+                        if (item.getPublishTime() < System.currentTimeMillis()) {
+                            //过了发布时间 需要同步到es中
+                            log.info("开始上架文章 id:{}", item.getId());
+                            articleRepository.save(item);
+                        }
                     }
                 }
             });

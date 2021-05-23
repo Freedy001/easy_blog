@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  * @author Freedy
@@ -71,7 +72,7 @@ public class MarkDown {
      * @return 字数
      */
     public static Integer countWords(String text){
-       return text.replaceAll("[`\r\n~·!@#$%^&*()\\t_+=-\\[\\]{}\\\\|;:'\",./<>?，。、《》？；‘：“【】！￥…（）—\\-=]", " ")
+       return text==null?null:text.replaceAll("[`\r\n~·!@#$%^&*()\\t_+=-\\[\\]{}\\\\|;:'\",./<>?，。、《》？；‘：“【】！￥…（）—\\-=]", " ")
         .replaceAll("\\w+", "#").replaceAll(" +", "").length();
     }
 

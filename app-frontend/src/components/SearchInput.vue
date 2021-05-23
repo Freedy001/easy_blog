@@ -1,12 +1,12 @@
 <template>
 	<div class="search">
 		<div class="logo" v-if="showLogo">
-			<img :src="loadResource('/resource/easysearch.svg')" alt="">
+			<img style="transition: all 1s ease" :src="isDarkMode()?easySearchDark:easySearch" alt="">
 		</div>
-		<div class="search-area">
+		<div class="search-area" :class="addDarkClass()">
 			<div class="input-pop">
 				<input v-model="queryString"
-				       placeholder="可以是标题、描述、标签、分类,甚至是文章类容"
+				       placeholder="可以是标题、描述、标签、分类,甚至是文章内容"
 				       @keypress.enter="$router.push(`/search?searchString=${queryString}`);$emit('searchCb')"
 				       id="searchInput"
 				       autocomplete="off"
@@ -17,10 +17,11 @@
 				       type="text" class="search-input">
 				<transition enter-active-class="slide-in-top1" leave-active-class="slide-out-top1">
 					<div class="pop" id="pop" v-if="showPop">
-						<div class="search-item" v-for="item in suggest" @click="$router.push(`/search?searchString=${item.title}`);$emit('searchCb')">
+						<div class="search-item" v-for="item in suggest"
+						     @click="$router.push(`/search?searchString=${item.title}`);$emit('searchCb')">
 							<div class="value">
 								<div class="content">
-									<el-tooltip placement="left" :content="item.logoExplain" effect="light">
+									<el-tooltip placement="left" :content="item.logoExplain" :effect="isDarkMode()?'dark':'light'">
 										<img :src="item.logo" style="width: 25px;height: 25px;object-fit: cover" alt="">
 									</el-tooltip>
 									<div v-html="item.content"></div>
@@ -43,14 +44,22 @@
 <script setup lang="ts">
 import {defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
 import {get} from "../http";
+import easySearch from "../assets/icon/easySearch.svg";
+import easySearchDark from "../assets/icon/easySearch-dark.svg";
 import articleCategory from "../assets/icon/articleCategory.svg";
+import articleCategoryDark from "../assets/icon/articleCategory-dark.svg";
 import articleDesc from "../assets/icon/articleDesc.svg";
+import articleDescDark from "../assets/icon/articleDesc-dark.svg";
 import articleTags from "../assets/icon/articleTags.svg";
+import articleTagsDark from "../assets/icon/articleTags-dark.svg";
 import content from "../assets/icon/content.svg";
+import contentDark from "../assets/icon/content-dark.svg";
 import title from "../assets/icon/title.svg";
+import titleDark from "../assets/icon/title-dark.svg";
 import enter from "../assets/icon/enter.svg";
 import {loadResource} from "../http";
 import {useRoute} from "vue-router";
+import {addDarkClass, isDarkMode} from "../utils/common";
 
 defineProps(['showLogo'])
 defineEmit(['searchCb'])
@@ -67,7 +76,7 @@ interface ISuggest {
 //以下是获取建议
 let search = ref()
 let showPop = ref(false)
-let queryString = ref()
+let queryString = ref<string|any>('')
 let suggest = reactive<Array<ISuggest>>([])
 let timeout: number | null | undefined;
 watch(queryString, (val) => {
@@ -86,19 +95,19 @@ watch(queryString, (val) => {
 					suggest.length = 0
 					resSuggest.forEach((value, index) => {
 						if (value.field == 'articleCategory') {
-							value.logo = articleCategory;
+							value.logo = isDarkMode()?articleCategoryDark:articleCategory;
 							value.logoExplain = '分类';
 						} else if (value.field == 'articleDesc') {
-							value.logo = articleDesc;
+							value.logo = isDarkMode()?articleDescDark:articleDesc;
 							value.logoExplain = '描述';
 						} else if (value.field == 'articleTags') {
-							value.logo = articleTags;
+							value.logo = isDarkMode()?articleTagsDark:articleTags;
 							value.logoExplain = '标签';
 						} else if (value.field == 'content') {
-							value.logo = content;
+							value.logo = isDarkMode()?contentDark:content;
 							value.logoExplain = '内容';
 						} else if (value.field == 'title') {
-							value.logo = title;
+							value.logo = isDarkMode()?titleDark:title;
 							value.logoExplain = '标题';
 						}
 						suggest.push(value)
@@ -133,11 +142,11 @@ watch(showPop, (val) => {
 })
 
 function outChangeStyle() {
-	if (!showPop.value) {
-		focusStyle['border-top'] = "2px solid #dedede";
-		focusStyle['border-left'] = "2px solid #dedede";
-		focusStyle['border-right'] = "2px solid #dedede";
-		focusStyle['border-bottom'] = "2px solid #dedede";
+	if (!showPop.value) {//454545
+		focusStyle['border-top'] = `2px solid ${isDarkMode()?'#454545':'#dedede'}`;
+		focusStyle['border-left'] =`2px solid ${isDarkMode()?'#454545':'#dedede'}`;
+		focusStyle['border-right'] = `2px solid ${isDarkMode()?'#454545':'#dedede'}`;
+		focusStyle['border-bottom'] = `2px solid ${isDarkMode()?'#454545':'#dedede'}`;
 	}
 }
 
@@ -145,10 +154,12 @@ onMounted(() => {
 	document.body.onclick = () => {
 		showPop.value = false
 	}
+	//同步搜索
 	if (route.query.searchString) {
 		queryString.value = route.query.searchString
 	}
 })
+//同步搜索
 watch(() => route.query.searchString, () => {
 	queryString.value = route.query.searchString
 })
@@ -174,9 +185,9 @@ watch(() => route.query.searchString, () => {
 
 	.search-area {
 		display: flex;
-
 		.input-pop {
-				position: relative;
+			position: relative;
+
 			.search-input {
 				width: 800px;
 				height: 48px;
@@ -185,7 +196,7 @@ watch(() => route.query.searchString, () => {
 				background-color: white;
 				font-size: inherit;
 				color: #898989;
-				transition: all 0.1s ease;
+				transition: all 0.3s ease;
 				text-indent: 20px;
 				z-index: 9999999;
 				border-top-left-radius: 10px;
@@ -276,7 +287,7 @@ watch(() => route.query.searchString, () => {
 
 						&:hover {
 							transform: scale(1.05);
-							span{
+							span {
 								color: #000000;
 							}
 						}
@@ -294,26 +305,74 @@ watch(() => route.query.searchString, () => {
 
 			}
 		}
-	}
 
-	.searchButton {
-		height: 52px;
-		background-color: #4e6ef2;
-		border-top-right-radius: 10px;
-		border-bottom-right-radius: 10px;
-		text-align: center;
-		line-height: 49px;
-		color: white;
-		font-size: 20px;
-		width: 100px;
-		cursor: pointer;
-		user-select: none;
-		transition: all .1s ease;
+		.searchButton {
+			height: 52px;
+			background-color: #4e6ef2;
+			border-top-right-radius: 10px;
+			border-bottom-right-radius: 10px;
+			text-align: center;
+			line-height: 49px;
+			color: white;
+			font-size: 20px;
+			width: 100px;
+			cursor: pointer;
+			user-select: none;
+			transition: all .1s ease;
 
-		&:hover {
-			background-color: #4662d9;
+			&:hover {
+				background-color: #4662d9;
+			}
 		}
 	}
+
+	.search-area.dark{
+
+		.input-pop {
+			.search-input {
+				color: #d9d9d9;
+				border: 2px solid #454545;
+				background-color: #0d1117;
+
+				&::-webkit-input-placeholder {
+					color: #a1a1a1;
+				}
+			}
+
+			.pop {
+				background-color: #0d1117;
+				border-left: 2px solid #4e71f2;
+				border-right: 2px solid #4e71f2;
+				border-bottom: 2px solid #4e71f2;
+				.search-item {
+					.jump {
+						border: 2px solid #454545;
+						background-color: #0d1117;
+						span {
+							color: #d9d9d9;
+						}
+
+						&:hover {
+							span {
+								color: #ffffff;
+							}
+						}
+					}
+
+				}
+
+			}
+		}
+
+		.searchButton{
+			background-color: #273753;
+			color: white;
+			&:hover {
+				background-color: #4662d9;
+			}
+		}
+	}
+
 
 }
 

@@ -1,6 +1,8 @@
 package com.freedy.backend.apiFront;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.constant.RabbitConstant;
+import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.MarkDown;
 import com.freedy.backend.utils.PageUtils;
@@ -43,6 +45,7 @@ public class FrontArticleController {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+
     @ApiOperation("列出前台所有文章")
     @GetMapping("/list")
     public Result getArticleList(@RequestParam Map<String, Object> params) throws Exception {
@@ -53,6 +56,11 @@ public class FrontArticleController {
     @ApiOperation("获取文章详情")
     @GetMapping("/get")
     public Result getArticle(@RequestParam Long id){
+        if (id==1){
+            ArticleEntity about = articleService.getAbout();
+            about.setContent( MarkDown.render(about.getContent()));
+            return Result.ok().setData(about);
+        }
         Optional<ArticleEsModel> optional = repository.findById(id);
         if (optional.isEmpty()){
             throw new NoArticleException();
@@ -68,6 +76,7 @@ public class FrontArticleController {
         model.put("publishTime",DateUtils.formatChineseDate(esModel.getPublishTime()));
         return  Result.ok().setData(model);
     }
+
 
     @ApiOperation("给文章点赞")
     @GetMapping("/likeArticle")

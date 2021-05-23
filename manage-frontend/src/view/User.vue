@@ -262,6 +262,7 @@ import {useRouter} from "vue-router";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import FullScreen from '../components/FullScreen.vue'
 import {useStore} from "vuex";
+import {copyProperties} from "../util/Common";
 const store = useStore();
 const router = useRouter();
 const {proxy}:any = getCurrentInstance();
@@ -353,7 +354,7 @@ let userInfoDetail: userInfo = reactive<userInfo>({
 	nickname: '',
 	email: '',
 	introduce: '',
-	headImg: '',
+	headImg: null,
 	rootAdmin: false,
 	pageUrl: '',
 	createDuration: '',
@@ -375,19 +376,7 @@ async function initData() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
 		const resData: userInfo = response.data
-		userInfoDetail.username = resData.username
-		userInfoDetail.nickname = resData.nickname
-		userInfoDetail.email = resData.email
-		userInfoDetail.introduce = resData.introduce
-		userInfoDetail.headImg = resData.headImg
-		userInfoDetail.rootAdmin = resData.rootAdmin
-		userInfoDetail.pageUrl = resData.pageUrl
-		userInfoDetail.createDuration = resData.createDuration
-		userInfoDetail.totalArticle = resData.totalArticle
-		userInfoDetail.totalCategory = resData.totalCategory
-		userInfoDetail.totalTags = resData.totalTags
-		userInfoDetail.totalComment = resData.totalComment
-		userInfoDetail.totalVisit = resData.totalVisit
+		copyProperties(resData,userInfoDetail)
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -541,7 +530,6 @@ let newUser = reactive<INewUser>({
 	userPermission: [],
 	settingPermission: [],
 })
-
 //******************************下面是全选功能******************************start
 let selectAll = reactive({
 	articleCheckAll: false,
@@ -677,7 +665,7 @@ async function userDelete(id:number) {
 		})
 	}
 }
-//******************************tab3下面方法与参数**********************************startend
+//******************************tab3下面方法与参数**********************************end
 </script>
 
 <style scoped lang="scss">

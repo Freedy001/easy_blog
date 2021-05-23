@@ -4,7 +4,7 @@
 		<div class="hide-card"></div>
 		<searchInput @searchCb="$emit('clickCb')" class="search-input"></searchInput>
 		<div class="menu-item">
-			<div class="index item" @click="$router.push('/');$emit('clickCb')">index</div>
+			<div class="item" @click="$router.push('/');$emit('clickCb')" >index</div>
 			<div class="shorthand item" @click="$router.push('/shorthand');$emit('clickCb')">shorthand</div>
 			<div class="item" @click="$store.commit('changingMode');$emit('clickCb')">{{ !isDarkMode()?'dark mode':'light mode'}}</div>
 			<div class="subscribe item" @click="$router.push('/subscribe');$emit('clickCb')">subscribe</div>

@@ -11,6 +11,7 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
     background: #F0F0F0;
     font-size: 15px;
     border-radius: 10px;
+    color: #1c1c1c;
 }
 .markdown-body .hljs::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
@@ -19,10 +20,10 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
     background: #bdbdbd;
 }
 .markdown-body .hljs::-webkit-scrollbar {
-     /*滚动条整体样式*/
-     width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
-     height: 10px;
- }
+    /*滚动条整体样式*/
+    width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
+    height: 10px;
+}
 
 
 
@@ -34,7 +35,7 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 }
 
 .markdown-body .hljs-comment {
-    color: #888888;
+    color: #24860c;
 }
 
 .markdown-body .hljs-keyword,
@@ -44,6 +45,7 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 .markdown-body .hljs-doctag,
 .markdown-body .hljs-name {
     font-weight: bold;
+    color: #d01e2f;
 }
 
 
@@ -57,12 +59,12 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 .markdown-body .hljs-quote,
 .markdown-body .hljs-template-tag,
 .markdown-body .hljs-deletion {
-    color: #880000;
+    color: #de9000;
 }
 
 .markdown-body .hljs-title,
 .markdown-body .hljs-section {
-    color: #880000;
+    color: #4caf50;
     font-weight: bold;
 }
 
@@ -87,14 +89,14 @@ Original highlight.js style (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
 .markdown-body .hljs-bullet,
 .markdown-body .hljs-code,
 .markdown-body .hljs-addition {
-    color: #397300;
+    color: #006ad8;
 }
 
 
 /* Meta color: hue: 200 */
 
 .markdown-body .hljs-meta {
-    color: #1f7199;
+    color: #119aff;
 }
 
 .markdown-body .hljs-meta-string {

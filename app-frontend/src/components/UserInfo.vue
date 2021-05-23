@@ -1,6 +1,6 @@
 <template>
 	<popBox :startX="startX" :startY="startY" size="Middle">
-		<div class="expand">
+		<div class="expand" :class="addDarkClass()">
 			<div class="info">
 				<div class="photo">
 					<img :src="loadResource(userInfo.headImg)" alt="">
@@ -10,13 +10,13 @@
 			<div class="introduce">
 				<div class="item day">
 					<div>
-						<i class="el-icon-sunny"></i>
+						<i class="el-icon-sunny" style="margin-right:3px"></i>
 						<span> {{ userInfo.createDuration }} </span>
 					</div>
 				</div>
 				<div class="item email">
 					<div class="email-box">
-						<img style="margin-right: 6px" :src="email" alt="">
+						<img style="margin-right: 6px" :src="isDarkMode()?emailDark:email" alt="">
 						<span> {{ userInfo.email }} </span>
 					</div>
 				</div>
@@ -36,9 +36,9 @@ import {get, loadResource} from "../http";
 import FullScreen from './FullScreen.vue'
 import popBox from './popBox.vue'
 import email from '../assets/icon/email.svg'
+import emailDark from '../assets/icon/email-dark.svg'
 import {defineComponent, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
-import {copyProperties} from "../utils/common";
-
+import {addDarkClass, copyProperties, isDarkMode} from "../utils/common";
 defineProps(['startX', 'startY', 'userId', 'nickname'])
 defineComponent({
 	FullScreen
@@ -63,6 +63,9 @@ watch(() => proxy.nickname, async (val) => {
 	margin: auto 0;
 	width: 100%;
 	height: 80%;
+	padding: 25px 10px 0 10px;
+	box-sizing: border-box;
+
 
 	.info {
 		.photo {
@@ -82,7 +85,7 @@ watch(() => proxy.nickname, async (val) => {
 		}
 
 		.name {
-			margin-top: 5px;
+			margin: 10px 0 10px 0;
 			color: #000000;
 			text-align: center;
 			font-size: 18px;
@@ -132,6 +135,14 @@ watch(() => proxy.nickname, async (val) => {
 	}
 }
 
+.expand.dark{
+	background-color: #0d1117;
+	border: none;
+	color: #c9c9c9;
 
+	.name {
+		color: #ffffff;
+	}
+}
 
 </style>

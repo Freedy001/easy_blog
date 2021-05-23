@@ -39,7 +39,6 @@ const router= createRouter({
     },
 })
 router.beforeEach((to, from, next) => {
-    console.log(123)
     if (to.matched.length===0){
         next("/error")
     }else {

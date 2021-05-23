@@ -1,7 +1,7 @@
 <!--suppress JSUnresolvedVariable -->
 <template>
 	<FullScreen v-if="opacity" :opacity="opacityNum" @clickOutSide="handleDismiss">
-		<el-card  shadow="hover" :style="cardStyle" :class="sizeClass">
+		<el-card  class="pop-card" :style="cardStyle" :class="sizeClass">
 			<slot></slot>
 		</el-card>
 	</FullScreen>
@@ -11,19 +11,20 @@
 //入场动画
 import {defineComponent, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
 import FullScreen from "./FullScreen.vue";
-import {addDarkClass} from "../utils/common";
+import {addDarkClass, isDarkMode} from "../utils/common";
 defineProps(['startX', 'startY','size'])
 const {proxy}: any = getCurrentInstance();
 defineComponent({
 	FullScreen
 })
+// onMounted(()=>{
+// 	if (isDarkMode()){
+// 		sizeClass['dark']=true;
+// 	}
+// })
 //加载size
-let sizeClass=reactive({})
-
-//入场动画
-let startAnimate = ref(false);
-//出场动画
-let endAnimate = ref(false);
+let sizeClass=reactive<any>({})
+//初始化弹窗出现位置
 let cardStyle = reactive<any>({})
 let opacityNum = ref(0.3)
 let opacity = ref(false)
@@ -31,14 +32,15 @@ watch(() => proxy.startX, () => {
 	cardStyle['left'] = proxy.startX + 'px'
 	cardStyle['top'] = proxy.startY + 'px'
 	opacityNum.value = 0.3
+	//入场动画
 	sizeClass[`startAnimate${proxy.size}`]=true
 	opacity.value = true
 })
 
 function handleDismiss() {
 	opacityNum.value = 0
+	//出场动画
 	sizeClass[`endAnimate${proxy.size}`]=true
-	// endAnimate.value = true
 	setTimeout(() => {
 		opacity.value = false
 		sizeClass[`startAnimate${proxy.size}`]=false
@@ -54,7 +56,15 @@ function handleDismiss() {
 	left: 0;
 	width: 0;
 	transform: translate(-50%, -50%);
+	border-radius:10px;
+	box-shadow: none;
+	border: none;
+
+	:deep(.el-card__body){
+		padding: 0;
+	}
 }
+
 //small大小
 .startAnimateSmall {
 	animation: showDescSmall 0.5s ease both;

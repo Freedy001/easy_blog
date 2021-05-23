@@ -113,12 +113,10 @@
 import {defineComponent, defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
 import {get, loadResource} from "../http";
 import {ElMessage} from "element-plus";
-import $ from 'jquery'
 import ImgDrawer from './ImgDrawer.vue'
 import CategoryOrTagCard from './CategoryOrTagCard.vue'
 import FullScreen from './FullScreen.vue'
 import {useStore} from "vuex";
-
 defineProps(['id', 'isOpenDrawer'])
 defineEmit(['saveCallback', 'content'])
 defineComponent({
@@ -126,10 +124,6 @@ defineComponent({
 	CategoryOrTagCard,
 	FullScreen
 })
-
-function abc() {
-	console.log("showCard=false")
-}
 
 const {proxy}: any = getCurrentInstance();
 const store = useStore();
@@ -142,7 +136,7 @@ let drawer = ref(false)
 watch(() => proxy.isOpenDrawer, (val) => {
 	drawer.value = true;
 })
-
+//图片回显
 function clickCb(url: string) {
 	form.url = url;
 }
@@ -169,7 +163,7 @@ let form = reactive<originalForm>({
 	category: 0,
 	desc: '',
 	tagValue: [],
-	url: ''
+	url: null
 })
 watch(() => form.title, (val) => {
 	store.commit('setTitle', val)
@@ -207,9 +201,8 @@ let categoryArr = reactive([{
 
 //增加分类
 function addCategory() {
-	$(".el-overlay").css({
-		'z-index': 10
-	})
+	const el:HTMLElement = document.querySelector('.el-overlay');
+	el.style.zIndex=10
 	showCard.value = true
 }
 
@@ -269,10 +262,9 @@ async function onSave() {
 
 //******************************数据初始化******************************
 onMounted(async () => {
-	$(".el-drawer.rtl").css({
-		'overflow': 'auto',
-		'z-index': 10
-	})
+	const el:HTMLElement = document.querySelector('.el-drawer.rtl');
+	el.style.overflow='auto'
+	el.style.zIndex=10
 	initDate().then();
 })
 watch(() => proxy.id, (val) => {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class LoadSetting {
     private Boolean examination;//评论需要审核
     private Boolean newCommentNotification;//新评论通知作者
     private Boolean replayNotification;//评论回复通知对方
+    private String webSiteDomainName;
     private final SettingService service;
 
     LoadSetting(SettingService service) {
@@ -52,7 +54,7 @@ public class LoadSetting {
             if (StringUtils.hasText(value)) {
                 field.setAccessible(true);
                 try {
-                    if (value.equals("true") || value.equals("false")) {
+                    if ("true".equals(value) || "false".equals(value)) {
                         field.set(this, Boolean.parseBoolean(value));
                     } else {
                         field.set(this, value);
@@ -62,10 +64,20 @@ public class LoadSetting {
                 }
                 log.info("加载系统设置{},值为{}", fieldName, value);
             } else {
-                if (!fieldName.equals("log") && !fieldName.equals("service"))//排除掉sl4j的log
-                    log.warn("数据库中没有初始值{}", fieldName);
+                //排除掉sl4j的log
+                if (!"log".equals(fieldName) && !"service".equals(fieldName)) {
+                    initSetting();
+                    break;
+                }
             }
         }
+    }
+
+    private void initSetting() {
+        ArrayList<SettingEntity> list = new ArrayList<>();
+        SettingEntity entity = new SettingEntity();
+//        entity.setItem();
+//        entity.setValue();
     }
 
 
