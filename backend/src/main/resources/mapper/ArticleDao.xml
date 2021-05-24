@@ -124,6 +124,7 @@
         manager.nickname,
         article.publish_time,
         article.content,
+        article.article_comment,
         tag.tag_name,
         article.article_poster
         from (select * from blog_article limit #{key_offset},#{limit})as article
@@ -144,6 +145,12 @@
 
     <select id="getAllArticleTitleAndCategoryId" resultType="com.freedy.backend.entity.ArticleEntity">
         select title,article_category_id,like_num,visit_num,comment_num from blog_db.blog_article
+    </select>
+
+    <select id="getCreatorEmailByArticleId" resultType="java.lang.String">
+        select manager.email from blog_db.blog_article as article
+        left join blog_db.blog_manager as manager on article.author_id=manager.id
+        where article.id=#{id}
     </select>
 
 

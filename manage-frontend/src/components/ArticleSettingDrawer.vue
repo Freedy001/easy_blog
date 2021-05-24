@@ -117,7 +117,7 @@ import ImgDrawer from './ImgDrawer.vue'
 import CategoryOrTagCard from './CategoryOrTagCard.vue'
 import FullScreen from './FullScreen.vue'
 import {useStore} from "vuex";
-defineProps(['id', 'isOpenDrawer'])
+defineProps(['id','status', 'isOpenDrawer'])
 defineEmit(['saveCallback', 'content'])
 defineComponent({
 	ImgDrawer,
@@ -150,7 +150,8 @@ interface originalForm {
 	authorId: number,
 	desc: string,
 	tagValue: Array<any>,
-	url: string
+	url: string|null,
+	articleStatus:any
 }
 
 //抽屉中表单的数据项
@@ -163,7 +164,8 @@ let form = reactive<originalForm>({
 	category: 0,
 	desc: '',
 	tagValue: [],
-	url: null
+	url: null,
+	articleStatus:null
 })
 watch(() => form.title, (val) => {
 	store.commit('setTitle', val)
@@ -201,7 +203,7 @@ let categoryArr = reactive([{
 
 //增加分类
 function addCategory() {
-	const el:HTMLElement = document.querySelector('.el-overlay');
+	const el:any = document.querySelector('.el-overlay');
 	el.style.zIndex=10
 	showCard.value = true
 }
@@ -262,7 +264,7 @@ async function onSave() {
 
 //******************************数据初始化******************************
 onMounted(async () => {
-	const el:HTMLElement = document.querySelector('.el-drawer.rtl');
+	const el:any = document.querySelector('.el-drawer.rtl');
 	el.style.overflow='auto'
 	el.style.zIndex=10
 	initDate().then();
@@ -339,6 +341,7 @@ async function initDate() {
 		form.tagValue = info.existedTags
 		form.url = info.articlePoster
 		form.authorId = info.authorId
+		form.articleStatus=proxy.status;
 		proxy.$emit('content', info.content);
 	}
 }

@@ -1,41 +1,49 @@
 <!--suppress JSUnresolvedVariable -->
 <template>
-<div class="root">
-	<teleport to="body">
-		<div id="cover" class="index-cover" ref="container">
-			<div class="img" :style="moveStyle">
-				<img :src="loadResource($store.state.indexSetting.poster)" alt="">
-			</div>
-			<div class="triangle" :style="{'border-bottom': `400vh solid ${$store.state.indexSetting.indexColor}`}"></div>
-			<div class="cover-title">
-				<div class="time">{{ $store.state.indexSetting.indexArticle.publishTime }}</div>
-				<div class="title">
-					<router-link :to="`/article?id=${$store.state.indexSetting.indexArticle.id}`" tag="a" data-v-241ea8f0="" class="title-a">{{$store.state.indexSetting.indexArticle.title}}</router-link>
+	<div class="root">
+		<teleport to="body">
+			<div id="cover" class="index-cover" ref="container">
+				<div class="img" :style="moveStyle">
+					<img :src="loadResource($store.state.indexSetting.poster)" alt="">
 				</div>
-				<div class="describe">{{$store.state.indexSetting.indexArticle.articleDesc}}</div>
+				<div class="triangle" :style="{'border-bottom': `400vh solid ${$store.state.indexSetting.indexColor}`}"></div>
+				<div class="cover-title">
+					<div class="time">
+						{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.publishTime : '' }}
+					</div>
+					<div class="title">
+						<router-link
+								:to="`/article?id=${$store.state.indexSetting.indexArticle?$store.state.indexSetting.indexArticle.id:''}`"
+								tag="a" data-v-241ea8f0="" class="title-a">
+							{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.title : '' }}
+						</router-link>
+					</div>
+					<div class="describe">
+						{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.title : '' }}
+					</div>
+				</div>
 			</div>
+		</teleport>
+		<div class="content">
+			<div :class="darkModeClass('line')"></div>
+			<transition-group
+					enter-active-class="fade-in-right"
+					leave-active-class="fade-out-left"
+					mode="out-in"
+			>
+				<SimpleArticleContainer
+						v-for="(item,i) in articleItem"
+						:articleItem="item"
+						:key="i"
+						:left="i%2===0">
+				</SimpleArticleContainer>
+			</transition-group>
+			<div>
+				<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
+			</div>
+			<ToTop @scroll="doScroll"></ToTop>
 		</div>
-	</teleport>
-	<div class="content">
-		<div :class="darkModeClass('line')"></div>
-		<transition-group
-				enter-active-class="fade-in-right"
-				leave-active-class="fade-out-left"
-				mode="out-in"
-		>
-			<SimpleArticleContainer
-					v-for="(item,i) in articleItem"
-					:articleItem="item"
-					:key="i"
-					:left="i%2===0">
-			</SimpleArticleContainer>
-		</transition-group>
-		<div>
-			<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
-		</div>
-		<ToTop @scroll="doScroll"></ToTop>
 	</div>
-</div>
 </template>
 
 <script setup lang="ts">
@@ -46,6 +54,7 @@ import {get, loadResource} from "../http";
 import ToTop from "../components/ToTop.vue";
 import {useStore} from "vuex";
 import {darkModeClass} from "../utils/common";
+
 const store = useStore();
 
 defineComponent({
@@ -53,11 +62,11 @@ defineComponent({
 	LoadMore,
 	ToTop
 })
-watch(()=>store.state.notifyReloadArticle,()=>{
-	articleItem.length=0
-	isShow.value=true;
-	page=1;
-	getArticleList().then(()=>{
+watch(() => store.state.notifyReloadArticle, () => {
+	articleItem.length = 0
+	isShow.value = true;
+	page = 1;
+	getArticleList().then(() => {
 		isShow.value = !hasMore.value;
 	})
 })
@@ -70,14 +79,14 @@ onMounted(() => {
 	initIndexMove()
 	getArticleList()
 })
-let hasMore=ref(true)
+let hasMore = ref(true)
 let isShow = ref(false)
-let doScroll:any = (srcElement: any) => {
+let doScroll: any = (srcElement: any) => {
 	const scroll: HTMLElement = srcElement.scrollingElement
-	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50)&&hasMore.value) {
-		isShow.value=true;
+	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50) && hasMore.value) {
+		isShow.value = true;
 		page++;
-		getArticleList().then(()=>{
+		getArticleList().then(() => {
 			isShow.value = !hasMore.value;
 		})
 	}
@@ -107,14 +116,14 @@ function initIndexMove() {
 		moveStyle.transform = 'translate(-5vw,-5vh)';
 		//移除屏幕时关掉鼠标移动动画
 	}
-	setTimeout(()=>{
+	setTimeout(() => {
 		moveStyle.transition = 'all 0.5s';
 		moveStyle.transform = 'translate(-5vw,-5vh)';
-	},500)
+	}, 500)
 }
 
 interface IArticleItem {
-	id:string
+	id: string
 	articlePoster: string,
 	publishTime: string,
 	title: string,
@@ -129,6 +138,7 @@ interface IArticleItem {
 
 let articleItem = reactive<Array<IArticleItem>>([])
 let page = 1
+
 /**
  * 加载数据
  */
@@ -136,24 +146,10 @@ async function getArticleList() {
 	const response = await get(`/article/list?page=${page}&limit=5`);
 	if (response.code == 200) {
 		const data: Array<IArticleItem> = response.data.list
-		if (data.length==0) {
-			hasMore.value=false;
+		if (data.length == 0) {
+			hasMore.value = false;
 		} else {
-			data.forEach((value, index) => {
-				articleItem.push({
-					id:value.id,
-					articlePoster: value.articlePoster,
-					publishTime: value.publishTime,
-					title: value.title,
-					authorName: value.authorName,
-					articleDesc: value.articleDesc,
-					articleCategory: value.articleCategory,
-					articleTags: value.articleTags,
-					wordNum: value.wordNum,
-					visitNum: value.visitNum,
-					likeNum: value.likeNum,
-				})
-			})
+			data.forEach(value => articleItem.push(value))
 		}
 	}
 }
@@ -171,6 +167,7 @@ async function getArticleList() {
 	.img {
 		width: 110vw;
 		height: 110vh;
+
 		img {
 			width: 100%;
 			height: 100%;
@@ -236,8 +233,7 @@ async function getArticleList() {
 }
 
 .content {
-	position: relative;
-	top:  calc(100vh);
+	margin-top: calc(100vh + 100px);
 	max-width: 1200px;
 	margin-left: auto;
 	margin-right: auto;
@@ -261,7 +257,7 @@ async function getArticleList() {
 		left: 50%;
 		background: #2d2d2d;
 	}
-}
 
+}
 
 </style>

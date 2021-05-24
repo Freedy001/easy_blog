@@ -47,9 +47,10 @@
 import {get, loadResource} from "../http";
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {addDarkClass} from "../utils/common";
+import {ElMessage} from "element-plus";
 const proxy:any = getCurrentInstance()?.proxy;
 let reSendLoading = ref(true)
-let timeout = ref(10)
+let timeout = ref(60)
 let runTime = reactive<any>({})
 function timeoutFun() {
 	const interval = setInterval(() => {
@@ -81,6 +82,7 @@ async function subscribe() {
 	if (response.code == 200) {
 		uuid=response.data
 		setTimeout(()=>{
+			timeout.value=60;
 			firstPage.value = 2
 		},500)
 	}else if (response.code == 3007) {
@@ -110,6 +112,12 @@ async function verify() {
 		verifyLoading.value=false
 		firstPage.value=3
 		localStorage.setItem("subscribe",uuid)
+	}else {
+		verifyLoading.value=false
+		ElMessage({
+			showClose: true,
+			message: response.msg
+		});
 	}
 }
 onMounted(()=>{

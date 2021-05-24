@@ -1,5 +1,6 @@
 package com.freedy.backend.service.impl;
 
+import com.freedy.backend.exception.ArgumentErrorException;
 import com.freedy.backend.utils.ResourceUrlUtil;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
 import com.freedy.backend.entity.vo.setting.CommonSettingVo;
@@ -22,6 +23,9 @@ import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.service.SettingService;
 
 
+/**
+ * @author Freedy
+ */
 @Service("settingService")
 public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> implements SettingService {
 
@@ -71,6 +75,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> i
             field.setAccessible(true);
             try {
                 Object value = field.get(settingVo);
+                if (value==null) throw new ArgumentErrorException();
                 if (value instanceof Boolean) {
                     entity.setValue(value.toString());
                 } else {

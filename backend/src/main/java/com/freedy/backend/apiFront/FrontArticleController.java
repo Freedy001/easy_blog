@@ -17,6 +17,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +46,6 @@ public class FrontArticleController {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-
     @ApiOperation("列出前台所有文章")
     @GetMapping("/list")
     public Result getArticleList(@RequestParam Map<String, Object> params) throws Exception {
@@ -65,6 +65,9 @@ public class FrontArticleController {
         if (optional.isEmpty()){
             throw new NoArticleException();
         }
+        // todo 文章参数统计
+
+
         ArticleEsModel esModel = optional.get();
         String html = MarkDown.render(esModel.getContent());
         esModel.setContent(html);
@@ -84,5 +87,6 @@ public class FrontArticleController {
         rabbitTemplate.convertAndSend(RabbitConstant.THIRD_PART_EXCHANGE_NAME,RabbitConstant.ARTICLE_LIKE_ROUTING_KEY, id);
         return Result.ok();
     }
+
 
 }

@@ -43,7 +43,7 @@
 			<template #default="scope">
 				<div class="status">
 					<span class="dot" :style="{'background-color':scope.row.dotColor}"></span>
-					<span class="test">{{ scope.row.articleStatus }}</span>
+					<span class="test">{{ scope.row.status }}</span>
 				</div>
 			</template>
 		</el-table-column>
@@ -67,12 +67,20 @@
 		>
 			<template #default="scope">
 				<el-button type="primary" size="mini" @click="doEdit(scope.row.id)" round>编辑</el-button>
-				<el-button type="success" size="mini" @click="doSetting(scope.row.id)" round>设置</el-button>
+				<el-button type="success" size="mini" @click="doSetting(scope.row.id,scope.row.articleStatus)" round>设置</el-button>
 				<el-button type="danger" size="mini" @click="doDel(scope.row.id)" round>删除</el-button>
 			</template>
 		</el-table-column>
 	</el-table>
+	<el-pagination
+			small
+			background
+			layout="prev, pager, next"
+			:page-count="totalPage"
+			@current-change="changePage">
+	</el-pagination>
 	<ArticleSettingDrawer :id="articleId"
+	                      :status="articleStatus"
 	                      :isOpenDrawer="drawer"
 	                      @saveCallback="save">
 
@@ -100,6 +108,7 @@ interface formData {
 	articleTags: Array<string>,
 	articleDesc: string,
 	commentNum: number,
+	status:string|number,
 	visitNum: number,
 	likeNum: number,
 	authorName: number,
@@ -109,43 +118,42 @@ interface formData {
 }
 let tableDate = reactive<Array<formData>>([])
 onMounted(async () => {
-	getData(null).then();
+	getData().then();
 })
 let page=1
+let totalPage=ref(1);
 /**
  * 获取文章数据
  */
-async function getData(pageNum:any|null){
+async function getData(){
 	let response;
-	if (pageNum){
-		response = await get(`/article/list?page=1&limit=${pageNum*20}`)
-	}else {
-		response = await get(`/article/list?page=${page}&limit=20`)
-	}
+	response = await get(`/article/list?page=${page}&limit=16`)
 	if (response.code == 200) {
+		tableDate.length=0
+		totalPage.value=response.data.totalPage;
 		const arr: Array<formData> = response.data.list
 		arr.forEach((value, index) => {
 			//文章状态 1:未发布 2:回收站 3:已发布 4:顶置 5:推荐
 			switch (value.articleStatus) {
 				case 1:
 					value.dotColor = '#fdf000'
-					value.articleStatus = '未发布'
+					value.status = '未发布'
 					break;
 				case 2:
 					value.dotColor = '#f6074e'
-					value.articleStatus = '回收站'
+					value.status = '回收站'
 					break;
 				case 3:
 					value.dotColor = '#52c41a'
-					value.articleStatus = '已发布'
+					value.status = '已发布'
 					break;
 				case 4:
 					value.dotColor = '#10fcf5'
-					value.articleStatus = '顶置'
+					value.status = '顶置'
 					break;
 				case 5:
 					value.dotColor = '#125ee3'
-					value.articleStatus = '推荐'
+					value.status = '推荐'
 					break;
 			}
 			tableDate.push(value)
@@ -157,7 +165,10 @@ async function getData(pageNum:any|null){
 		})
 	}
 }
-
+function changePage(currentPage:number) {
+	page=currentPage;
+	getData()
+}
 //点击编辑按钮 跳转到文章页面
 function doEdit(id:any) {
 	router.push({
@@ -168,8 +179,10 @@ function doEdit(id:any) {
 //设置回调
 let articleId=ref<string>();
 let drawer=ref(false)
+let articleStatus=ref<number|string>();
 //设置文章
-function doSetting(id:any) {
+function doSetting(id:any,status:any) {
+	articleStatus.value=status
 	articleId.value=id
 	drawer.value=!drawer.value
 }
@@ -193,6 +206,7 @@ async function save(form:any){
 		title: form.title,
 		publishTime: form.publishTime.getTime(),
 		isComment: form.isComment,
+		articleStatus:form.articleStatus,
 		isOverhead: form.isOverhead,
 		authorId: form.authorId,
 		articleCategoryId: form.category,
@@ -208,7 +222,8 @@ async function save(form:any){
 			type: 'success'
 		})
 		tableDate.length=0;
-		getData(page).then()
+		page=1;
+		getData().then()
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -230,7 +245,8 @@ async function doDel(id:any) {
 			type: 'success'
 		})
 		tableDate.length=0;
-		getData(page).then()
+		page=1;
+		getData().then()
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -238,11 +254,6 @@ async function doDel(id:any) {
 		})
 	}
 }
-
-watch(()=>store.state.scrollCount,(val)=>{
-	page++;
-	getData(null)
-})
 
 </script>
 
@@ -296,5 +307,9 @@ watch(()=>store.state.scrollCount,(val)=>{
 	.el-tag {
 		margin-left: 5px;
 	}
+}
+
+:deep(.el-table__body-wrapper.is-scrolling-none) {
+	margin-bottom: 50px;
 }
 </style>

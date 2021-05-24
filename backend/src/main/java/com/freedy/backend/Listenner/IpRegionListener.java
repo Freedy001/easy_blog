@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.entity.dto.IpRegionDto;
+import com.freedy.backend.entity.vo.comment.CommentVo;
 import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.service.ArticleService;
 import com.freedy.backend.service.CommentService;
@@ -11,6 +12,7 @@ import com.freedy.backend.utils.HttpUtil;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,9 @@ public class IpRegionListener {
 
     @Autowired
     private ArticleService articleService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queues = RabbitConstant.IP_REGION_QUEUE_NAME)
     public void handle(CommentEntity comment,Message message, Channel channel) throws IOException {

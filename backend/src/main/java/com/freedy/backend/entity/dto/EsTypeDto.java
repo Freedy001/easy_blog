@@ -12,4 +12,9 @@ public class EsTypeDto {
     private EsType type;
     private Long id;
     private Long publishTime;
+
+
+
+    //记录是否是顶置
+    private boolean isOverHead;
 }

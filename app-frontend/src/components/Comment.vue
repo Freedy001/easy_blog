@@ -11,11 +11,11 @@
 					placement="top"
 					title="success"
 					trigger="manual"
-					content="评论发布成功😎😎!"
+					:content="$store.state.indexSetting.examination?'评论成功请耐心等待管理员审核哦！':'评论发布成功😎!'"
 					v-model:visible="visible"
 			>
 				<template #reference>
-					<button type="button"  :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}" @click.stop="submit">SUBMIT
+					<button type="button" :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}" @click.stop="submit">SUBMIT
 					</button>
 				</template>
 			</el-popover>
@@ -37,7 +37,7 @@ defineEmit(['commentCB'])
 const {proxy}: any = getCurrentInstance();
 const router = useRoute();
 
-let comment = reactive({
+let comment = reactive<any>({
 	articleId: '',
 	username: '',
 	email: '',
@@ -216,13 +216,16 @@ onMounted(() => {
 	margin-left: 10px;
 	transition: all .3s ease;
 	&:hover{
-		background-color: #273753;
+		background-color: #e8e8e8;
 	}
 }
 
 .button-dark{
 	color: #c4c4c4;
 	background-color: #0d1117;
+	&:hover{
+		background-color: #273753;
+	}
 }
 
 @keyframes shake-horizontal {

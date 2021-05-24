@@ -81,6 +81,13 @@
 				</template>
 			</el-table-column>
 		</el-table>
+		<el-pagination
+				small
+				background
+				layout="prev, pager, next"
+				:page-count="totalPage"
+				@current-change="changePage">
+		</el-pagination>
 		<transition name="el-fade-in">
 			<FullScreen opacity="0.1" v-if="showReplayCard">
 				<div class="content">
@@ -107,6 +114,7 @@ import examine from '../assets/examine.svg'
 import close from '../assets/close.svg'
 import FullScreen from '../components/FullScreen.vue'
 import {useStore} from "vuex";
+
 const {proxy}: any = getCurrentInstance();
 defineComponent({
 	FullScreen,
@@ -134,43 +142,41 @@ onMounted(() => {
 })
 
 //多选框选中的ids
-let ids:any=[];
-function handleSelectionChange(val:[any]) {
-	ids.length=0;
+let ids: any = [];
+
+function handleSelectionChange(val: [any]) {
+	ids.length = 0;
 	val.forEach(value => {
 		ids.push(value.id)
 	})
 }
+
 let tableDate = reactive<Array<ITableData | any>>([])
 let page = 1;
 let hasMore = true
+let totalPage = ref(1)
 
 /**
  * 加载评论
  */
 async function getComment() {
-	const response = await get(`/comment/list?page=${page}&limit=20`);
+	const response = await get(`/comment/list?page=${page}&limit=10`);
 	if (response.code == 200) {
+		totalPage.value = response.data.totalPage
+		tableDate.length = 0
 		const data: Array<ITableData> = response.data.list;
 		if (data.length == 0) {
 			hasMore = false
 		}
-		if (page == 1) {
-			tableDate.length = 0
-		}
-		data.forEach((value, index) => {
-			tableDate.push(value)
-		})
+		data.forEach(value => tableDate.push(value))
 	}
 }
 
-//监听滚动加载更多数据
-watch(() => store.state.scrollCount, () => {
-	if (hasMore) {
-		page++;
-		getComment();
-	}
-})
+function changePage(currentPage: number) {
+	page = currentPage;
+	getComment()
+}
+
 let showReplayCard = ref(false)
 
 //关闭弹窗
@@ -188,11 +194,11 @@ async function doExamine(id: string) {
 
 //批量通过审核
 async function batchConfirm() {
-	let idsString:string='';
-	ids.forEach((value: string)=>{
-		idsString+=value+","
+	let idsString: string = '';
+	ids.forEach((value: string) => {
+		idsString += value + ","
 	})
-	const response = await get(`/comment/confirmExaminations?ids=${idsString.slice(0,-1)}`);
+	const response = await get(`/comment/confirmExaminations?ids=${idsString.slice(0, -1)}`);
 	if (response.code == 200) {
 		success("成功！")
 	}
@@ -234,9 +240,9 @@ async function doDel(id: string) {
 }
 
 async function batchDel() {
-	let idsString:string='';
-	ids.forEach((value: string)=>{
-		idsString+=value+","
+	let idsString: string = '';
+	ids.forEach((value: string) => {
+		idsString += value + ","
 	})
 	const response = await get(`/comment/delete?ids=${idsString}`);
 	if (response.code == 200) {
@@ -259,8 +265,6 @@ function success(msg: string) {
 		})
 	});
 }
-
-
 </script>
 
 <style scoped lang="scss">
@@ -278,7 +282,8 @@ function success(msg: string) {
 	margin-bottom: 0;
 	width: 50%;
 }
-.btn-area{
+
+.btn-area {
 	width: 100%;
 	display: flex;
 	justify-content: flex-end;
@@ -290,7 +295,7 @@ function success(msg: string) {
 	align-items: center;
 	justify-content: space-around;
 
-	.examine{
+	.examine {
 		width: 19px;
 		height: 19px;
 	}
@@ -394,6 +399,10 @@ function success(msg: string) {
 			margin-right: 20px;
 		}
 	}
+}
+
+:deep(.el-table__body-wrapper.is-scrolling-none){
+	margin-bottom: 50px;
 }
 
 

@@ -37,6 +37,10 @@ public class ArticleEsModel{
     @Field(type = FieldType.Integer)
     private Integer articleStatus;
 
+    @ApiModelProperty("文章顶置 0:可以评论 1:不能评论")
+    @Field(type = FieldType.Integer)
+    private Integer articleComment;
+
     @ApiModelProperty("分类名称")
     @Field(type = FieldType.Keyword)
     private String articleCategory;

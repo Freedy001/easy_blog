@@ -27,11 +27,11 @@ public class ArticleInfoVo implements Serializable {
     @ApiModelProperty("文章描述")
     private String articleDesc;
     @ApiModelProperty("评论数")
-    private int commentNum;
+    private Long commentNum;
     @ApiModelProperty("访问数")
-    private int visitNum;
+    private Long visitNum;
     @ApiModelProperty("点赞数")
-    private int likeNum;
+    private Long likeNum;
     @ApiModelProperty("作者信息")
     private String authorName;
     @ApiModelProperty("文章字数")

@@ -132,7 +132,7 @@ import {defineComponent, getCurrentInstance, onMounted, reactive, ref, watch} fr
 import {get, getFrontApi, loadResource, post} from "../http";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import {ElMessage} from "element-plus";
-import {copyProperties} from "../util/Common.ts";
+import {copyProperties} from "../util/Common";
 import {useRoute} from "vue-router";
 const {proxy}:any = getCurrentInstance();
 defineComponent({
@@ -174,13 +174,22 @@ let triangle = reactive({
 	"border-bottom": "500vh solid rgba(45, 37, 73, 0.7)"
 })
 watch(() => common.indexColor, () => {
-	console.log(`500vh solid ${common.indexColor}`)
 	triangle["border-bottom"] = `500vh solid ${common.indexColor}`
 })
 
 let loading = ref(false)
 //建议数据
 let recommend = reactive<any>([])
+
+watch(()=>common.indexArticle.id,(val)=>{
+	recommend.forEach((item: { id: any,label:any })=>{
+		if (item.id==val){
+			common.indexArticle.title=item.label
+		}
+	})
+})
+
+
 //获取文章建议
 async function querySearch(queryString: string) {
 	loading.value=true
@@ -227,9 +236,10 @@ async function initCommonValue() {
 	const response = await get('/setting/getCommonSetting');
 	if (response.code == 200) {
 		const data: any | ICommon = response.data;
-		Object.keys(data).forEach((key, index) => {
-			common[key] = data[key];
-		})
+		copyProperties(data,common)
+		// Object.keys(data).forEach((key, index) => {
+		// 	common[key] = data[key];
+		// })
 		recommend.push({
 			id:data.indexArticle.id,
 			label:data.indexArticle.title,
@@ -335,13 +345,12 @@ async function savaComment() {
 		});
 	}
 }
-//********************************其他设置**************************************
+//********************************关于页面**************************************
 let article = reactive<any>({})
 onMounted(async () => {
 	const response = await getFrontApi('/frontend/article/get?id=1')
 	if (response.code == 200) {
 		copyProperties(response.data, article)
-		console.log(article)
 	}
 })
 

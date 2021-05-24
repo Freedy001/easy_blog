@@ -32,18 +32,23 @@
 		<transition enter-active-class="slide-in-left" leave-active-class="slide-out-left">
 			<div class="table-of-content" :class="addDarkClass()" v-show="showToc" id="toc"></div>
 		</transition>
-		<Comment :id="$route.query.id" class="comment-component" @commentCB="commentCB"></Comment>
-		<div class="comment-header" v-if="article.commentNum!=0">
-			<span id="CommentList">Comment List</span>
-			<span>({{ article.commentNum }})</span>
+		<div v-if="article.articleComment==0">
+			<Comment :id="$route.query.id" class="comment-component" @commentCB="commentCB"></Comment>
+			<div class="comment-header" v-if="article.commentNum!=0">
+				<span id="CommentList">Comment List</span>
+				<span>({{ article.commentNum }})</span>
+			</div>
+			<div v-else class="no-comment">呜呜呜😭~没有评论,你赶紧评论一个吧！</div>
+			<transition-group enter-active-class="slide-in-bck-top">
+				<CommentList class="comment-list" @commentCB="commentCB" :commentItem="item" :key="item.id"
+				             v-for="item in commentItem"></CommentList>
+			</transition-group>
+			<div>
+				<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
+			</div>
 		</div>
-		<div v-else class="no-comment">呜呜呜😭~没有评论,你赶紧评论一个吧！</div>
-		<transition-group enter-active-class="slide-in-bck-top">
-			<CommentList class="comment-list" @commentCB="commentCB" :commentItem="item" :key="item.id"
-			             v-for="item in commentItem"></CommentList>
-		</transition-group>
-		<div>
-			<LoadMore v-if="isShow" :hasMore="hasMore"></LoadMore>
+		<div class="no-comment" v-else>
+			博主关闭了该文章的评论功能
 		</div>
 		<UserInfo :startX="userInfo.x" :stratY="userInfo.y" :nickname="userInfo.nickname"></UserInfo>
 	</div>
@@ -62,6 +67,7 @@ import FullScreenLoading from "../components/FullScreenChanging.vue";
 import {ElMessage} from "element-plus";
 import {addDarkClass, copyProperties, isDarkMode} from "../utils/common";
 import {useStore} from "vuex";
+
 const route = useRoute();
 const router = useRouter();
 defineComponent({
@@ -76,7 +82,7 @@ watch(() => route.query.id, () => {
 	page = 1
 	getComments()
 })
-let isOk=ref()
+let isOk = ref()
 //用户介绍
 let userInfo = reactive<any>({})
 
@@ -139,6 +145,7 @@ onMounted(() => {
 		showWave.value = true
 	}
 })
+
 //以下是加载文章
 interface IArticle {
 	id: number | string,
@@ -158,6 +165,7 @@ onMounted(async () => {
 	loadArticle().then()
 	getComments().then()
 })
+
 /**
  * 加载样式
  */
@@ -165,20 +173,22 @@ function loadStyle() {
 	const head = document.getElementsByTagName('head')[0];
 	const mdLink = document.createElement('link');
 	const hjLink = document.createElement('link');
-	mdLink.href = loadResource(isDarkMode()?'/resource/md-dark.css':'/resource/md.css')
+	mdLink.href = loadResource(isDarkMode() ? '/resource/md-dark.css' : '/resource/md.css')
 	mdLink.setAttribute("rel", "stylesheet")
 	mdLink.setAttribute("class", "md-css")
-	hjLink.href = loadResource(isDarkMode()?'/resource/hj-dark.css':'/resource/hj.css')
+	hjLink.href = loadResource(isDarkMode() ? '/resource/hj-dark.css' : '/resource/hj.css')
 	hjLink.setAttribute("rel", "stylesheet")
 	hjLink.setAttribute("class", "md-css")
 	head.appendChild(mdLink);
 	head.appendChild(hjLink);
 }
+
 const store = useStore();
-watch(()=>store.state.darkMode,()=>{
+watch(() => store.state.darkMode, () => {
 	clearStyle()
 	loadStyle()
 })
+
 /**
  * 清除样式 防止干扰其他页面
  */
@@ -191,11 +201,12 @@ function clearStyle() {
 }
 
 onBeforeRouteLeave((to, from, next) => {
-	setTimeout(()=>{
+	setTimeout(() => {
 		clearStyle()
-	},300)
+	}, 300)
 	next();
 })
+
 /**
  * 文章
  */
@@ -218,21 +229,24 @@ let hasMore = ref(true)
 let isShow = ref(false)
 let articleContainer = reactive({})
 let showToc = ref(false)
+let scrollFlag = true;
+let prevNode: any;
+
 /**
  * 生成文章目录
  */
 function generateTOC() {
 	setTimeout(() => {
 		//评论组件
-		const comment:any  = document.getElementsByClassName("comment-component");
+		const comment: any = document.getElementsByClassName("comment-component");
 		//文章组件
-		const markdown:any  = document.getElementById("markdown");
-		const childrenEle:any = markdown.children;
-		const tocContainer:any  = document.createElement('ul');
+		const markdown: any = document.getElementById("markdown");
+		const childrenEle: any = markdown.children;
+		const tocContainer: any = document.createElement('ul');
 		let scrollTopObj: any = [];
 		for (let i = 0; i < childrenEle.length; i++) {
 			const currentEle: HTMLElement = childrenEle[i];
-			const tagName:any  = currentEle.tagName;
+			const tagName: any = currentEle.tagName;
 			if (tagName == 'H1' || tagName == 'H2' || tagName == 'H3' || tagName == 'H4' || tagName == 'H5' || tagName == 'H6') {
 				//当标签时h1-h6时,为其生成目录
 				const eleItem = document.createElement('li');
@@ -252,21 +266,28 @@ function generateTOC() {
 						top: currentEle.offsetTop,
 						behavior: "smooth"
 					});
+					scrollFlag = false;
+					if (prevNode) {
+						prevNode.style.color = ''
+					}
+					eleItem.style.color = '#3eaf7c'
+					setTimeout(() => {
+						scrollFlag = true
+					}, 1000)
 				})
 				tocContainer.appendChild(eleItem)
 			}
 		}
-		const toc:any  = document.getElementById("toc");
+		const toc: any = document.getElementById("toc");
 		toc.appendChild(tocContainer)
 		//*************************以上是生成目录*************************
 		let prev = Date.now();
-		let prevNode:any ;
 		//设置目录高亮的回显
 		document.body.onscroll = ({srcElement}: any) => {
 			const scroll: HTMLElement = srcElement.scrollingElement
 			let now = Date.now();
 			//节流
-			if (now - prev > 50) {
+			if (now - prev > 1) {
 				//do sth...
 				try {
 					//调整位置
@@ -275,7 +296,7 @@ function generateTOC() {
 					} else {
 						showToc.value = false;
 					}
-					if (scroll.scrollTop>comment[0].offsetTop-scroll.clientHeight){
+					if (article.articleComment == 0 && scroll.scrollTop > (comment[0].offsetTop - scroll.clientHeight) + 300) {
 						showToc.value = false;
 					}
 					//滚动加载评论
@@ -286,18 +307,17 @@ function generateTOC() {
 							isShow.value = !hasMore.value;
 						})
 					}
-
-					scrollTopObj.forEach((item :any , index:any ) => {
-						if (item > scroll.scrollTop - 50 && item < scroll.scrollTop + 50) {
+					scrollTopObj.forEach((item: any, index: any) => {
+						if (item > scroll.scrollTop - 50 && item < scroll.scrollTop + 50 && scrollFlag) {
 							//当满足条件时回显 目录高亮
 							if (prevNode) {
-								prevNode.style.color = '#2c3e50'
+								prevNode.style.color = ''
 							}
-							const item:any  = document.querySelector(`.li-${index}`);
+							const item: any = document.querySelector(`.li-${index}`);
 							prevNode = item;
 							item.style.color = '#3eaf7c'
 							toc.scrollTo({
-								top: item.offsetTop,
+								top: item.offsetTop - 300,
 								behavior: "smooth"
 							})
 							//通过异常机制退出循环
@@ -322,8 +342,10 @@ interface ICommentItem {
 	creatTime: string,
 	child: Array<ICommentItem>
 }
+
 let commentItem = reactive<Array<ICommentItem>>([])
 let page = 1;
+
 /**
  * 加载评论
  */
@@ -347,18 +369,26 @@ async function getComments() {
  * 评论成功的回调
  */
 async function commentCB(data: any) {
-	commentItem.length = 0
-	getComments().then(() => {
-		const element: any = document.getElementById("CommentList")
-		window.scrollTo({
-			top: element.offsetTop,
-			behavior: "smooth"
-		});
+	if (store.state.indexSetting.examination) {
 		ElMessage({
 			showClose: true,
-			message: '评论发布成功😎😎!'
+			message: '评论成功请耐心等待管理员审核哦！'
 		});
-	})
+	} else {
+		commentItem.length = 0
+		page = 1
+		getComments().then(() => {
+			const element: any = document.getElementById("CommentList")
+			window.scrollTo({
+				top: element.offsetTop,
+				behavior: "smooth"
+			});
+			ElMessage({
+				showClose: true,
+				message: '评论发布成功😎😎!'
+			});
+		})
+	}
 }
 </script>
 
@@ -557,7 +587,7 @@ async function commentCB(data: any) {
 	text-decoration: none;
 }
 
-.no-comment{
+.no-comment {
 	text-align: center;
 	margin: 100px auto;
 	width: 850px;
@@ -603,6 +633,7 @@ async function commentCB(data: any) {
 	border-radius: 10px;
 	overscroll-behavior: contain;
 	user-select: none;
+
 	&::-webkit-scrollbar-thumb {
 		/*滚动条里面小方块*/
 		border-radius: 10px;
@@ -626,6 +657,7 @@ async function commentCB(data: any) {
 
 	:deep(li) {
 		cursor: pointer;
+
 		&:hover {
 			color: #43AF78;
 		}
@@ -666,9 +698,10 @@ async function commentCB(data: any) {
 	}
 }
 
-.table-of-content.dark{
+.table-of-content.dark {
 	color: #a0c4ff;
 	background-color: #0d1117;
+
 	&::-webkit-scrollbar-thumb {
 		/*滚动条里面小方块*/
 		border-radius: 10px;
@@ -678,6 +711,7 @@ async function commentCB(data: any) {
 
 	:deep(li) {
 		cursor: pointer;
+
 		&:hover {
 			color: #43AF78;
 		}
@@ -689,22 +723,25 @@ async function commentCB(data: any) {
 
 }
 
-@font-face{
+@font-face {
 	font-family: 'JetBrains Mono';
 	src: url('../assets/JetBrainsMono-Regular.woff2') format('woff2'),
 	url('../assets/JetBrainsMono-Regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
-#markdown{
-	:deep(.hljs){
+
+#markdown {
+	:deep(.hljs) {
 		font-family: 'JetBrains Mono';
 	}
 }
+
 //目录移动动画
 .slide-in-left {
 	animation: slide-in-left 0.5s ease both;
 }
+
 @keyframes slide-in-left {
 	0% {
 		transform: translateX(-300px);
@@ -715,9 +752,11 @@ async function commentCB(data: any) {
 		opacity: 1;
 	}
 }
+
 .slide-out-left {
 	animation: slide-out-left 0.5s ease both;
 }
+
 @keyframes slide-out-left {
 	0% {
 		transform: translateX(0);
@@ -728,10 +767,12 @@ async function commentCB(data: any) {
 		opacity: 0;
 	}
 }
+
 //文章移动动画
-.to-center{
+.to-center {
 	animation: to-center 0.5s ease both;
 }
+
 @keyframes to-center {
 	0% {
 		transform: translateX(0);
@@ -742,9 +783,11 @@ async function commentCB(data: any) {
 		transform: translateX(-50%);
 	}
 }
-.to-right{
+
+.to-right {
 	animation: to-right 0.5s ease both;
 }
+
 @keyframes to-right {
 	0% {
 		left: 50%;

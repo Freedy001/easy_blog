@@ -1,5 +1,6 @@
 package com.freedy.backend.apiFront;
 
+import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.utils.IPUtil;
 import com.freedy.backend.utils.PageUtils;
@@ -27,15 +28,15 @@ public class FrontCommentController {
     @Autowired
     private CommentService commentService;
 
-    @Value("#{loadSetting.examination}")
-    private Boolean examination;
+    @Autowired
+    private LoadSetting setting;
 
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @ApiOperation("发布评论")
     @PostMapping("/publish")
     public Result publishComment(@RequestBody CommentEntity comment, HttpServletRequest httpRequest){
         comment.setIp(IPUtil.getRemoteIpAddr(httpRequest));
-        comment.setCommentStatus(examination ? 0 : 1);
+        comment.setCommentStatus(setting.getExamination() ? 0 : 1);
         commentService.publishComment(comment);
         return Result.ok();
     }

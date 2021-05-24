@@ -48,8 +48,8 @@ public class ArticleController {
         return Result.ok().setData(articleService.getArticle(id));
     }
 
+    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME, allEntries = true)
     @RecordLog(type = RecordEnum.ARTICLE)
-    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
     @ApiOperation("保存或修改文章")
     @PostMapping("/saveOrUpdate")
     public Result saveOrUpdateArticle(@RequestBody ArticleVo article) throws ExecutionException, InterruptedException {

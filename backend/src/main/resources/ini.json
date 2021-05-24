@@ -1,0 +1,18 @@
+{
+  "blogTitle": "哈哈",
+  "emailAuthentication": "EPGQIUWTXDOCEIIG",
+  "emailFrom": "freedyamazing@126.com",
+  "emailHostName": "smtp.126.com",
+  "examination": true,
+  "footInfo": "example",
+  "indexArticleIdAndTitle": "",
+  "indexColor": "rgba(116, 116, 116, 0.2)",
+  "logo": "/resource/easyBlog.svg",
+  "newCommentNotification": true,
+  "poster": "/resource/StarrySky.jpg",
+  "replayNotification": true,
+  "senderName": "Freedy I LOVE YOU HAHAHA",
+  "setupTime": "1619530585804",
+  "sslPort": "465",
+  "webSiteDomainName": "https://www.example.com"
+}

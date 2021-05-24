@@ -6,8 +6,6 @@ import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.entity.vo.comment.CommentAdminVo;
 import com.freedy.backend.entity.vo.comment.CommentVo;
 import com.freedy.backend.exception.ArgumentErrorException;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,12 +31,11 @@ import com.freedy.backend.service.CommentService;
 import static com.freedy.backend.constant.RabbitConstant.*;
 
 
+/**
+ * @author Freedy
+ */
 @Service("commentService")
 public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> implements CommentService {
-
-    @Autowired
-    private RedissonClient redissonClient;
-
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -114,20 +114,15 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         if (comment.getFatherCommentId() != null) {
             CommentEntity fatherEntity = baseMapper.selectById(comment.getFatherCommentId());
             comment.setFlore(fatherEntity.getFlore());
-            //发送异步消息去发送邮件
-            if (comment.getCommentStatus()==1) {
-                //发布状态的评论 以方式异步发送邮件通知对方
-                rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
-            }
         } else {
             Integer topFlore;
-            RLock lock = redissonClient.getLock("lock");
+            ReentrantLock reentrantLock = new ReentrantLock();
+            reentrantLock.lock();
             try {
                 //加锁防止获取到相同楼层
-                lock.lock(30, TimeUnit.SECONDS);
                 topFlore = baseMapper.getTopFlore(comment.getArticleId());
             } finally {
-                lock.unlock();
+                reentrantLock.unlock();
             }
             if (topFlore == null) {
                 comment.setFlore(1);
@@ -136,8 +131,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             }
         }
         baseMapper.insert(comment);
+        //发布状态的评论 以方式异步发送邮件通知对方
+        rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
         //利用异步方式获取ip地区并保存数据库  这里使用异步的原因主要是因为地区查询接口有请求限制，可能会很慢从而使用户体验不好
-        rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME,IP_REGION_ROUTING_KEY,comment);
+        rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, IP_REGION_ROUTING_KEY, comment);
     }
 
     @Override
@@ -146,11 +143,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             List<CommentAdminVo> vos = baseMapper.getAdminCommentList(utils);
             List<String> list = vos.stream().map(CommentAdminVo::getId).collect(Collectors.toList());
-            if (list.size()>0){
+            if (list.size() > 0) {
                 baseMapper.readAll(list);
             }
             utils.setList(vos);
-        },executor);
+        }, executor);
         utils.setTotalCount(count());
         f1.get();
         return utils;
@@ -193,8 +190,9 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
      * 找到与之关联的所有子节点
      * 并将找到的节点id添加到删除list中
      * 方便批量删除
-     * @param deleteIds 删除id list
-     * @param parentComment 父实体类
+     *
+     * @param deleteIds               删除id list
+     * @param parentComment           父实体类
      * @param commentEntitiesAndFlore 所有实体类
      */
     private void buildDeleteIds(List<Long> deleteIds,
@@ -212,6 +210,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
 
     @Override
     public void confirmExaminations(List<Long> asList) {
+        //邮件通知
+        rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, asList);
         baseMapper.confirmExaminations(asList);
     }
 

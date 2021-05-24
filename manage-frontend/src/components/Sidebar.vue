@@ -20,37 +20,37 @@
 			</div>
 			<el-menu
 					mode="horizontal"
-					:default-active="$router.currentRoute.value.path"
+					:default-active="currentTab"
 					router
 			>
-				<el-menu-item index="/index">
+				<el-menu-item index="/index" @click="$store.commit('changeClickTab','/index')">
 					<i class="el-icon-help"></i>
 					<span>仪表盘</span>
 				</el-menu-item>
 				<div class="divide-line"></div>
-				<el-menu-item index="/index/article">
+				<el-menu-item index="/index/article" @click="$store.commit('changeClickTab','/index/article')">
 					<i class="el-icon-help"></i>
 					<span>发布文章</span>
 				</el-menu-item>
-				<el-menu-item index="/index/articleList">
+				<el-menu-item index="/index/articleList" @click="$store.commit('changeClickTab','/index/articleList')">
 					<i class="el-icon-help"></i>
 					<span>文章列表</span>
 				</el-menu-item>
-				<el-menu-item index="/index/category&tag">
+				<el-menu-item index="/index/category&tag" @click="$store.commit('changeClickTab','/index/category&tag')">
 					<i class="el-icon-help"></i>
 					<span>分类与标签</span>
 				</el-menu-item>
-				<el-menu-item index="/index/comment">
+				<el-menu-item index="/index/comment" @click="$store.commit('changeClickTab','/index/comment')">
 					<i class="el-icon-help"></i>
 					<span>评论</span>
 					<span class="badge">{{notReadNum}}</span>
 				</el-menu-item>
-				<el-menu-item index="/index/user">
+				<el-menu-item index="/index/user" @click="$store.commit('changeClickTab','/index/user')">
 					<i class="el-icon-help"></i>
 					<span>用户</span>
 				</el-menu-item>
 				<div class="divide-line"></div>
-				<el-menu-item index="/index/setting">
+				<el-menu-item index="/index/setting" @click="$store.commit('changeClickTab','/index/setting')">
 					<i class="el-icon-help"></i>
 					<span>设置</span>
 				</el-menu-item>
@@ -76,7 +76,10 @@ async function lg() {
 	await logout()
 	await router.push('/login')
 }
-
+let currentTab=ref(router.currentRoute.value.path)
+watch(()=>store.state.currentTab,(val:string)=>{
+	currentTab.value=val.split('*')[0];
+})
 let nickname = ref()
 let headImg = ref()
 let notReadNum=ref(0)
@@ -103,6 +106,10 @@ async function getNotReadNum(){
 		notReadNum.value=num.data;
 	}
 }
+
+
+
+
 
 </script>
 

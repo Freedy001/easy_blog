@@ -19,6 +19,8 @@
 		<Menu v-if="isShowMenu" @clickCb="isShowMenu=false"></Menu>
 	</transition>
 	<FullScreenChanging v-if="$store.state.modeChanging"></FullScreenChanging>
+	<div id="footer" v-html="$store.state.indexSetting.footInfo">
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -29,6 +31,7 @@ import FullScreenChanging from './components/FullScreenChanging.vue'
 import router from "./router";
 import {get, loadResource} from "./http";
 import {useStore} from "vuex";
+
 const store = useStore();
 defineComponent({
 	LoadingTab,
@@ -52,13 +55,13 @@ onMounted(() => {
 })
 watch(() => store.state.darkMode, modeChange)
 
-function modeChange(val:boolean) {
+function modeChange(val: boolean) {
 	if (val) {
-		document.body.style.backgroundColor='#0d1117'
-		document.body.style.color='#b8b8b8'
+		document.body.style.backgroundColor = '#0d1117'
+		document.body.style.color = '#b8b8b8'
 	} else {
-		document.body.style.backgroundColor='#ffffff'
-		document.body.style.color='#000000'
+		document.body.style.backgroundColor = '#ffffff'
+		document.body.style.color = '#000000'
 	}
 }
 
@@ -78,11 +81,11 @@ function heartBeat() {
 		const sys = await get('/sys/heartbeat');
 		const split = ("" + sys.code).split(',');
 		split.forEach((item: any) => {
-			if (sys.code == 205) {
+			if (item == 205) {
 				//重新加载设置
 				getIndexSetting().then();
 			}
-			if (sys.code == 206) {
+			if (item == 206) {
 				store.commit('notifyReloadArticle')
 			}
 		})
@@ -144,6 +147,12 @@ function heartBeat() {
 			}
 		}
 	}
+}
+
+#footer {
+	width: 100%;
+	display: flex;
+	justify-content: center;
 }
 
 .fade-in-right {
@@ -210,6 +219,7 @@ function heartBeat() {
 * {
 	margin: 0;
 	padding: 0;
+
 	&::selection {
 		background: rgb(132, 239, 112);
 		color: #000000;

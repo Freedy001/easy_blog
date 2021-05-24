@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.service.SettingService;
@@ -48,9 +49,14 @@ public class SettingController {
         CommonSettingVo settingVo = new CommonSettingVo();
         BeanUtils.copyProperties(loadSetting, settingVo);
         CommonSettingVo.IndexArticle article = new CommonSettingVo.IndexArticle();
-        String[] split = loadSetting.getIndexArticleIdAndTitle().split(",", 2);
-        article.setId(split[0]);
-        article.setTitle(split[1]);
+        if (StringUtils.hasText(loadSetting.getIndexArticleIdAndTitle())) {
+            String[] split = loadSetting.getIndexArticleIdAndTitle().split(",", 2);
+            article.setId(split[0]);
+            article.setTitle(split[1]);
+        }else {
+            article.setId("");
+            article.setTitle("");
+        }
         settingVo.setIndexArticle(article);
         return Result.ok().setData(settingVo);
     }
@@ -63,7 +69,7 @@ public class SettingController {
         settingService.saveCommonSetting(settingVo);
         loadSetting.refreshSetting();
         //通知前台页面
-        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(), ResultCode.NOTIFY_INDEX_SETTING.name(),5, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(), ResultCode.NOTIFY_INDEX_SETTING.name(), 5, TimeUnit.SECONDS);
         return Result.ok();
     }
 
@@ -102,6 +108,8 @@ public class SettingController {
     public Result saveCommentSetting(@RequestBody CommentSettingVo commentSettingVo) {
         settingService.saveComment(commentSettingVo);
         loadSetting.refreshSetting();
+        //通知前台页面
+        redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(), ResultCode.NOTIFY_INDEX_SETTING.name(), 5, TimeUnit.SECONDS);
         return Result.ok();
     }
 

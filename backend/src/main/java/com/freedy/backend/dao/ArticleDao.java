@@ -82,4 +82,9 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * @param id 文章id
      */
     void likeArticle(Long id);
+
+    /**
+     * 获取指定文章的作者邮箱
+     */
+    String getCreatorEmailByArticleId(Long articleId);
 }

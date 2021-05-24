@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.constant.RedisConstant;
+import com.freedy.backend.entity.vo.setting.CommentSettingVo;
 import com.freedy.backend.exception.EmailAlreadyExistsException;
 import com.freedy.backend.exception.VerifyErrorException;
 import com.freedy.backend.utils.*;
@@ -22,6 +23,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,17 +96,35 @@ public class FrontSysController {
     public Result getIndexSetting() {
         CommonSettingVo settingVo = new CommonSettingVo();
         BeanUtils.copyProperties(loadSetting, settingVo);
-        ArticleEntity article = articleService.getOne(new QueryWrapper<ArticleEntity>()
-                .lambda().eq(ArticleEntity::getId,
-                        Long.parseLong(loadSetting.getIndexArticleIdAndTitle().split(",")[0]))
-        );
-        CommonSettingVo.IndexArticle indexArticle = new CommonSettingVo.IndexArticle();
-        indexArticle.setId(article.getId().toString());
-        indexArticle.setTitle(article.getTitle());
-        indexArticle.setArticleDesc(article.getArticleDesc());
-        indexArticle.setPublishTime(DateUtils.formatChineseDate(article.getPublishTime()));
-        settingVo.setIndexArticle(indexArticle);
-        return Result.ok().setData(settingVo);
+        if (StringUtils.hasText(loadSetting.getIndexArticleIdAndTitle())){
+            //构建首页文章
+            ArticleEntity article = articleService.getOne(new QueryWrapper<ArticleEntity>()
+                    .lambda().eq(ArticleEntity::getId,
+                            Long.parseLong(loadSetting.getIndexArticleIdAndTitle().split(",")[0]))
+            );
+            CommonSettingVo.IndexArticle indexArticle = new CommonSettingVo.IndexArticle();
+            indexArticle.setId(article.getId().toString());
+            indexArticle.setTitle(article.getTitle());
+            indexArticle.setArticleDesc(article.getArticleDesc());
+            indexArticle.setPublishTime(DateUtils.formatChineseDate(article.getPublishTime()));
+            settingVo.setIndexArticle(indexArticle);
+        }
+        CommentSettingVo commentSettingVo = new CommentSettingVo();
+        BeanUtils.copyProperties(loadSetting, commentSettingVo);
+        //将对象转换为map
+        HashMap<Object, Object> settingMap = Arrays.stream(BeanUtils.getPropertyDescriptors(settingVo.getClass()))
+                .filter(itm -> !"class".equals(itm.getName()))
+                .collect(HashMap::new,
+                        (map, pd) -> map.put(pd.getName(), ReflectionUtils.invokeMethod(pd.getReadMethod(), settingVo)),
+                        HashMap::putAll);
+        HashMap<Object, Object> commentSettingMap = Arrays.stream(BeanUtils.getPropertyDescriptors(commentSettingVo.getClass()))
+                .filter(itm -> !"class".equals(itm.getName()))
+                .collect(HashMap::new,
+                        (map, pd) -> map.put(pd.getName(), ReflectionUtils.invokeMethod(pd.getReadMethod(), commentSettingVo)),
+                        HashMap::putAll);
+        //连接在一起返回
+        settingMap.putAll(commentSettingMap);
+        return Result.ok().setData(settingMap);
     }
 
     @ApiOperation("心跳接口,用于统计数据与通知客户端最新变化")

@@ -1,23 +1,23 @@
 <!--suppress JSUnresolvedVariable -->
 <template>
-<div class="root">
-	<div class="indexContainer">
-		<div class="title-row">
-			<h1>{{ $store.state.articleTitle === '' ? '新文章' : $store.state.articleTitle }}</h1>
-			<div>
-				<el-button type="danger" @click="saveDraft">保存草稿</el-button>
-				<el-button type="primary" @click="publishArticle">发布</el-button>
+	<div class="root">
+		<div class="indexContainer">
+			<div class="title-row">
+				<h1>{{ $store.state.articleTitle === '' ? '新文章' : $store.state.articleTitle }}</h1>
+				<div>
+					<el-button type="danger" @click="saveDraft">保存草稿</el-button>
+					<el-button type="primary" @click="publishArticle">发布</el-button>
+				</div>
 			</div>
+			<el-input v-model="$store.state.articleTitle" placeholder="请输入标题"></el-input>
 		</div>
-		<el-input v-model="$store.state.articleTitle" placeholder="请输入标题"></el-input>
+		<editor :initText="initArticle" @getArticle="getArticle"></editor>
+		<ArticleSettingDrawer :id="$route.query.id"
+		                      :isOpenDrawer="drawer"
+		                      @saveCallback="save"
+		                      @content="getContent"
+		></ArticleSettingDrawer>
 	</div>
-	<editor :initText="initArticle" @getArticle="getArticle"></editor>
-	<ArticleSettingDrawer :id="$route.query.id"
-	                      :isOpenDrawer="drawer"
-	                      @saveCallback="save"
-	                      @content="getContent"
-	></ArticleSettingDrawer>
-</div>
 </template>
 
 <script setup lang="ts">
@@ -25,8 +25,9 @@ import {defineComponent, getCurrentInstance, onMounted, ref} from "vue";
 import editor from '../components/MarkdownContainer.vue';
 import ArticleSettingDrawer from '../components/ArticleSettingDrawer.vue'
 import {get, post} from "../http";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
+
 defineComponent({
 	editor,
 	ArticleSettingDrawer
@@ -37,10 +38,11 @@ const store = useStore();
 //是否打开侧边栏
 let drawer = ref(false)
 // noinspection TypeScriptExplicitMemberType
-const {proxy}:any = getCurrentInstance();
-let initArticle=ref<string>();
+const {proxy}: any = getCurrentInstance();
+let initArticle = ref<string>();
 //文章markdown文本
 let article = ref()
+
 /**
  * 同步markdown文本
  * 当修改markdown时
@@ -54,18 +56,18 @@ function getArticle(text: string) {
 /**
  * 对文章进行回显
  */
-function getContent(content:string){
-	initArticle.value=content
+function getContent(content: string) {
+	initArticle.value = content
 }
 
 /**
  * 保存或更改文章
  * @param form
  */
-async function save(form:any){
+async function save(form: any) {
 	let existedTags: Array<number> = []
 	let notExistedTag: Array<string> = []
-	form.tagValue.forEach((value:any, index:number) => {
+	form.tagValue.forEach((value: any, index: number) => {
 		if ((typeof value) == 'number') {
 			existedTags.push(value)
 		} else if ((typeof value) == 'string') {
@@ -79,6 +81,7 @@ async function save(form:any){
 		publishTime: form.publishTime.getTime(),
 		isComment: form.isComment,
 		isOverhead: form.isOverhead,
+		articleStatus:form.articleStatus,
 		authorId: form.authorId,
 		articleCategoryId: form.category,
 		articleDesc: form.desc,
@@ -92,9 +95,10 @@ async function save(form:any){
 			message: '保存成功!',
 			type: 'success'
 		})
-		if (route.query.id=='1'){
+		if (route.query.id == '1') {
 			await router.push('/index/setting?toForth=true');
-		}else {
+		} else {
+			article.value=''
 			await router.push('/index/articleList');
 		}
 	} else {
@@ -104,14 +108,15 @@ async function save(form:any){
 		})
 	}
 }
+
 /**
  * 保存到草稿
  */
-async function saveDraft(){
-	const response=await post('/article/saveDraft',{
-			id:route.query.id,//有就代表修改原来的文章和状态   无则创建新的草稿文章
-			title:store.state.articleTitle,
-			content:article.value
+async function saveDraft() {
+	const response = await post('/article/saveDraft', {
+		id: route.query.id,//有就代表修改原来的文章和状态   无则创建新的草稿文章
+		title: store.state.articleTitle,
+		content: article.value
 	})
 	if (response.code == 200) {
 		proxy.$notify({
@@ -129,31 +134,62 @@ async function saveDraft(){
 }
 
 function publishArticle() {
-	if (route.query.id=='1'){
+	if (route.query.id == '1') {
 		//id为1时 是关于页面
 		save({
-			publishTime:new Date(),
-			tagValue:[],
+			publishTime: new Date(),
+			tagValue: [],
 			authorId: 1,
-			title:'',
-			isComment:false,
-			isOverhead:false,
-			desc:'',
-			url:'',
+			title: '',
+			isComment: false,
+			isOverhead: false,
+			desc: '',
+			url: '',
 		})
-	}else {
+	} else {
 		drawer.value = !drawer.value
 	}
 }
-onMounted(()=>{
 
+onBeforeRouteLeave(async () => {
+	if (article.value == null || article.value == '') return true
+	setTimeout(() => {
+		store.commit('changeTab', '/index/article')
+	}, 100)
+	try {
+		if (!!(await proxy.$confirm('你的文章还没保存，你确定要离开吗?', '提示', {
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+			type: 'warning'
+		}))) {
+			setTimeout(() => {
+				store.commit('goClickTab')
+			}, 100)
+			return true;
+		}
+	} catch (e) {
+		return false
+	}
 })
+
+function clearAll() {
+	document.querySelectorAll(".el-menu.el-menu--horizontal li").forEach((item, i) => {
+		item.classList.forEach(name => {
+			if (name == 'is-active') {
+				item.classList.remove('is-active')
+				console.log(i)
+			}
+		})
+	})
+}
+
 </script>
 
 <style scoped lang="scss">
-.root{
+.root {
 	height: 100%;
 }
+
 .indexContainer {
 	.title-row {
 		margin: 0 20px 10px 20px;

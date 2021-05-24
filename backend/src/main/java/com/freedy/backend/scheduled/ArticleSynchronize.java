@@ -31,7 +31,7 @@ public class ArticleSynchronize {
      * 每天凌晨3点检查数据库与es 保证数据一致性
      */
     //todo 修改corn表达式
-    //@Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
+//    @Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
     @Scheduled(cron = "0 * * * * ?")
     public void synchronizeArticleEveryThreeClock(){
         log.info("开始检查ES与数据库中文章的数据!");
@@ -39,7 +39,7 @@ public class ArticleSynchronize {
         for (int i = 0; i < count/100+1; i++) {
             List<ArticleEsModel> ids=articleService.getEsArticleList(i+1,100);
             ids.forEach(item->{
-                if (item.getId()!=1){
+                if (item.getId()!=1&&item.getArticleStatus()>=3){
                     Optional<ArticleEsModel> optional = articleRepository.findById(item.getId());
                     if (optional.isPresent()) {
                         if (!optional.get().equals(item)) {

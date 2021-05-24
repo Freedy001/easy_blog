@@ -106,5 +106,9 @@ public interface ArticleService extends IService<ArticleEntity> {
      */
     ArticleEntity getAbout();
 
+    /**
+     * 获取指定文章的作者邮箱
+     */
+    String getCreatorEmailByArticleId(Long articleId);
 }
 

@@ -34,10 +34,8 @@ const routes: Array<RouteRecordRaw> = [
 const router= createRouter({
     history:createWebHashHistory(),
     routes,
-    scrollBehavior(to, from, savedPosition) {
-        return { top: 0 }
-    },
 })
+
 router.beforeEach((to, from, next) => {
     if (to.matched.length===0){
         next("/error")

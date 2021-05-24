@@ -31,6 +31,10 @@ spring:
       time-to-live: 3600000
       use-key-prefix: true
       cache-null-values: true
+  web:
+    resources:
+      static-locations:
+
 
 easy:
   thread:

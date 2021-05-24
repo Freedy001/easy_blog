@@ -19,14 +19,32 @@ public class EmailTemplate {
                 "  </div>";
     }
 
+    public static String commentArticleTemplate(String username, String commentTime,
+                                        String content,String articleUrl){
+        return "  <div style=\"display: flex;flex-direction: column;color: #424242;line-height: 20px\">\n" +
+                "    <h1>有人评论你的文章啦\uD83D\uDE00</h1>\n" +
+                "    <p style=\"margin: 8px 0;text-indent: 20px\">"+username+" 在 "+commentTime+"的时候给你的文章留言了</p>\n" +
+                "    <p style=\"margin: 8px 0;text-indent: 20px\">内容是:\""+content+"\"</p>\n" +
+                "    <p style=\"margin: 8px 0;text-indent: 20px\">赶紧去<a href=\""+articleUrl+"\" style=\"color:#fc0000\">article</a>查看吧!</p>\n" +
+                "  </div>";
+    }
+
     public static String subscribeTemplate(String email,String code){
-        return "<div class=\"qmbox qm_con_body_content qqmail_webmail_only\" id=\"mailContentContainer\" style=\"\">\n" +
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"html\">\n" +
+                "<head>\n" +
+                "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n" +
+                "  <title></title>\n" +
+                "  <meta charset=\"utf-8\"/>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "<div class=\"qmbox qm_con_body_content qqmail_webmail_only\" id=\"mailContentContainer\" style=\"\">\n" +
                 "  <style type=\"text/css\">\n" +
                 "    .qmbox body {\n" +
                 "      margin: 0;\n" +
                 "      padding: 0;\n" +
                 "      background: #fff;\n" +
-                "      font-family: \"Verdana, Arial, Helvetica, sans-serif\";\n" +
+                "      font-family: \"Verdana, Arial, Helvetica, sans-serif\",serif;\n" +
                 "      font-size: 14px;\n" +
                 "      line-height: 24px;\n" +
                 "    }\n" +
@@ -46,7 +64,7 @@ public class EmailTemplate {
                 "\n" +
                 "    .qmbox .title {\n" +
                 "      margin: 0 auto;\n" +
-                "      background: url() #CCC repeat-x;\n" +
+                "      background: #CCC repeat-x;\n" +
                 "      height: 30px;\n" +
                 "      text-align: center;\n" +
                 "      font-weight: bold;\n" +
@@ -145,14 +163,9 @@ public class EmailTemplate {
                 "      <b class=\"xtop\"><b class=\"xb1\"></b><b class=\"xb2\"></b><b class=\"xb3\"></b><b class=\"xb4\"></b></b>\n" +
                 "      <div class=\"xboxcontent\">\n" +
                 "        <div class=\"neirong\">\n" +
-                "          <p><b>请核对你的邮箱：</b><span id=\"userName\" class=\"font_darkblue\">"+email+"</span></p>\n" +
-                "          <p style=\"display:inline-block;margin: 20px 0 30px 10px\"><b>你的验证码是：</b>\n" +
-                "            <span class=\"font_lightblue\">\n" +
-                "            <span id=\"yzm\" onclick=\"return false;\"\n" +
-                "                  style=\"border-bottom: 1px dashed rgb(204, 204, 204);\n" +
-                "                   z-index: 1; position: static; font-size: 30px\">"+code+"</span>\n" +
-                "            </span>\n" +
-                "            <br><span class=\"font_gray\">(请输入该验证码完成验证，验证码30分钟内有效！)</span></p>\n" +
+                "          <p style=\"height: 50px\"><b>请核对你的邮箱：</b><span class=\"font_darkblue\">"+email+"</span></p>\n" +
+                "          <p style=\"height: 50px\"><b>你的验证码为：</b><span id=\"userName\" class=\"font_darkblue\">"+code+"</span></p>\n" +
+                "          <p><a href=\"#\" style=\"text-decoration: none;color: #3a9ff5\">赶紧去看看吧</a></p>\n" +
                 "          <div class=\"line\">如果你未申请订阅服务，请忽略该邮件。</div>\n" +
                 "        </div>\n" +
                 "      </div>\n" +
@@ -164,7 +177,9 @@ public class EmailTemplate {
                 "      display: none !important;\n" +
                 "    }\n" +
                 "  </style>\n" +
-                "</div>";
+                "</div>\n" +
+                "</body>\n" +
+                "</html>\n";
     }
 
     public static String articleNotifyTemplate(String url,String title) {

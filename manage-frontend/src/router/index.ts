@@ -3,13 +3,20 @@ import { RouteRecordRaw, createRouter,createWebHashHistory } from "vue-router";
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
-        redirect:'/login',
+        redirect:'/index',
+    },
+    {
+        path: "/error",
+        component:()=>import('../view/ErrorPage.vue'),
+        meta:{
+            notRequireAuth: true,  // 除此路由外，其他都需登录
+        }
     },
     {
         path: "/login",
         component:()=>import('../view/Login.vue'),
         meta:{
-            requireAuth: true,  // 除此路由外，其他都需登录
+            notRequireAuth: true,  // 除此路由外，其他都需登录
         }
     },
     {
@@ -56,7 +63,7 @@ const router= createRouter({
 
 
 router.beforeEach((to, from, next) => {
-    if (!to.meta.requireAuth) {
+    if (!to.meta.notRequireAuth) {
         if (localStorage.getItem("Authorization")) {  // 是否已登录
             next()
         } else {
@@ -66,5 +73,15 @@ router.beforeEach((to, from, next) => {
         next()
     }
 })
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.length===0){
+        next("/error")
+    }else {
+        next()
+    }
+})
+
+
 
 export default router

@@ -25,7 +25,10 @@ public class ArticleVo implements Serializable {
     private String content;
 
     @ApiModelProperty("发布时间")
-    private long publishTime;
+    private Long publishTime;
+
+    @ApiModelProperty("文章状态")
+    private Integer articleStatus;
 
     @ApiModelProperty("文章作者的id")
     private Integer authorId;

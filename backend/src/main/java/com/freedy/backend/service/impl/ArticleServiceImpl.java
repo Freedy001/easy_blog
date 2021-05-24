@@ -85,12 +85,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             articleList.forEach(item -> {
                 //设置日期
                 Date date = new Date();
-                if (!"0".equals(item.getPublishTime())) {
+                if (item.getPublishTime() != null) {
                     date.setTime(Long.parseLong(item.getPublishTime()));
                     item.setPublishTime(DateUtils.formatTime(date));
                 }
-                date.setTime(Long.parseLong(item.getUpdateTime()));
-                item.setUpdateTime(DateUtils.formatTime(date));
             });
             page.setList(articleList);
         }, executor);
@@ -130,7 +128,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.from((page - 1) * limit);
         builder.size(limit);
-        builder.sort("publishTime", SortOrder.DESC);
+        builder.sort("articleStatus", SortOrder.DESC).sort("publishTime", SortOrder.DESC);
         //构建需要返回的字段
         builder.fetchSource(null, new String[]{"content"});
         request.source(builder);
@@ -144,6 +142,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             BeanUtils.copyProperties(esModel, vo);
             vo.setId(esModel.getId().toString());
             vo.setPublishTime(DateUtils.formatChineseDate(esModel.getPublishTime()));
+            if (vo.getArticlePoster() == null) vo.setArticlePoster("/resource/pexels-johannes-plenio-3421812.jpg");
             infoVoList.add(vo);
         }
         return new PageUtils(infoVoList, Math.toIntExact(hits.getTotalHits().value), limit, page);
@@ -163,12 +162,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
+        //设置发布状态
+        entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
         if (article.getId() == null) {
             //获取作者消息
             entity.setAuthorId(authorId);
-            entity.setArticleStatus(article.getIsOverhead() ? EntityConstant.ARTICLE_Overhead : EntityConstant.ARTICLE_UNPUBLISHED);
-        } else {
-            entity.setArticleStatus(article.getIsOverhead() ? EntityConstant.ARTICLE_Overhead : null);
         }
         entity.setArticleComment(article.getIsComment() ?
                 EntityConstant.ARTICLE_CAN_COMMENT : EntityConstant.ARTICLE_CAN_NOT_COMMENT);
@@ -187,21 +185,22 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                 dto.setId(entity.getId());
                 dto.setType(EsType.SAVE);
                 dto.setPublishTime(entity.getPublishTime());
+                //判断是否顶置
+                dto.setOverHead(article.getIsOverhead());
                 rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
                         RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
                         dto);
             } else {
                 baseMapper.updateById(entity);
-                //只有在发布时间晚于现在才发消息
-                if (entity.getPublishTime() > System.currentTimeMillis()) {
-                    EsTypeDto dto = new EsTypeDto();
-                    dto.setId(entity.getId());
-                    dto.setType(EsType.UPDATE);
-                    dto.setPublishTime(entity.getPublishTime());
-                    rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
-                            RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
-                            dto);
-                }
+                EsTypeDto dto = new EsTypeDto();
+                dto.setId(entity.getId());
+                dto.setType(EsType.UPDATE);
+                dto.setPublishTime(entity.getPublishTime());
+                //判断是否顶置
+                dto.setOverHead(article.getIsOverhead());
+                rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                        RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
+                        dto);
             }
         }, executor);
         //创建用户新建的标签
@@ -244,7 +243,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         ArticleVo articleVo = new ArticleVo();
         BeanUtils.copyProperties(entity, articleVo);
         //设置发布状态
-        articleVo.setIsOverhead(entity.getArticleStatus().equals(EntityConstant.ARTICLE_Overhead));
+        articleVo.setIsOverhead(entity.getArticleStatus().equals(EntityConstant.ARTICLE_OVERHEAD));
         articleVo.setIsComment(entity.getArticleComment().equals(EntityConstant.ARTICLE_CAN_COMMENT));
         List<ArticleTagRelationEntity> relationList = relationService.list(new QueryWrapper<ArticleTagRelationEntity>()
                 .eq("article_id", entity.getId()));
@@ -257,14 +256,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     public void saveDraft(ArticleDraftVo draftVo) {
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(draftVo, entity);
+        entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
+        entity.setPublishTime(System.currentTimeMillis());
+        if (entity.getContent() != null) entity.setWordNum(Long.valueOf(MarkDown.countWords(entity.getContent())));
         if (entity.getId() != null) {
             //有id表示文章已经存在 这时要将文章状态转换为草稿状态 即未发布状态
-            entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
             entity.setUpdateTime(System.currentTimeMillis());
             baseMapper.updateById(entity);
         } else {
             //文章不存在创建文章
-            entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
             entity.setCreateTime(System.currentTimeMillis());
             entity.setUpdateTime(System.currentTimeMillis());
             //获取作者名称
@@ -375,6 +375,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Cacheable(cacheNames = CacheConstant.ABOUT_CACHE_NAME)
     public ArticleEntity getAbout() {
         return getOne(new QueryWrapper<ArticleEntity>().lambda().eq(ArticleEntity::getId, 1));
+    }
+
+    @Override
+    public String getCreatorEmailByArticleId(Long articleId) {
+        return baseMapper.getCreatorEmailByArticleId(articleId);
     }
 
 

@@ -1,12 +1,17 @@
 <template>
 	<div class="post">
-		<div :style="{right:left?null:0}" class="img-box" :class="addDarkClass()" >
-			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="loadResource(articleItem.articlePoster)" alt="">
+		<div :style="{right:left?null:0}" class="img-box" :class="addDarkClass()">
+			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="loadResource(articleItem.articlePoster)"
+			     alt="">
 		</div>
 		<div :style="{right:left?0:null,left:left?null:0}" class="info" :class="addDarkClass()">
 			<div class="time">{{ articleItem.publishTime }}</div>
 			<div class="title">
-				<router-link class="title-content" @click="handleJump" tag="a" to="">{{ articleItem.title }}</router-link></div>
+				<router-link class="title-content" @click="handleJump" tag="a" to="">{{ articleItem.title }}</router-link>
+				<el-tooltip content="顶置" v-if="articleItem.articleStatus===4" placement="top" :effect="isDarkMode()?'dark':'light'">
+					<img :src="isDarkMode()?overheadDark:overhead" alt="" style="width: 20px;height: 20px;margin-left: 10px;cursor: pointer">
+				</el-tooltip>
+			</div>
 			<div class="describe">{{ articleItem.articleDesc }}</div>
 			<div class="stuff">
 				<el-tooltip content="分类" placement="top" :effect="isDarkMode()?'dark':'light'">
@@ -70,13 +75,16 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {loadResource} from "../http";
 import {addDarkClass, isDarkMode} from "../utils/common";
+import overhead from '../assets/icon/overhead.svg'
+import overheadDark from '../assets/icon/overhead-dark.svg'
+
 defineProps(['articleItem', 'left'])
 const {proxy} = getCurrentInstance();
 const router = useRouter();
-function handleJump(){
+
+function handleJump() {
 	router.push(`/article?id=${proxy.articleItem.id}`)
 }
-
 
 
 </script>
@@ -99,6 +107,7 @@ function handleJump(){
 		transition: all 0.3s;
 		position: absolute;
 		border-radius: 10px;
+
 		img {
 			display: inline-block;
 			width: 100%;
@@ -108,7 +117,7 @@ function handleJump(){
 		}
 	}
 
-	.img-box.dark{
+	.img-box.dark {
 		border: 1px solid #2d2d2d;
 	}
 
@@ -153,6 +162,7 @@ function handleJump(){
 				background-size: 20px auto;
 				animation: waveMove 1s infinite linear;
 			}
+
 			@keyframes waveMove {
 				from {
 					background-position: 0 100%;
@@ -199,15 +209,15 @@ function handleJump(){
 		}
 	}
 
-	.info.dark{
+	.info.dark {
 		border: 1px solid #2d2d2d;
 
 		.time {
 			color: #999;
 		}
 
-		.title{
-			a{
+		.title {
+			a {
 				color: #f3f3f3;
 			}
 		}

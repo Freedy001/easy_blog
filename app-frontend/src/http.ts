@@ -1,6 +1,6 @@
 import axios from 'axios'
-const baseURL=import.meta.env.DEV?"http://localhost:1000/frontend":""
-const ResourceURL=import.meta.env.DEV?"http://localhost:1000":""
+const baseURL=import.meta.env.DEV?"http://192.168.1.105:1000/frontend":""
+const ResourceURL=import.meta.env.DEV?"http://192.168.1.105:1000":""
 
 export async function get(uri:string) {
     const {data} =await axios.get(baseURL+uri);
