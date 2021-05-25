@@ -45,7 +45,7 @@
 			</el-table-column>
 			<el-table-column label="评论文章">
 				<template #default="scope">
-					<a :href="`http://localhost:5000/#/article?id=${scope.row.article.id}`"
+					<a :href="`/#/article?id=${scope.row.article.id}`"
 					   style="color: #0b9aff;text-decoration: none">{{ scope.row.article.title }}</a>
 				</template>
 			</el-table-column>
@@ -228,6 +228,7 @@ async function doReplay() {
 		await getComment();
 		success("回复成功!")
 		doClose()
+		Object.keys(replay).forEach(key=>replay[key]='')
 	}
 }
 

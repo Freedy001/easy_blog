@@ -15,6 +15,7 @@
 			<component :is="Component"/>
 		</transition>
 	</router-view>
+
 	<transition enter-active-class="slide-in-top" leave-active-class="slide-out-top">
 		<Menu v-if="isShowMenu" @clickCb="isShowMenu=false"></Menu>
 	</transition>

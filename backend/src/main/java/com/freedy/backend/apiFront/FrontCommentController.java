@@ -31,6 +31,7 @@ public class FrontCommentController {
     @Autowired
     private LoadSetting setting;
 
+
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @ApiOperation("发布评论")
     @PostMapping("/publish")

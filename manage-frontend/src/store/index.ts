@@ -3,15 +3,18 @@ import {createStore} from 'vuex'
 export default createStore({
     state: {
         articleTitle:'',
+        //文章markdown文本
+        articleContent:'',
         scrollCount:0,
         notifyReloadReadNum:0,
         notifyReloadNickNameAndHeadImg:0,
-        currentTab:'',
-        clickTab:''
     },
     mutations: {
         setTitle(state,title){
             state.articleTitle=title;
+        },
+        changeArticleContent(state,text){
+            state.articleContent=text;
         },
         addScroll(state){
             state.scrollCount++;
@@ -21,15 +24,6 @@ export default createStore({
         },
         notifyReloadNickNameAndHeadImg(state){
             state.notifyReloadNickNameAndHeadImg++;
-        },
-        changeTab(state,tab){
-            state.currentTab=tab+"*"+new Date().getTime();
-        },
-        changeClickTab(state,tab){
-            state.clickTab=tab;
-        },
-        goClickTab(state){
-            state.currentTab=state.clickTab;
         }
     }
 })

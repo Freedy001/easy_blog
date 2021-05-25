@@ -120,6 +120,7 @@ public class ArticleEsListener {
                 //邮件通知
                 esModel.setContent(null);
                 esModel.setArticleDesc(null);
+                //邮件通知
                 rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, esModel);
                 //通知前台
                 redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(),
@@ -134,32 +135,6 @@ public class ArticleEsListener {
         }
     }
 
-    @RabbitListener(queues = ARTICLE_LIKE_QUEUE_NAME)
-    public void handleLike(Message message, Channel channel) throws Exception {
-        try {
-            Long id = Long.parseLong(new String(message.getBody()));
-            articleService.likeArticle(id);
-            GetRequest getRequest = new GetRequest();
-            getRequest.index("article");
-            getRequest.id(String.valueOf(id));
-            getRequest.fetchSourceContext(new FetchSourceContext(true, new String[]{"likeNum"}, null));
-            //查询出文章点赞数
-            Map<String, Object> likeNumMap = highLevelClient.get(getRequest, RequestOptions.DEFAULT).getSourceAsMap();
-            Integer likeNum = (Integer) likeNumMap.get("likeNum");
-            likeNumMap.put("likeNum", likeNum + 1);
-            UpdateRequest request = new UpdateRequest();
-            request.index("article");
-            request.id(String.valueOf(id));
-            request.doc(likeNumMap);
-            // 更新文章点赞数
-            highLevelClient.update(request, RequestOptions.DEFAULT);
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        } catch (Exception e) {
-            channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
-            e.printStackTrace();
-        }
-
-    }
 
 
 }

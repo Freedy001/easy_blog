@@ -1,4 +1,4 @@
-package com.freedy.backend.middleWare.mq.mqCreator;
+package com.freedy.backend.middleWare.mqCreator;
 
 import com.freedy.backend.constant.RabbitConstant;
 import org.springframework.amqp.core.*;

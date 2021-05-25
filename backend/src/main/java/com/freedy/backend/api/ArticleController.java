@@ -34,7 +34,7 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @Cacheable(cacheNames = CacheConstant.ARTICLE_CACHE_NAME)
+    @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true, key = "T(com.freedy.backend.utils.AuthorityUtils).hasAuthority('comment-operation-to-others')+'-'+#root.methodName+'-'+#root.args[0]")
     @ApiOperation("列出所有文章")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -73,7 +73,7 @@ public class ArticleController {
     @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
     @ApiOperation("删除文章")
     @GetMapping("/delete")
-    public Result deleteArticle(@RequestParam Long[] ids){
+    public Result deleteArticle(@RequestParam Long[] ids) throws ExecutionException, InterruptedException {
 		articleService.deleteArticle(Arrays.asList(ids));
         return Result.ok();
     }

@@ -37,8 +37,7 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true)
-    @ApiOperation("列出评论")
+    @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true, key = "T(com.freedy.backend.utils.AuthorityUtils).hasAuthority('article-operation-to-others')+'-'+#root.methodName+'-'+#root.args[0]")    @ApiOperation("列出评论")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils page = commentService.queryAdminPage(params);

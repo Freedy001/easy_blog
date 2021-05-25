@@ -41,7 +41,6 @@ public class IpRegionListener {
             String json = HttpUtil.get("https://ip.taobao.com/outGetIpInfo?ip=" + ipAddr);
             IpRegionDto ipRegionDto = JSON.parseObject(json, IpRegionDto.class);
             comment.setRegion(ipRegionDto.getCountry()+"-"+ipRegionDto.getRegion()+"-"+ipRegionDto.getCity());
-            articleService.addCommentNum(comment.getArticleId());
             service.updateById(comment);
             //手动确定
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

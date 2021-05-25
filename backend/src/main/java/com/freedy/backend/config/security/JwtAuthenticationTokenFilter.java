@@ -11,6 +11,7 @@ import com.freedy.backend.entity.dto.UserTokenInfo;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.properties.JwtProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -61,10 +62,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest,
-                                    HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain)
+                                    @NotNull HttpServletResponse httpServletResponse,
+                                    @NotNull FilterChain filterChain)
             throws ServletException, IOException {
-        log.debug("进入自定义过滤器,访问路径{}",httpServletRequest.getRequestURI());
         String authToken = httpServletRequest.getHeader(jwtProperties.getHeader());
         String username = jwtTokenUtil.getUsernameFromToken(authToken);
         if (StringUtils.hasText(authToken)&& !StringUtils.hasText(username)){
@@ -75,8 +75,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             httpServletResponse.getWriter().write(JSON.toJSONString(result));
             return;
         }
-        log.debug("自定义过滤器获得用户名为   " + username);
-
         //当token中的username不为空时进行验证token是否是有效的token
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //token中username不为空，并且Context中的认证为空，进行token验证
@@ -114,10 +112,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                         .buildDetails(httpServletRequest));
                 //将authentication放入SecurityContextHolder中
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("token认证成功!");
-                for (GrantedAuthority authority : authentication.getAuthorities()) {
-                    log.debug("用户拥有{}权限",authority.getAuthority());
-                }
                 //将用户消息保存到threadLocal
                 Local.MANAGER_LOCAL.set(tokenInfo.getManager());
                 Local.PERMISSION_LOCAL.set(permission);

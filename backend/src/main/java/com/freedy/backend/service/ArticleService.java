@@ -46,7 +46,7 @@ public interface ArticleService extends IService<ArticleEntity> {
     /**
      * 根绝id批量删除
      */
-    void deleteArticle(List<Long> singletonList);
+    void deleteArticle(List<Long> singletonList) throws ExecutionException, InterruptedException;
 
     /**
      * 获取该用户的总访问量
@@ -110,5 +110,20 @@ public interface ArticleService extends IService<ArticleEntity> {
      * 获取指定文章的作者邮箱
      */
     String getCreatorEmailByArticleId(Long articleId);
+
+
+    /**
+     * 增加文章的各个参数
+     * @param field 要更新的字段
+     * @param map 键为文章id 值为增加的数目
+     */
+    void addArticleParameter(String field, Map<String, String> map);
+
+    /**
+     * 更新文章评论数
+     * @param map 键为文章id 值为数目
+     */
+    void updateComment(Map<String, String> map);
+
 }
 

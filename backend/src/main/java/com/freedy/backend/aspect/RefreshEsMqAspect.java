@@ -24,11 +24,9 @@ public class RefreshEsMqAspect {
     private RabbitTemplate template;
 
 
-    @SuppressWarnings("unchecked")
     @Around("@annotation(com.freedy.backend.aspect.annotation.ESEvict)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         try {
-            log.debug("starting..........");
             Object[] args = pjp.getArgs();
             Object result = pjp.proceed(args);
             Long[] articleId = (Long[]) args[0];
@@ -44,8 +42,6 @@ public class RefreshEsMqAspect {
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
-        } finally {
-            log.debug("ending..........");
         }
     }
 

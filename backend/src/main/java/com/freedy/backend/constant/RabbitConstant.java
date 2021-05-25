@@ -21,6 +21,6 @@ public class RabbitConstant {
     public static final String IP_REGION_QUEUE_NAME="ip.query.region.queue";
     public static final String IP_REGION_ROUTING_KEY="ip.query.region.routing.key";
 
-    public static final String ARTICLE_LIKE_QUEUE_NAME="article.like.queue";
-    public static final String ARTICLE_LIKE_ROUTING_KEY="article.like.routing.key";
+    public static final String ARTICLE_PARAMETER_QUEUE_NAME="article.parameter.queue";
+    public static final String ARTICLE_PARAMETER_ROUTING_KEY="article.parameter.routing.key";
 }

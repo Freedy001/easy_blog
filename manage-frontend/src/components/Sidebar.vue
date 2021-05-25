@@ -20,37 +20,37 @@
 			</div>
 			<el-menu
 					mode="horizontal"
-					:default-active="currentTab"
+					:default-active="$router.currentRoute.value.path"
 					router
 			>
-				<el-menu-item index="/index" @click="$store.commit('changeClickTab','/index')">
+				<el-menu-item index="/index">
 					<i class="el-icon-help"></i>
 					<span>仪表盘</span>
 				</el-menu-item>
 				<div class="divide-line"></div>
-				<el-menu-item index="/index/article" @click="$store.commit('changeClickTab','/index/article')">
+				<el-menu-item index="/index/article">
 					<i class="el-icon-help"></i>
 					<span>发布文章</span>
 				</el-menu-item>
-				<el-menu-item index="/index/articleList" @click="$store.commit('changeClickTab','/index/articleList')">
+				<el-menu-item index="/index/articleList">
 					<i class="el-icon-help"></i>
 					<span>文章列表</span>
 				</el-menu-item>
-				<el-menu-item index="/index/category&tag" @click="$store.commit('changeClickTab','/index/category&tag')">
+				<el-menu-item index="/index/category&tag">
 					<i class="el-icon-help"></i>
 					<span>分类与标签</span>
 				</el-menu-item>
-				<el-menu-item index="/index/comment" @click="$store.commit('changeClickTab','/index/comment')">
+				<el-menu-item index="/index/comment">
 					<i class="el-icon-help"></i>
 					<span>评论</span>
-					<span class="badge">{{notReadNum}}</span>
+					<span class="badge">{{ notReadNum }}</span>
 				</el-menu-item>
-				<el-menu-item index="/index/user" @click="$store.commit('changeClickTab','/index/user')">
+				<el-menu-item index="/index/user">
 					<i class="el-icon-help"></i>
 					<span>用户</span>
 				</el-menu-item>
 				<div class="divide-line"></div>
-				<el-menu-item index="/index/setting" @click="$store.commit('changeClickTab','/index/setting')">
+				<el-menu-item index="/index/setting">
 					<i class="el-icon-help"></i>
 					<span>设置</span>
 				</el-menu-item>
@@ -69,27 +69,27 @@ import {get, loadResource, logout} from '../http'
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
 import {useStore} from "vuex";
+
 const scale = ref(false)
 const router = useRouter();
 const store = useStore();
+
 async function lg() {
 	await logout()
 	await router.push('/login')
 }
-let currentTab=ref(router.currentRoute.value.path)
-watch(()=>store.state.currentTab,(val:string)=>{
-	currentTab.value=val.split('*')[0];
-})
+
 let nickname = ref()
 let headImg = ref()
-let notReadNum=ref(0)
+let notReadNum = ref(0)
 onMounted(async () => {
 	getNickNameAndHeadImg().then();
 	getNotReadNum().then();
 })
-watch(()=>store.state.notifyReloadNickNameAndHeadImg,()=>{
+watch(() => store.state.notifyReloadNickNameAndHeadImg, () => {
 	getNickNameAndHeadImg()
 })
+
 async function getNickNameAndHeadImg() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
@@ -97,18 +97,17 @@ async function getNickNameAndHeadImg() {
 		headImg.value = response.data.headImg;
 	}
 }
-watch(()=>store.state.notifyReloadReadNum,()=>{
+
+watch(() => store.state.notifyReloadReadNum, () => {
 	getNotReadNum()
 })
-async function getNotReadNum(){
-	const num =await get('/comment/getNotReadNum')
-	if (num.code==200){
-		notReadNum.value=num.data;
+
+async function getNotReadNum() {
+	const num = await get('/comment/getNotReadNum')
+	if (num.code == 200) {
+		notReadNum.value = num.data;
 	}
 }
-
-
-
 
 
 </script>
@@ -179,7 +178,8 @@ async function getNotReadNum(){
 			border-radius: 20px 0 0 20px;
 			transition: all .3s ease;
 			position: relative;
-			.badge{
+
+			.badge {
 				top: 20%;
 				right: 50%;
 				position: absolute;
@@ -216,7 +216,8 @@ async function getNotReadNum(){
 				i {
 					color: #0084ff;
 				}
-				.badge{
+
+				.badge {
 					top: 20%;
 					right: 50%;
 					position: absolute;

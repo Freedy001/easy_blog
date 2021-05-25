@@ -3,6 +3,7 @@ package com.freedy.backend.aspect;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.entity.OperationLogEntity;
+import com.freedy.backend.exception.ArgumentErrorException;
 import com.freedy.backend.service.OperationLogService;
 import com.freedy.backend.utils.Local;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Component
 @Aspect
 @Slf4j
-public class OperationLog {
+public class OperationLogAspect {
 
     @Autowired
     private OperationLogService logService;
@@ -54,22 +55,17 @@ public class OperationLog {
         Object[] args = pjp.getArgs();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method targetMethod = signature.getMethod();
-        //这时候不能异步执行 否则会导致查不到操作id
-        //构建操作日志实体类
         RecordLog recordLog = targetMethod.getDeclaredAnnotation(RecordLog.class);
+        //构建操作日志实体类
         OperationLogEntity logEntity = new OperationLogEntity();
         logEntity.setCreatTime(System.currentTimeMillis());
         String nickname = Local.MANAGER_LOCAL.get().getNickname();
         logEntity.setOperator(nickname);
         logEntity.setIsSuccess(0);
-        try {
-            if (StringUtils.hasText(recordLog.logMsg())){
-                logEntity.setOperationName(recordLog.logMsg());
-            }else {
-                logEntity.setOperationName(autoGuess(targetMethod.getName(), args[0], pjp.getTarget()));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (StringUtils.hasText(recordLog.logMsg())){
+            logEntity.setOperationName(recordLog.logMsg());
+        }else {
+            logEntity.setOperationName(autoGuess(targetMethod.getName(), args[0], pjp.getTarget()));
         }
         logEntity.setOperationType(recordLog.type().name());
         try {
@@ -81,7 +77,7 @@ public class OperationLog {
             return proceed;
         } catch (Throwable throwable) {
             logEntity.setIsSuccess(1);
-            throw new RuntimeException(throwable);
+            throw throwable;
         } finally {
             logService.save(logEntity);
         }
@@ -153,7 +149,7 @@ public class OperationLog {
             //表示该方法是批量删除或者通过等等批量执行的方法
             List<Number> ids = Arrays.asList((Number[]) arg);
             if (ids.size() == 0) {
-                throw new RuntimeException("没有传入id值");
+                throw new ArgumentErrorException();
             }
             //目标操作类 名称
             String targetName = targetObj.getClass().getSimpleName().replace("Controller", "ServiceImpl");

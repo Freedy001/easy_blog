@@ -1,4 +1,4 @@
-package com.freedy.backend.middleWare.mq.mqCreator;
+package com.freedy.backend.middleWare.mqCreator;
 
 import com.freedy.backend.constant.RabbitConstant;
 import org.springframework.amqp.core.*;
@@ -49,16 +49,17 @@ public class ThirdPartServiceMqCreator {
 
     @Bean
     public Queue articleLikeQueue() {
-        return new Queue(RabbitConstant.ARTICLE_LIKE_QUEUE_NAME,
+        return new Queue(RabbitConstant.ARTICLE_PARAMETER_QUEUE_NAME,
                 true, false, false);
     }
 
     @Bean
     public Binding articleLikeBinding() {
-        return new Binding(RabbitConstant.ARTICLE_LIKE_QUEUE_NAME,
+        return new Binding(RabbitConstant.ARTICLE_PARAMETER_QUEUE_NAME,
                 Binding.DestinationType.QUEUE,
                 RabbitConstant.THIRD_PART_EXCHANGE_NAME,
-                RabbitConstant.ARTICLE_LIKE_ROUTING_KEY,
+                RabbitConstant.ARTICLE_PARAMETER_ROUTING_KEY,
                 null);
     }
+
 }

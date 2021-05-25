@@ -3,6 +3,7 @@ package com.freedy.backend.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.*;
 import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
 import com.freedy.backend.exception.ArgumentErrorException;
@@ -17,13 +18,11 @@ import com.freedy.backend.entity.vo.article.ArticleInfoVo;
 import com.freedy.backend.entity.vo.comment.CommentAdminVo;
 import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.exception.NoPermissionsException;
-import com.freedy.backend.middleWare.es.dao.ArticleRepository;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -32,7 +31,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +46,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.freedy.backend.dao.ArticleDao;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import static com.freedy.backend.constant.EsConstant.INDEX;
 
@@ -64,10 +63,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private final CategoryService categoryService;
     private final VisitorService visitorService;
     private final RestHighLevelClient highLevelClient;
+    private final StringRedisTemplate redisTemplate;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private CommentService commentService;
 
-    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService, RestHighLevelClient highLevelClient) {
+
+    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService, RestHighLevelClient highLevelClient, StringRedisTemplate redisTemplate) {
         this.rabbitTemplate = rabbitTemplate;
         this.relationService = relationService;
         this.tagService = tagService;
@@ -75,6 +76,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         this.categoryService = categoryService;
         this.visitorService = visitorService;
         this.highLevelClient = highLevelClient;
+        this.redisTemplate = redisTemplate;
     }
 
     private PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -114,7 +116,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
 
 
     @Override
-    @SuppressWarnings("unchecked")
     public PageUtils getFrontArticleList(Map<String, Object> params) throws Exception {
         int limit;
         int page;
@@ -142,6 +143,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             BeanUtils.copyProperties(esModel, vo);
             vo.setId(esModel.getId().toString());
             vo.setPublishTime(DateUtils.formatChineseDate(esModel.getPublishTime()));
+            //同步点赞数
+            String redisVisit = redisTemplate.opsForValue().get(RedisConstant.ARTICLE_VISIT_HEADER + vo.getId());
+            if (StringUtils.hasText(redisVisit)) {
+                vo.setVisitNum(vo.getVisitNum() + Integer.parseInt(redisVisit));
+            }
+            //同步点赞数
+            String redisLike = redisTemplate.opsForValue().get(RedisConstant.ARTICLE_LIKE_HEADER + vo.getId());
+            if (StringUtils.hasText(redisLike)) {
+                vo.setLikeNum(vo.getLikeNum() + Integer.parseInt(redisLike));
+            }
             if (vo.getArticlePoster() == null) vo.setArticlePoster("/resource/pexels-johannes-plenio-3421812.jpg");
             infoVoList.add(vo);
         }
@@ -275,8 +286,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
 
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void deleteArticle(List<Long> articleId) {
+    public void deleteArticle(List<Long> articleId) throws ExecutionException, InterruptedException {
+        CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> commentService.removeCommentByArticleIds(articleId), executor);
         relationService.removeRelationByArticleIds(articleId);
+        f1.get();
         baseMapper.deleteBatchIds(articleId);
     }
 
@@ -382,5 +395,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         return baseMapper.getCreatorEmailByArticleId(articleId);
     }
 
+    @Override
+    public void addArticleParameter(String field, Map<String, String> map) {
+        if (!map.isEmpty()) {
+            baseMapper.updateParameter(field, map);
+        }
+    }
+
+    @Override
+    public void updateComment(Map<String, String> map) {
+        if (!map.isEmpty()) {
+            baseMapper.updateComment(map);
+        }
+    }
 
 }

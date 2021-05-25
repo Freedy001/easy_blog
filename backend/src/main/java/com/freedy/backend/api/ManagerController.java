@@ -124,7 +124,7 @@ public class ManagerController {
     }
 
     @RecordLog(type = RecordEnum.USER)
-    @ApiOperation("创建新管理员")
+    @ApiOperation("创建或者更新新管理员")
     @PreAuthorize("hasAuthority('user-manager')")
     @PostMapping("/createOrUpdateManager")
     public Result createOrUpdateUser(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {

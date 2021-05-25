@@ -1,7 +1,6 @@
 package com.freedy.backend.apiFront;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.freedy.backend.constant.RabbitConstant;
+import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.ArticleEntity;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.MarkDown;
@@ -16,17 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.ResultSet;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author Freedy
@@ -46,6 +43,9 @@ public class FrontArticleController {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @ApiOperation("列出前台所有文章")
     @GetMapping("/list")
     public Result getArticleList(@RequestParam Map<String, Object> params) throws Exception {
@@ -61,16 +61,25 @@ public class FrontArticleController {
             about.setContent( MarkDown.render(about.getContent()));
             return Result.ok().setData(about);
         }
+        //增加访问数
+        redisTemplate.opsForValue().increment(RedisConstant.ARTICLE_VISIT_HEADER+id);
         Optional<ArticleEsModel> optional = repository.findById(id);
         if (optional.isEmpty()){
             throw new NoArticleException();
         }
-        // todo 文章参数统计
-
-
         ArticleEsModel esModel = optional.get();
         String html = MarkDown.render(esModel.getContent());
         esModel.setContent(html);
+        //同步点赞数
+        String redisVisit = redisTemplate.opsForValue().get(RedisConstant.ARTICLE_VISIT_HEADER + esModel.getId());
+        if (StringUtils.hasText(redisVisit)){
+            esModel.setVisitNum(esModel.getVisitNum()+Integer.parseInt(redisVisit));
+        }
+        //同步点赞数
+        String redisLike = redisTemplate.opsForValue().get(RedisConstant.ARTICLE_LIKE_HEADER + esModel.getId());
+        if (StringUtils.hasText(redisLike)){
+            esModel.setLikeNum(esModel.getLikeNum()+Integer.parseInt(redisLike));
+        }
         HashMap<Object, Object> model = Arrays.stream(BeanUtils.getPropertyDescriptors(esModel.getClass()))
                 .filter(itm -> !"class".equals(itm.getName()))
                 .collect(HashMap::new,
@@ -84,7 +93,7 @@ public class FrontArticleController {
     @ApiOperation("给文章点赞")
     @GetMapping("/likeArticle")
     public Result likeArticle(@RequestParam Long id){
-        rabbitTemplate.convertAndSend(RabbitConstant.THIRD_PART_EXCHANGE_NAME,RabbitConstant.ARTICLE_LIKE_ROUTING_KEY, id);
+        redisTemplate.opsForValue().increment(RedisConstant.ARTICLE_LIKE_HEADER+id);
         return Result.ok();
     }
 

@@ -19,20 +19,22 @@
 import {defineComponent, onMounted} from 'vue'
 import Sidebar from "../components/Sidebar.vue";
 import {useStore} from "vuex";
+
 defineComponent({
 	Sidebar
 })
 const store = useStore();
-let timeout:any;
-function doScroll(event:any) {
-	const scroll= event.srcElement
+let timeout: any;
+
+function doScroll(event: any) {
+	const scroll = event.srcElement
 	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50)) {
-		if (timeout){
+		if (timeout) {
 			clearTimeout(timeout)
 		}
-		timeout = setTimeout(()=>{
+		timeout = setTimeout(() => {
 			store.commit('addScroll')
-		},300);
+		}, 300);
 	}
 }
 </script>
@@ -41,6 +43,7 @@ function doScroll(event:any) {
 .fade-in {
 	animation: fade-in 0.3s both;
 }
+
 @keyframes fade-in {
 	0% {
 		opacity: 0;
@@ -49,9 +52,11 @@ function doScroll(event:any) {
 		opacity: 1;
 	}
 }
+
 .fade-out {
 	animation: fade-out 0.3s ease-out both;
 }
+
 @keyframes fade-out {
 	0% {
 		opacity: 1;

@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -135,26 +136,8 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void createOrUpdateManager(NewUserVo manager) throws ExecutionException, InterruptedException {
-        if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
-            //没有管理用户权限的的 权限
-            try {
-                for (Field field : manager.getClass().getDeclaredFields()) {
-                    if (field.getType().getSimpleName().equals("List")) {
-                        field.setAccessible(true);
-                        List<String> list = (List<String>) field.get(manager);
-                        try {
-                            //只能创建用户 如果给了权限就直接抛异常
-                            if (list.size() > 0) {
-                                throw new NoPermissionsException();
-                            }
-                        } catch (NullPointerException ignore) {
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        //检查权限
+        permissionCheck(manager);
         long time = System.currentTimeMillis();
         ManagerEntity entity = new ManagerEntity();
         if (manager.getId() == null) {
@@ -174,6 +157,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             }
             f1 = CompletableFuture.runAsync(() -> baseMapper.updateById(entity), executor);
             if (AuthorityUtils.hasAuthority("user-permission-manager")) {
+                //删除权限重新赋值
                 f2 = CompletableFuture.runAsync(() -> permissionService.deletePermissionByUserIds(Collections.singletonList(entity.getId())));
             }
         }
@@ -182,7 +166,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             log.debug("baseMapper.insert(entity)耗时{}", middleTime - time);
             ArrayList<RolePermissionEntity> userPermissionList = new ArrayList<>();
             for (Field field : manager.getClass().getDeclaredFields()) {
-                if (field.getType().getSimpleName().equals("List")) {
+                if ("List".equals(field.getType().getSimpleName())) {
                     try {
                         //中文权限列表
                         field.setAccessible(true);
@@ -225,8 +209,11 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     }
 
     @Override
-    public void deleteUserByIds(List<Integer> ids) {
-        List<Integer> list = ids.stream().filter(i -> i != 1).collect(Collectors.toList());
+    public void deleteUserByIds(List<Integer> list) {
+        list.forEach(id->{
+            //1是根管理员 权限最大
+            if (id.equals(1)) throw new NoPermissionsException();
+        });
         List<String> usernames = baseMapper.getUsernamesByIds(list);
         for (String username : usernames) {
             //退出登录
@@ -255,13 +242,11 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             permissionStr = permissionService.getPermissionsByManagerId(id);
         }
         //回显权限消息
-        for (Field field : userVo.getClass().getDeclaredFields()) {
-            //利用反射获取属性中的权限列表 并给其赋值
-            if (field.getType().getSimpleName().equals("List")) {
-                field.setAccessible(true);
+        for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(userVo.getClass())) {
+            if ("List".equals(descriptor.getPropertyType().getSimpleName())){
                 ArrayList<String> permissionNameList = new ArrayList<>();
                 //对应属性列表的名称
-                String typeName = field.getName().replace("Permission", "");
+                String typeName = descriptor.getName().replace("Permission", "");
                 if (StringUtils.hasText(permissionStr)){
                     for (String permission : permissionStr.split(",")) {
                         if (permission.startsWith(typeName)) {
@@ -273,15 +258,46 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
                             permissionNameList.add(permissionName);
                         }
                     }
-                    field.set(userVo, permissionNameList);
+                    descriptor.getWriteMethod().invoke(userVo,permissionNameList);
                 }
             }
         }
-        userVo.setPassword("");
         if (f1 != null) {
             f1.get();
         }
+        userVo.setPassword(null);
         return userVo;
+    }
+
+    private void permissionCheck(NewUserVo manager){
+        if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
+            //没有管理用户权限的的 权限
+            try {
+                //1是根管理员 权限最大
+                if (manager.getId().equals(1)){
+                    throw new NoPermissionsException();
+                }
+                String permissions = permissionService.getPermissionsByManagerId(manager.getId());
+                if (AuthorityUtils.hasAuthority("user-permission-manager",permissions)){
+                    throw new NoPermissionsException();
+                }
+                for (Field field : manager.getClass().getDeclaredFields()) {
+                    if ("List".equals(field.getType().getSimpleName())) {
+                        field.setAccessible(true);
+                        List<String> list = (List<String>) field.get(manager);
+                        try {
+                            //只能创建用户 如果给了权限就直接抛异常
+                            if (list.size() > 0) {
+                                throw new NoPermissionsException();
+                            }
+                        } catch (NullPointerException ignore) {
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

@@ -58,7 +58,7 @@
 								<el-input v-model="userInfoDetail.email"></el-input>
 							</el-form-item>
 							<el-form-item label="个人说明">
-								<el-input type="textarea" v-model="userInfoDetail.introduce"></el-input>
+								<el-input type="textarea" placeholder="可以是普通文本或者html" v-model="userInfoDetail.introduce"></el-input>
 							</el-form-item>
 							<el-form-item>
 								<el-button type="primary" @click="saveInfo">保存</el-button>
@@ -262,7 +262,7 @@ import {useRouter} from "vue-router";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import FullScreen from '../components/FullScreen.vue'
 import {useStore} from "vuex";
-import {copyProperties} from "../util/Common";
+import {copyProperties, copyPropertiesHasNull} from "../util/Common";
 const store = useStore();
 const router = useRouter();
 const {proxy}:any = getCurrentInstance();
@@ -339,7 +339,7 @@ interface userInfo {
 	nickname: string,
 	email: string,
 	introduce: string,
-	headImg: string,
+	headImg: string|null,
 	rootAdmin: boolean,
 	pageUrl: string,
 	createDuration: string
@@ -597,7 +597,7 @@ async function createOrUpdateNewUser() {
 	if (response.code == 200) {
 		proxy.$notify({
 			title: '成功',
-			message: '用户创建成功！',
+			message: '操作成功！',
 			type: 'success'
 		})
 		userManagement.length=0
@@ -628,13 +628,7 @@ async function userSetting(id:number) {
 	const response = await get(`/manager/getUserImportantInfo?id=${id}`)
 	if (response.code == 200) {
 		const data:INewUser=response.data
-		newUser.id=data.id;
-		newUser.username=data.username;
-		newUser.email=data.email;
-		newUser.articlePermission=data.articlePermission;
-		newUser.commentPermission=data.commentPermission;
-		newUser.userPermission=data.userPermission;
-		newUser.settingPermission=data.settingPermission;
+		copyPropertiesHasNull(data,newUser)
 		//打开用户消息窗口
 		showCard.value=true;
 	} else {

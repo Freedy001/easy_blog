@@ -1,5 +1,6 @@
 package com.freedy.backend.service.impl;
 
+import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.entity.ManagerEntity;
@@ -131,7 +132,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             }
         }
         baseMapper.insert(comment);
-        //发布状态的评论 以方式异步发送邮件通知对方
+        //发布评论 以方式异步发送邮件通知对方
         rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, comment);
         //利用异步方式获取ip地区并保存数据库  这里使用异步的原因主要是因为地区查询接口有请求限制，可能会很慢从而使用户体验不好
         rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, IP_REGION_ROUTING_KEY, comment);
@@ -140,8 +141,15 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     @Override
     public PageUtils queryAdminPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils utils = new PageUtils(params);
+        Integer managerId = Local.MANAGER_LOCAL.get().getId();
+        String permissionStr = Local.PERMISSION_LOCAL.get();
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
-            List<CommentAdminVo> vos = baseMapper.getAdminCommentList(utils);
+            List<CommentAdminVo> vos;
+            if (AuthorityUtils.hasAuthority("comment-operation-to-others",permissionStr)) {
+                vos = baseMapper.getAdminCommentList(utils);
+            } else {
+                vos = baseMapper.getOwnCommentList(utils, managerId);
+            }
             List<String> list = vos.stream().map(CommentAdminVo::getId).collect(Collectors.toList());
             if (list.size() > 0) {
                 baseMapper.readAll(list);
@@ -213,6 +221,19 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         //邮件通知
         rabbitTemplate.convertAndSend(THIRD_PART_EXCHANGE_NAME, EMAIL_REPLAY_ROUTING_KEY, asList);
         baseMapper.confirmExaminations(asList);
+    }
+
+    @Override
+    public Map<String, String> getArticleCommentNum() {
+        return baseMapper.getArticleCommentNum().stream()
+                .collect(HashMap::new,
+                        (map, result) -> map.put(result.get("id").toString(), result.get("count").toString()),
+                        HashMap::putAll);
+    }
+
+    @Override
+    public void removeCommentByArticleIds(List<Long> articleId) {
+        baseMapper.removeCommentByArticleIds(articleId);
     }
 
 

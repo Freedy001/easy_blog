@@ -5,6 +5,8 @@ import com.freedy.backend.enumerate.RecordEnum;
 import java.lang.annotation.*;
 
 /**
+ * 用于记录日志
+ *
  * @author Freedy
  * @date 2021/5/18 10:22
  */

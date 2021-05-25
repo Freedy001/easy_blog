@@ -20,168 +20,160 @@
 	</div>
 </template>
 
-<script setup lang="ts">
-import {defineComponent, getCurrentInstance, onMounted, ref} from "vue";
+<script lang="ts">
+import {defineComponent, getCurrentInstance, onMounted, ref, watch} from "vue";
 import editor from '../components/MarkdownContainer.vue';
 import ArticleSettingDrawer from '../components/ArticleSettingDrawer.vue'
 import {get, post} from "../http";
 import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
 
-defineComponent({
-	editor,
-	ArticleSettingDrawer
-})
-const router = useRouter();
-const route = useRoute();
-const store = useStore();
-//是否打开侧边栏
-let drawer = ref(false)
-// noinspection TypeScriptExplicitMemberType
-const {proxy}: any = getCurrentInstance();
-let initArticle = ref<string>();
-//文章markdown文本
-let article = ref()
+export default defineComponent({
+	name: 'Article',
+	components: {
+		editor,
+		ArticleSettingDrawer
+	},
+	setup() {
+		const router = useRouter();
+		const route = useRoute();
+		const store = useStore();
+		//是否打开侧边栏
+		let drawer = ref(false)
+		// noinspection TypeScriptExplicitMemberType
+		const {proxy}: any = getCurrentInstance();
+		let initArticle = ref<string>();
 
-/**
- * 同步markdown文本
- * 当修改markdown时
- * 子组件将会通过该方法给article赋值
- * 方便后面的传值
- */
-function getArticle(text: string) {
-	article.value = text
-}
-
-/**
- * 对文章进行回显
- */
-function getContent(content: string) {
-	initArticle.value = content
-}
-
-/**
- * 保存或更改文章
- * @param form
- */
-async function save(form: any) {
-	let existedTags: Array<number> = []
-	let notExistedTag: Array<string> = []
-	form.tagValue.forEach((value: any, index: number) => {
-		if ((typeof value) == 'number') {
-			existedTags.push(value)
-		} else if ((typeof value) == 'string') {
-			notExistedTag.push(value)
-		}
-	})
-	const response = await post(`/article/saveOrUpdate`, {
-		id: route.query.id ? route.query.id : '',
-		title: form.title,
-		content: article.value,
-		publishTime: form.publishTime.getTime(),
-		isComment: form.isComment,
-		isOverhead: form.isOverhead,
-		articleStatus:form.articleStatus,
-		authorId: form.authorId,
-		articleCategoryId: form.category,
-		articleDesc: form.desc,
-		articlePoster: form.url,
-		existedTags: existedTags,
-		notExistedTag: notExistedTag,
-	});
-	if (response.code == 200) {
-		proxy.$notify({
-			title: '成功',
-			message: '保存成功!',
-			type: 'success'
-		})
-		if (route.query.id == '1') {
-			await router.push('/index/setting?toForth=true');
-		} else {
-			article.value=''
-			await router.push('/index/articleList');
-		}
-	} else {
-		proxy.$notify.error({
-			title: '出差啦😢！',
-			message: `保存失败！ reason-->${response.msg}`
-		})
-	}
-}
-
-/**
- * 保存到草稿
- */
-async function saveDraft() {
-	const response = await post('/article/saveDraft', {
-		id: route.query.id,//有就代表修改原来的文章和状态   无则创建新的草稿文章
-		title: store.state.articleTitle,
-		content: article.value
-	})
-	if (response.code == 200) {
-		proxy.$notify({
-			title: '成功',
-			message: '保存到草稿成功!',
-			type: 'success'
-		})
-		await router.push('/index/articleList');
-	} else {
-		proxy.$notify.error({
-			title: '出差啦😢！',
-			message: `保存到草稿！ reason-->${response.msg}`
-		})
-	}
-}
-
-function publishArticle() {
-	if (route.query.id == '1') {
-		//id为1时 是关于页面
-		save({
-			publishTime: new Date(),
-			tagValue: [],
-			authorId: 1,
-			title: '',
-			isComment: false,
-			isOverhead: false,
-			desc: '',
-			url: '',
-		})
-	} else {
-		drawer.value = !drawer.value
-	}
-}
-
-onBeforeRouteLeave(async () => {
-	if (article.value == null || article.value == '') return true
-	setTimeout(() => {
-		store.commit('changeTab', '/index/article')
-	}, 100)
-	try {
-		if (!!(await proxy.$confirm('你的文章还没保存，你确定要离开吗?', '提示', {
-			confirmButtonText: '确定',
-			cancelButtonText: '取消',
-			type: 'warning'
-		}))) {
-			setTimeout(() => {
-				store.commit('goClickTab')
-			}, 100)
-			return true;
-		}
-	} catch (e) {
-		return false
-	}
-})
-
-function clearAll() {
-	document.querySelectorAll(".el-menu.el-menu--horizontal li").forEach((item, i) => {
-		item.classList.forEach(name => {
-			if (name == 'is-active') {
-				item.classList.remove('is-active')
-				console.log(i)
+		onMounted(() => {
+			if (store.state.articleContent !== '') {
+				initArticle.value = store.state.articleContent
 			}
 		})
-	})
-}
+
+		/**
+		 * 同步markdown文本
+		 * 当修改markdown时
+		 * 子组件将会通过该方法给article赋值
+		 * 方便后面的传值
+		 */
+		function getArticle(text: string) {
+			store.commit('changeArticleContent', text)
+		}
+
+		/**
+		 * 对文章进行回显
+		 */
+		function getContent(content: string) {
+			initArticle.value = content
+			store.commit('changeArticleContent', content)
+		}
+
+		/**
+		 * 保存或更改文章
+		 * @param form
+		 */
+		async function save(form: any) {
+			let existedTags: Array<number> = []
+			let notExistedTag: Array<string> = []
+			form.tagValue.forEach((value: any, index: number) => {
+				if ((typeof value) == 'number') {
+					existedTags.push(value)
+				} else if ((typeof value) == 'string') {
+					notExistedTag.push(value)
+				}
+			})
+			const response = await post(`/article/saveOrUpdate`, {
+				id: route.query.id ? route.query.id : '',
+				title: form.title,
+				content: store.state.articleContent,
+				publishTime: form.publishTime.getTime(),
+				isComment: form.isComment,
+				isOverhead: form.isOverhead,
+				articleStatus: form.articleStatus,
+				authorId: form.authorId,
+				articleCategoryId: form.category,
+				articleDesc: form.desc,
+				articlePoster: form.url,
+				existedTags: existedTags,
+				notExistedTag: notExistedTag,
+			});
+			if (response.code == 200) {
+				proxy.$notify({
+					title: '成功',
+					message: '保存成功!',
+					type: 'success'
+				})
+				initArticle.value = ''
+				store.commit('changeArticleContent', '')
+				store.commit('setTitle', '')
+				if (route.query.id == '1') {
+					await router.push('/index/setting?toForth=true');
+				} else {
+					await router.push('/index/articleList');
+				}
+			} else {
+				proxy.$notify.error({
+					title: '出差啦😢！',
+					message: response.msg
+				})
+			}
+		}
+
+		/**
+		 * 保存到草稿
+		 */
+		async function saveDraft() {
+			const response = await post('/article/saveDraft', {
+				id: route.query.id,//有就代表修改原来的文章和状态   无则创建新的草稿文章
+				title: store.state.articleTitle,
+				content: store.state.articleContent
+			})
+			if (response.code == 200) {
+				proxy.$notify({
+					title: '成功',
+					message: '保存到草稿成功!',
+					type: 'success'
+				})
+				await router.push('/index/articleList');
+			} else {
+				proxy.$notify.error({
+					title: '出差啦😢！',
+					message:response.msg
+				})
+			}
+		}
+
+		function publishArticle() {
+			if (route.query.id == '1') {
+				//id为1时 是关于页面
+				save({
+					publishTime: new Date(),
+					tagValue: [],
+					authorId: 1,
+					title: '',
+					isComment: false,
+					isOverhead: false,
+					desc: '',
+					url: '',
+				})
+			} else {
+				drawer.value = !drawer.value
+			}
+		}
+
+
+		return {
+			drawer,
+			initArticle,
+			save,
+			getArticle,
+			getContent,
+			saveDraft,
+			publishArticle
+		}
+	}
+})
+
 
 </script>
 

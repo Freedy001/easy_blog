@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     /**
      * 未知异常
      */
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = Throwable.class)
     public Result exceptionHandler(Exception e) {
         e.printStackTrace();
         return handler("UNKNOWN_EXCEPTION",e.getMessage());

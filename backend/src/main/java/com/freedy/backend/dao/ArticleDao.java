@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文章表
@@ -87,4 +88,19 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      * 获取指定文章的作者邮箱
      */
     String getCreatorEmailByArticleId(Long articleId);
+
+
+    /**
+     * 更新文章参数
+     * @param field 要更新的字段
+     * @param map 键为文章id 值为增加的数目
+     */
+    void updateParameter(@Param("field") String field, @Param("map") Map<String, String> map);
+
+    /**
+     * 更新文章评论数
+     * @param map 键为文章id 值为数目
+     */
+    void updateComment(@Param("map") Map<String, String> map);
+
 }

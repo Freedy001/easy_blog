@@ -110,7 +110,17 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, watch} from "vue";
+import {
+	defineComponent,
+	defineEmit,
+	defineProps,
+	getCurrentInstance,
+	onActivated,
+	onMounted,
+	reactive,
+	ref,
+	watch
+} from "vue";
 import {get, loadResource} from "../http";
 import {ElMessage} from "element-plus";
 import ImgDrawer from './ImgDrawer.vue'
@@ -269,6 +279,7 @@ onMounted(async () => {
 	el.style.zIndex=10
 	initDate().then();
 })
+
 watch(() => proxy.id, (val) => {
 	if (val) {
 		initDate();

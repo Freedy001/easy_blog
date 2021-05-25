@@ -27,13 +27,13 @@
         <result property="articleStatus" column="article_status"/>
         <result property="articleCategory" column="category_name"/>
         <result property="wordNum" column="word_num"/>
+        <result property="articleComment" column="article_comment"/>
         <result property="articleDesc" column="article_desc"/>
         <result property="visitNum" column="visit_num"/>
-        <result property="commentNum" column="comment_num"/>
         <result property="likeNum" column="like_num"/>
-        <result property="wordNum" column="word_num"/>
         <result property="authorName" column="nickname"/>
         <result property="content" column="content"/>
+        <result property="publishTime" column="publish_time"/>
         <result property="articlePoster" column="article_poster"/>
         <collection property="articleTags" javaType="list" ofType="string">
             <result column="tag_name"/>
@@ -47,9 +47,33 @@
     <update id="updateArticleStatus">
         update blog_db.blog_article set blog_db.blog_article.article_status = #{articleStatus} where id = #{id}
     </update>
-    
+
     <update id="likeArticle">
         update blog_db.blog_article set like_num = like_num+1 where id=#{id}
+    </update>
+
+    <update id="updateParameter">
+        update blog_db.blog_article set ${field}= case id
+        <foreach collection="map.entrySet()" index="key" item="value">
+            when #{key} then ${field}+#{value}
+        </foreach>
+        end
+        where id in
+        <foreach collection="map.entrySet()" index="key" separator="," open="(" close=")">
+            #{key}
+        </foreach>
+    </update>
+
+    <update id="updateComment">
+        update blog_db.blog_article set comment_num= case id
+        <foreach collection="map.entrySet()" index="key" item="value">
+            when #{key} then #{value}
+        </foreach>
+        end
+        where id in
+        <foreach collection="map.entrySet()" index="key" separator="," open="(" close=")">
+            #{key}
+        </foreach>
     </update>
 
     <select id="queryArticleList"
@@ -59,7 +83,7 @@
         select article.id,article.title,article.article_status,category.category_name,article.word_num,
         article.article_desc,article.comment_num,article.visit_num,article.like_num,
         manager.nickname,article.publish_time,article.update_time,article.article_poster,tag.tag_name
-        from (select * from blog_article order by create_time desc limit #{key_offset},#{pageSize})as article
+        from (select * from blog_article order by article_status desc,create_time desc limit #{key_offset},#{pageSize})as article
         left join blog_category as category on article.article_category_id=category.id
         left join blog_article_tag_relation relation on article.id = relation.article_id
         left join blog_tag tag on tag.id = relation.tag_id
@@ -94,10 +118,10 @@
                article.article_status,
                category.category_name,
                article.article_desc,
-               article.comment_num,
                article.visit_num,
                article.like_num,
                article.word_num,
+               article.article_comment,
                manager.nickname,
                article.publish_time,
                article.content,
@@ -117,7 +141,6 @@
         article.article_status,
         category.category_name,
         article.article_desc,
-        article.comment_num,
         article.visit_num,
         article.like_num,
         article.word_num,

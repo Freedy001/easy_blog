@@ -23,7 +23,7 @@
 				<div class="item text">
 					<div>
 						<span>个人介绍</span>
-						<p> {{ userInfo.introduce }} </p>
+						<div v-html="userInfo.introduce"></div>
 					</div>
 				</div>
 			</div>

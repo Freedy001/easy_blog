@@ -69,10 +69,6 @@ public class ArticleEsModel{
     @Field(type = FieldType.Long)
     private Long visitNum;
 
-    @ApiModelProperty("评论数量")
-    @Field(type = FieldType.Long)
-    private Long commentNum;
-
     @ApiModelProperty("点赞数量")
     @Field(type = FieldType.Long)
     private Long likeNum;

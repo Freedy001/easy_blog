@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评论表
@@ -37,6 +38,11 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
     List<CommentAdminVo> getAdminCommentList(PageUtils utils);
 
     /**
+     * 获取自己文章的评论
+     */
+    List<CommentAdminVo> getOwnCommentList(@Param("utils") PageUtils utils, @Param("id") Integer id);
+
+    /**
      * 获取同楼层的所有评论
      */
     List<CommentEntity> getAllCommentInOneFlore(List<CommentEntity> entities);
@@ -51,4 +57,15 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      */
     void readAll(List<String> ids);
 
+    /**
+     * 获取每个文章的评论数
+     * @return 键为文章id 值为数量
+     */
+    List<Map<String, Long>> getArticleCommentNum();
+
+
+    /**
+     * 批量删除
+     */
+    void removeCommentByArticleIds(List<Long> articleId);
 }

@@ -48,5 +48,18 @@ public interface CommentService extends IService<CommentEntity> {
     void confirmExaminations(List<Long> asList);
 
 
+    /**
+     * 获取每个文章的评论数
+     * @return 键为文章id 值为数量
+     */
+    Map<String, String> getArticleCommentNum();
+
+    /**
+     * 根据文章id批量删除
+     * @param articleId 文章id
+     */
+    void removeCommentByArticleIds(List<Long> articleId);
+
+
 }
 

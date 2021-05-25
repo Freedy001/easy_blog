@@ -25,31 +25,52 @@ const routes: Array<RouteRecordRaw> = [
         children:[
             {
                 path:"",
-                component:()=>import('../view/Dashboard.vue')
+                component:()=>import('../view/Dashboard.vue'),
+                meta:{
+                    isKeep: false,
+                }
             },
             {
                 path:"article",
-                component:()=>import('../view/Article.vue')
+                component:()=>import('../view/Article.vue'),
+                meta:{
+                    isKeep: true,
+                }
             },
             {
                 path:"articleList",
-                component:()=>import('../view/ArticleList.vue')
+                component:()=>import('../view/ArticleList.vue'),
+                meta:{
+                    isKeep: false,
+                }
             },
             {
                 path:"category&tag",
-                component:()=>import('../view/Category&Tag.vue')
+                component:()=>import('../view/Category&Tag.vue'),
+                meta:{
+                    isKeep: false,
+                }
             },
             {
                 path:"comment",
-                component:()=>import('../view/Comment.vue')
+                component:()=>import('../view/Comment.vue'),
+                meta:{
+                    isKeep: false,
+                }
             } ,
             {
                 path:"user",
-                component:()=>import('../view/User.vue')
+                component:()=>import('../view/User.vue'),
+                meta:{
+                    isKeep: true,
+                }
             },
             {
                 path:"setting",
-                component:()=>import('../view/Setting.vue')
+                component:()=>import('../view/Setting.vue'),
+                meta:{
+                    isKeep: false,
+                }
             }
         ]
     }
