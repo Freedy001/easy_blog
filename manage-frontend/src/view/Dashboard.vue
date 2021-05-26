@@ -71,6 +71,7 @@ import plus from '../assets/plus.svg'
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {get, post} from "../http";
 import {ElMessage} from "element-plus";
+import {onBeforeRouteLeave} from "vue-router";
 const {proxy}:any = getCurrentInstance();
 let shotHand = ref('')
 let isLoading = ref(false)
@@ -122,7 +123,7 @@ async function getAnalyzeData() {
 	}
 }
 
-
+let interval: number | undefined;
 onMounted(() => {
 	getAnalyzeData().then(() => {
 		articleDistribute();
@@ -130,11 +131,17 @@ onMounted(() => {
 		visitor();
 	});
 	getOperation().then();
-	setInterval(()=>{
+	interval=setInterval(()=>{
 		getOperation().then();
 	},5000)
 })
+onBeforeRouteLeave(()=>{
+	clearInterval(interval)
+})
+
+
 let flag=true
+
 function articleDistribute() {
 	let chartDom: any = document.getElementById('articleDistribute');
 	let myChart = echarts.init(chartDom);

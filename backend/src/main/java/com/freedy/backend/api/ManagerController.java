@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutionException;
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.enumerate.RecordEnum;
+import com.freedy.backend.exception.NoPermissionsException;
+import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
@@ -108,14 +110,14 @@ public class ManagerController {
     }
 
     @ApiOperation("列出所有用户")
-    @PreAuthorize("hasAuthority('user-manager')")
+    @PreAuthorize("hasAnyAuthority('user-manager','root-admin')")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) {
         PageUtils page = managerService.queryPage(params);
         return Result.ok().put("page", page);
     }
 
-    @PreAuthorize("hasAuthority('user-manager')")
+    @PreAuthorize("hasAnyAuthority('user-manager','root-admin')")
     @ApiOperation("回显用户的权限等账号信息")
     @GetMapping("/getUserImportantInfo")
     public Result getUserImportantInfo(@RequestParam("id") Integer id) throws Exception {
@@ -125,18 +127,27 @@ public class ManagerController {
 
     @RecordLog(type = RecordEnum.USER)
     @ApiOperation("创建或者更新新管理员")
-    @PreAuthorize("hasAuthority('user-manager')")
+    @PreAuthorize("hasAnyAuthority('user-manager','root-admin')")
     @PostMapping("/createOrUpdateManager")
     public Result createOrUpdateUser(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
         managerService.createOrUpdateManager(manager);
+        if (AuthorityUtils.isUser(manager.getId())){
+            return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
+                    ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
+        }
         return Result.ok();
     }
 
     @RecordLog(type = RecordEnum.USER)
     @ApiOperation("删除用户")
-    @PreAuthorize("hasAuthority('user-permission-manager')")
+    @PreAuthorize("hasAnyAuthority('user-permission-manager','root-admin')")
     @GetMapping("/delete")
     public Result deleteUser(@RequestParam Integer[] ids) {
+        for (Integer id : ids) {
+            if (AuthorityUtils.isUser(id)){
+                throw new NoPermissionsException();
+            }
+        }
         managerService.deleteUserByIds(Arrays.asList(ids));
         return Result.ok();
     }

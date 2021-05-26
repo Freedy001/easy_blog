@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {ElMessage} from "element-plus";
-
+import router from "./router";
 const baseURL = import.meta.env.DEV ? "http://192.168.1.105:1000/backend" : ""
 const ResourceURL = import.meta.env.DEV ? "http://192.168.1.105:1000" : ""
 
@@ -47,7 +47,7 @@ export async function get(uri: string) {
     });
     if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        location.href = "/"
+        await router.push('/login')
     }
     return data
 }
@@ -59,7 +59,7 @@ export async function post(uri: string, dataFiled: any) {
     });
     if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        location.href = "/"
+        await router.push('/login')
     }
     return data
 }

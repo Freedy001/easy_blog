@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +17,9 @@ import com.freedy.backend.entity.RolePermissionEntity;
 import com.freedy.backend.service.RolePermissionService;
 
 
+/**
+ * @author Freedy
+ */
 @Service("rolePermissionService")
 public class RolePermissionServiceImpl extends ServiceImpl<RolePermissionDao, RolePermissionEntity> implements RolePermissionService {
 
@@ -35,7 +40,7 @@ public class RolePermissionServiceImpl extends ServiceImpl<RolePermissionDao, Ro
 
     @Override
     public void deletePermissionByUserIds(List<Integer> ids) {
-        baseMapper.deletePermissionByUserIds(ids);
+        baseMapper.deletePermissionByUserIds(ids.stream().filter(id->id!=1).collect(Collectors.toList()));
     }
 
 }

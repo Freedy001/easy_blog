@@ -2,12 +2,18 @@ package com.freedy.backend.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
+import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.manager.NewUserVo;
 import com.freedy.backend.properties.PermissionItemProperties;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.RolePermissionEntity;
@@ -38,7 +44,14 @@ public class RolePermissionController {
         userVo.setCommentPermission(new ArrayList<>(permissionItem.getCommentPermission().values()));
         userVo.setUserPermission(new ArrayList<>(permissionItem.getUserPermission().values()));
         userVo.setSettingPermission(new ArrayList<>(permissionItem.getSettingPermission().values()));
-        return Result.ok().setData(userVo);
+        HashMap<Object, Object> model = Arrays.stream(BeanUtils.getPropertyDescriptors(userVo.getClass()))
+                .filter(itm -> !"class".equals(itm.getName()))
+                .collect(HashMap::new, (map, pd) -> {
+                        Object value = ReflectionUtils.invokeMethod(pd.getReadMethod(), userVo);
+                        if (value!=null) map.put(pd.getName(), value);
+                }, HashMap::putAll);
+        model.put("isManager",AuthorityUtils.hasAnyAuthority("user-permission-manager","root-admin"));
+        return Result.ok().setData(model);
     }
 
     @ApiOperation("列出")

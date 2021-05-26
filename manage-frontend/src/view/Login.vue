@@ -1,6 +1,6 @@
 <template>
 	<div class="outer">
-		<div class="form">
+		<div class="form" @click="tip=''">
 			<h2>Welcome Home!</h2>
 			<div class="form-item">
 				<div class="ipt user">
@@ -12,11 +12,9 @@
 					<img src="../assets/login-2.png" alt="">
 				</div>
 				<img src="../assets/login-0.png" alt="">
-				<el-button type="primary" @click="loginBtn">sign in</el-button>
+				<el-button :class="{'shake-horizontal':tip!==''}" type="primary" @click.stop="loginBtn">sign in</el-button>
 				<p class="options">
-					<span>- SignIn</span>
-					or
-					<span>Password -</span>
+					<span>{{ tip }}</span>
 				</p>
 			</div>
 		</div>
@@ -32,11 +30,17 @@ import {ElMessage} from "element-plus";
 export default defineComponent({
 	name: "Login.vue",
 	setup() {
-		const {proxy}=getCurrentInstance()
+		const {proxy}:any=getCurrentInstance()
 		const username = ref<string>("")
 		const password = ref<string>("")
 		const router = useRouter()
+
+		let tip = ref('')
 		const loginBtn=async ()=>{
+			if (username.value==''||password.value==''){
+				tip.value='用户名密码不能为空!'
+				return;
+			}
 			const boolean = await login({
 				"username":username.value,
 				"password":password.value
@@ -44,26 +48,17 @@ export default defineComponent({
 			if (boolean){
 				await router.push("/index")
 			}else {
-				const id=setInterval(()=>{
-					proxy.$notify.error({
-						title: '出差啦😢！',
-						message: '亲，密码错了哦！',
-					});
-					proxy.$notify.error({
-						title: '出差啦😢！',
-						message: '亲，密码错了哦！',
-						position: 'top-left'
-					});
-				},50)
-				setTimeout(()=>{
-					clearInterval(id)
-				},1000)
+				proxy.$notify.error({
+					title: '出差啦😢！',
+					message: '亲，密码错了哦！'
+				});
 			}
 		}
 
 		return {
 			username,
 			password,
+			tip,
 			loginBtn
 		}
 	}
@@ -119,7 +114,8 @@ export default defineComponent({
 			transform: translate(-50%, 0);
 		}
 		.options{
-			color: #ccc;
+			text-align: center;
+			color: #ff268b;
 			span{
 				font-size: 12px;
 				display: inline-block;
@@ -150,5 +146,33 @@ input{
 button {
 	border: none;
 	background: #0b9aff;
+}
+.shake-horizontal {
+	color: #ea0707;
+	animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
+}
+
+@keyframes shake-horizontal {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	10%,
+	30%,
+	50%,
+	70% {
+		transform: translateX(-10px);
+	}
+	20%,
+	40%,
+	60% {
+		transform: translateX(10px);
+	}
+	80% {
+		transform: translateX(8px);
+	}
+	90% {
+		transform: translateX(-8px);
+	}
 }
 </style>

@@ -15,7 +15,9 @@
 					v-model:visible="visible"
 			>
 				<template #reference>
-					<button type="button" :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}" @click.stop="submit">SUBMIT
+					<button type="button"
+					        :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}"
+					        @click.stop="submit">SUBMIT
 					</button>
 				</template>
 			</el-popover>
@@ -84,7 +86,6 @@ onMounted(() => {
 	comment.username = localStorage.getItem("username");
 	comment.email = localStorage.getItem("email");
 })
-
 
 
 </script>
@@ -174,6 +175,7 @@ onMounted(() => {
 
 .root.dark {
 	border: 1px solid #3b3b3b;
+
 	.input-box.dark {
 		input {
 			border: 2px solid #454545;
@@ -212,22 +214,6 @@ onMounted(() => {
 	animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
 }
 
-.el-button{
-	margin-left: 10px;
-	transition: all .3s ease;
-	&:hover{
-		background-color: #e8e8e8;
-	}
-}
-
-.button-dark{
-	color: #c4c4c4;
-	background-color: #0d1117;
-	&:hover{
-		background-color: #273753;
-	}
-}
-
 @keyframes shake-horizontal {
 	0%,
 	100% {
@@ -251,4 +237,23 @@ onMounted(() => {
 		transform: translateX(-8px);
 	}
 }
+
+.el-button {
+	margin-left: 10px;
+	transition: all .3s ease;
+
+	&:hover {
+		background-color: #e8e8e8;
+	}
+}
+
+.button-dark {
+	color: #c4c4c4;
+	background-color: #0d1117;
+
+	&:hover {
+		background-color: #273753;
+	}
+}
+
 </style>

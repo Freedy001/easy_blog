@@ -156,12 +156,12 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
                 entity.setPassword(passwordEncoder.encode(entity.getPassword()));
             }
             f1 = CompletableFuture.runAsync(() -> baseMapper.updateById(entity), executor);
-            if (AuthorityUtils.hasAuthority("user-permission-manager")) {
+            if (AuthorityUtils.hasAnyAuthority("user-permission-manager","root-admin")) {
                 //删除权限重新赋值
                 f2 = CompletableFuture.runAsync(() -> permissionService.deletePermissionByUserIds(Collections.singletonList(entity.getId())));
             }
         }
-        if (AuthorityUtils.hasAuthority("user-permission-manager")) {
+        if (AuthorityUtils.hasAnyAuthority("user-permission-manager","root-admin")) {
             long middleTime = System.currentTimeMillis();
             log.debug("baseMapper.insert(entity)耗时{}", middleTime - time);
             ArrayList<RolePermissionEntity> userPermissionList = new ArrayList<>();
@@ -194,7 +194,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             }
             log.debug("userPermissionList构建时长{}", System.currentTimeMillis() - middleTime);
             if (f2 != null) {
-                f2.get();//忽略空指针异常
+                f2.get();
             }
             permissionService.saveBatch(userPermissionList);
             if (manager.getId() != null) {
@@ -203,7 +203,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             }
             log.debug("createManager总耗时{}", System.currentTimeMillis() - time);
             if (f1 != null) {
-                f1.get();//忽略空指针异常
+                f1.get();
             }
         }
     }
@@ -270,20 +270,20 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
     }
 
     private void permissionCheck(NewUserVo manager){
+        //根管理员直接返回
+        if (AuthorityUtils.isRoot()) return;
+        //1是根管理员 权限最大
+        if (manager.getId().equals(AuthorityUtils.ROOT_ADMIN)) {
+            throw new NoPermissionsException();
+        }
+        //最低级管理员只能创建用户不能带有任何权限
         if (!AuthorityUtils.hasAuthority("user-permission-manager")) {
             //没有管理用户权限的的 权限
             try {
-                //1是根管理员 权限最大
-                if (manager.getId().equals(1)){
-                    throw new NoPermissionsException();
-                }
-                String permissions = permissionService.getPermissionsByManagerId(manager.getId());
-                if (AuthorityUtils.hasAuthority("user-permission-manager",permissions)){
-                    throw new NoPermissionsException();
-                }
                 for (Field field : manager.getClass().getDeclaredFields()) {
                     if ("List".equals(field.getType().getSimpleName())) {
                         field.setAccessible(true);
+                        @SuppressWarnings("unchecked")
                         List<String> list = (List<String>) field.get(manager);
                         try {
                             //只能创建用户 如果给了权限就直接抛异常
@@ -297,6 +297,14 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+        }
+        //有用user-permission-manager权限的只有自己 和 根管理员可以操作
+        if (AuthorityUtils.hasAuthority("user-permission-manager")
+                //判断是否操作自己
+                &&AuthorityUtils.isUser(manager.getId())) return;
+        String permissions = permissionService.getPermissionsByManagerId(manager.getId());
+        if (AuthorityUtils.hasAuthority(permissions,"user-permission-manager")) {
+            throw new NoPermissionsException();
         }
     }
 

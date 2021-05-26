@@ -145,7 +145,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         String permissionStr = Local.PERMISSION_LOCAL.get();
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             List<CommentAdminVo> vos;
-            if (AuthorityUtils.hasAuthority("comment-operation-to-others",permissionStr)) {
+            if (AuthorityUtils.hasAuthority(permissionStr,"comment-operation-to-others")) {
                 vos = baseMapper.getAdminCommentList(utils);
             } else {
                 vos = baseMapper.getOwnCommentList(utils, managerId);

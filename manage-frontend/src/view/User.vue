@@ -47,17 +47,17 @@
 					<el-tab-pane label="基本资料" name="first">
 						<el-form ref="form"
 						         :model="userInfoDetail"
-						>
-							<el-form-item label="登录用户名">
+						         :rules="userInfoRules">
+							<el-form-item label="登录用户名" prop="username" style="margin-bottom: 15px">
 								<el-input v-model="userInfoDetail.username"></el-input>
 							</el-form-item>
-							<el-form-item label="昵称">
+							<el-form-item label="昵称" prop="nickname" style="margin-bottom: 15px">
 								<el-input v-model="userInfoDetail.nickname"></el-input>
 							</el-form-item>
-							<el-form-item label="电子邮件">
+							<el-form-item label="电子邮件" prop="email" style="margin-bottom: 15px">
 								<el-input v-model="userInfoDetail.email"></el-input>
 							</el-form-item>
-							<el-form-item label="个人说明">
+							<el-form-item label="个人说明" style="margin-bottom: 15px">
 								<el-input type="textarea" placeholder="可以是普通文本或者html" v-model="userInfoDetail.introduce"></el-input>
 							</el-form-item>
 							<el-form-item>
@@ -138,10 +138,12 @@
 									label="操作">
 								<template #default="prop">
 									<el-tooltip content="设置" placement="top">
-										<i class="el-icon-setting" style="margin-right: 10px" @click="userSetting(prop.row.id)"></i>
+										<i class="el-icon-setting" style="font-size: 20px;margin-right: 15px;cursor: pointer;"
+										   @click="userSetting(prop.row.id)"></i>
 									</el-tooltip>
 									<el-tooltip content="删除" placement="top">
-										<i class="el-icon-milk-tea"  @click="userDelete(prop.row.id)"></i>
+										<i class="el-icon-milk-tea" style="font-size: 20px;cursor: pointer;"
+										   @click="userDelete(prop.row.id)"></i>
 									</el-tooltip>
 								</template>
 							</el-table-column>
@@ -152,7 +154,7 @@
 		</div>
 		<transition name="el-fade-in-linear">
 			<FullScreen v-if="showCard" @click="showCard=false" :opacity="0.5">
-				<el-card class="permission-card" @click.stop="">
+				<el-card class="permission-card" @click.stop="tip=''">
 					<div class="newUserForm">
 						<div class="item">
 							<span>用户名:</span>
@@ -167,7 +169,7 @@
 							<el-input placeholder="请输入邮箱" v-model="newUser.email"></el-input>
 						</div>
 						<el-divider class="outer-divider"></el-divider>
-						<div class="permission item">
+						<div class="permission item" v-if="PermissionItem.isManager!==null&&PermissionItem.isManager">
 							<div style="width: 100%"><p style="margin-left: 10px">权限:</p></div>
 							<div class="permissionContainer">
 								<span>文章:</span>
@@ -239,10 +241,12 @@
 								</div>
 							</div>
 						</div>
-						<el-divider class="outer-divider"></el-divider>
+						<el-divider class="outer-divider" v-if="PermissionItem.isManager!==null&&PermissionItem.isManager"></el-divider>
 						<div class="item">
-							<el-button type="primary" @click="createOrUpdateNewUser">保存</el-button>
+							<el-button type="primary" :class="{'shake-horizontal':tip!==''}" @click.stop="createOrUpdateNewUser">保存
+							</el-button>
 							<el-button @click="showCard=false">取消</el-button>
+							<span style="color: #ff268b;margin-left: 20px;width: 100%">{{ tip }}</span>
 						</div>
 					</div>
 				</el-card>
@@ -263,23 +267,26 @@ import ImgDrawer from '../components/ImgDrawer.vue'
 import FullScreen from '../components/FullScreen.vue'
 import {useStore} from "vuex";
 import {copyProperties, copyPropertiesHasNull} from "../util/Common";
+
 const store = useStore();
 const router = useRouter();
-const {proxy}:any = getCurrentInstance();
+const {proxy}: any = getCurrentInstance();
 defineComponent({
 	ImgDrawer,
 	FullScreen
 })
-let drawer=ref(false)
+let drawer = ref(false)
+
 //更换头像
 function changeHeadImg() {
-	drawer.value=!drawer.value;
+	drawer.value = !drawer.value;
 }
+
 //更换头像
-async function handlePickPic(url:string){
-	const response =await post('/manager/updateUserInfo',{
-		headImg:url,
-		username:userInfoDetail.username
+async function handlePickPic(url: string) {
+	const response = await post('/manager/updateUserInfo', {
+		headImg: url,
+		username: userInfoDetail.username
 	});
 	if (response.code == 200) {
 		initData().then()
@@ -291,7 +298,24 @@ async function handlePickPic(url:string){
 		})
 	}
 }
+
 //**********************************校验**********************************start
+let userInfoRules = reactive({
+	username: [
+		{required: true, message: '用户名不能为空', trigger: 'blur'},
+		{min: 5, max: 20, message: '用户名长度在 5 到 20 个字符', trigger: 'blur'}
+	],
+	nickname: [
+		{required: true, message: '昵称不能为空', trigger: 'blur'},
+		{min: 5, max: 20, message: '密码长度在 8 到 20 个字符！', trigger: 'blur'}
+	],
+	email: [
+		{required: true, message: '请输入邮箱地址', trigger: 'blur'},
+		{type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change']}
+	]
+})
+
+
 //密码验证表单
 let ruleForm = reactive({
 	oldPass: '',
@@ -332,6 +356,7 @@ function resetForm() {
 	ruleForm.pass = '';
 	ruleForm.checkPass = '';
 }
+
 //**********************************校验**********************************end
 //******************************tab1下面方法与参数**********************************start
 interface userInfo {
@@ -339,7 +364,7 @@ interface userInfo {
 	nickname: string,
 	email: string,
 	introduce: string,
-	headImg: string|null,
+	headImg: string | null,
 	rootAdmin: boolean,
 	pageUrl: string,
 	createDuration: string
@@ -349,6 +374,7 @@ interface userInfo {
 	totalComment: number
 	totalVisit: number
 }
+
 let userInfoDetail: userInfo = reactive<userInfo>({
 	username: '',
 	nickname: '',
@@ -368,7 +394,8 @@ let userInfoDetail: userInfo = reactive<userInfo>({
 onMounted(async () => {
 	initData().then();
 })
-let page=1
+let page = 1
+
 /**
  * 获取个人用户消息
  */
@@ -376,7 +403,7 @@ async function initData() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
 		const resData: userInfo = response.data
-		copyProperties(resData,userInfoDetail)
+		copyProperties(resData, userInfoDetail)
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -433,31 +460,35 @@ async function changePassword() {
 		})
 	}
 }
+
 //******************************tab3下面方法与参数**********************************start
-interface IUserManagement{
+interface IUserManagement {
 	id: number
 	username: string
 	nickname: string
 	headImg: string
 	email: string
-	createDuration:string
+	createDuration: string
 	introduce: string
 	status: string
 }
+
 let userManagement = reactive<Array<IUserManagement>>([])
 
 let activeName = ref('first')
+
 function handleClick() {
 	if (activeName.value == 'third') {
-		userManagement.length=0
+		userManagement.length = 0
 		loadUserList()
 	}
 }
+
 //加载用户列表
 async function loadUserList() {
 	const response = await get(`/manager/list??page=${page}&limit=20`);
-	if(response.code==200){
-		const data:Array<IUserManagement>=response.page.list
+	if (response.code == 200) {
+		const data: Array<IUserManagement> = response.page.list
 		data.forEach((value, index) => {
 			userManagement.push({
 				id: value.id,
@@ -465,12 +496,12 @@ async function loadUserList() {
 				nickname: value.nickname,
 				headImg: value.headImg,
 				email: value.email,
-				createDuration:value.createDuration,
+				createDuration: value.createDuration,
 				introduce: value.introduce,
 				status: value.status,
 			})
 		})
-	}else {
+	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
 			message: response.msg
@@ -487,23 +518,23 @@ interface IPermissionItem {
 	userPermission: Array<string>
 	settingPermission: Array<string>
 }
+
 //所有权限的列表
 let PermissionItem: IPermissionItem = reactive<IPermissionItem>({
 	articlePermission: [],
 	commentPermission: [],
 	userPermission: [],
-	settingPermission: [],
+	settingPermission: []
 });
+
 //打开创建新用户窗口
 async function openNewUserWindow() {
+	emptyNewUser()
 	const response = await get('/rolePermission/getPermissionItem');
 	if (response.code == 200) {
 		showCard.value = true;
 		const item: IPermissionItem = response.data
-		PermissionItem.articlePermission = item.articlePermission
-		PermissionItem.commentPermission = item.commentPermission
-		PermissionItem.userPermission = item.userPermission
-		PermissionItem.settingPermission = item.settingPermission
+		copyProperties(item,PermissionItem)
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -512,11 +543,25 @@ async function openNewUserWindow() {
 	}
 }
 
+function emptyNewUser() {
+	if (newUser.id != null) {
+		newUser.id = null
+		newUser.username = ''
+		newUser.password = ''
+		newUser.email = ''
+		newUser.articlePermission = []
+		newUser.commentPermission = []
+		newUser.settingPermission = []
+		newUser.userPermission = []
+		Object.keys(selectAll).forEach(key => selectAll[key] = false)
+	}
+}
+
 interface INewUser extends IPermissionItem {
-	id: null|number
-	username: null|number
-	password: null|number
-	email: null|number
+	id: number | any
+	username: string | any
+	password: string | any
+	email: string | any
 }
 
 //创建用户的表单
@@ -531,7 +576,7 @@ let newUser = reactive<INewUser>({
 	settingPermission: [],
 })
 //******************************下面是全选功能******************************start
-let selectAll = reactive({
+let selectAll = reactive<any>({
 	articleCheckAll: false,
 	commentCheckAll: false,
 	userCheckAll: false,
@@ -585,52 +630,121 @@ function handleSettingCheckedCitiesChange(value: any) {
 	selectAll.settingCheckAll = checkedCount === PermissionItem.settingPermission.length;
 	selectAll.settingIsIndeterminate = checkedCount > 0 && checkedCount < PermissionItem.settingPermission.length
 }
+
 //******************************上面是全选功能******************************end
-watch(newUser, (val) => {
-	console.log(val)
-})
+let tip = ref('')
+
 /**
  * 创建或更改用户
  */
 async function createOrUpdateNewUser() {
-	const response = await post('/manager/createOrUpdateManager', newUser)
-	if (response.code == 200) {
-		proxy.$notify({
-			title: '成功',
-			message: '操作成功！',
-			type: 'success'
-		})
-		userManagement.length=0
-		loadUserList().then();
-		showCard.value = false;
-		newUser.id=null;
-		newUser.username=null;
-		newUser.password=null;
-		newUser.email=null;
-		newUser.articlePermission=[];
-		newUser.commentPermission=[];
-		newUser.userPermission=[];
-		newUser.settingPermission=[];
-	} else {
-		proxy.$notify.error({
-			title: '出差啦😢！',
-			message: response.msg
-		})
+	try {
+		valid();
+		const response = await post('/manager/createOrUpdateManager', newUser)
+		if (response.code == 200) {
+			proxy.$notify({
+				title: '成功',
+				message: '操作成功！',
+				type: 'success'
+			})
+			userManagement.length = 0
+			loadUserList().then();
+			showCard.value = false;
+			newUser.id = null;
+			newUser.username = null;
+			newUser.password = null;
+			newUser.email = null;
+			newUser.articlePermission = [];
+			newUser.commentPermission = [];
+			newUser.userPermission = [];
+			newUser.settingPermission = [];
+		} else if (response.code == 2002) {
+			proxy.$notify({
+				title: '成功',
+				message: '修改成功，请重新登录!',
+				type: 'success'
+			})
+			await router.push('/login');
+		} else {
+			proxy.$notify.error({
+				title: '出差啦😢！',
+				message: response.msg,
+				duration: 5000
+			})
+		}
+	} catch (e) {
+		//验证失败
 	}
+}
+
+function valid() {
+	if (newUser.id!=null){
+		if (newUser.password!=null&&(newUser.password.length < 8 || newUser.password.length > 20)) {
+			tip.value = '密码长度在 8 到 20 个字符！'
+			throw new Error();
+		}else if (!newUser.email.match('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$')) {
+			tip.value = '邮箱格式不正确~~ 😥😥'
+			throw new Error();
+		}
+	} else if (!hasText(newUser.username) || !hasText(newUser.email) || !hasText(newUser.password)) {
+		tip.value = '用户名密码邮箱都不能为空哦！'
+		throw new Error();
+	} else if (newUser.username.length < 5 || newUser.username.length > 20) {
+		tip.value = '用户名长度在 5 到 20 个字符！'
+		throw new Error();
+	} else if (newUser.password.length < 8 || newUser.password.length > 20) {
+		tip.value = '密码长度在 8 到 20 个字符！'
+		throw new Error();
+	} else if (!newUser.email.match('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$')) {
+		tip.value = '邮箱格式不正确~~ 😥😥'
+		throw new Error();
+	}
+}
+
+function hasText(str: string) {
+	return str != null && str.length > 0
 }
 
 /**
  * 用户的相关设置 回显数据
  */
-async function userSetting(id:number) {
-	console.log(id)
+async function userSetting(id: number) {
 	await openNewUserWindow()
 	const response = await get(`/manager/getUserImportantInfo?id=${id}`)
 	if (response.code == 200) {
-		const data:INewUser=response.data
-		copyPropertiesHasNull(data,newUser)
+		const data: INewUser = response.data
+		copyPropertiesHasNull(data, newUser)
+		Object.keys(selectAll).forEach(key => selectAll[key] = false)
+		if (newUser.userPermission.length > 0) {
+			selectAll.userIsIndeterminate = true
+		}
+		if (newUser.settingPermission.length > 0) {
+			selectAll.settingIsIndeterminate = true
+		}
+		if (newUser.commentPermission.length > 0) {
+			selectAll.commentIsIndeterminate = true
+		}
+		if (newUser.articlePermission.length > 0) {
+			selectAll.articleIsIndeterminate = true
+		}
+		if (newUser.articlePermission.length === PermissionItem.articlePermission.length) {
+			selectAll.articleIsIndeterminate = false
+			selectAll.articleCheckAll = true
+		}
+		if (newUser.commentPermission.length === PermissionItem.commentPermission.length) {
+			selectAll.commentIsIndeterminate = false
+			selectAll.commentCheckAll = true
+		}
+		if (newUser.userPermission.length === PermissionItem.userPermission.length) {
+			selectAll.userIsIndeterminate = false
+			selectAll.userCheckAll = true
+		}
+		if (newUser.settingPermission.length === PermissionItem.settingPermission.length) {
+			selectAll.settingIsIndeterminate = false
+			selectAll.settingCheckAll = true
+		}
 		//打开用户消息窗口
-		showCard.value=true;
+		showCard.value = true;
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -642,7 +756,7 @@ async function userSetting(id:number) {
 /**
  * 删除用户
  */
-async function userDelete(id:number) {
+async function userDelete(id: number) {
 	const response = await get(`/manager/delete?ids=${id}`)
 	if (response.code == 200) {
 		proxy.$notify({
@@ -650,7 +764,7 @@ async function userDelete(id:number) {
 			message: '删除成功！',
 			type: 'success'
 		})
-		userManagement.length=0
+		userManagement.length = 0
 		loadUserList().then();
 	} else {
 		proxy.$notify.error({
@@ -659,12 +773,14 @@ async function userDelete(id:number) {
 		})
 	}
 }
+
 //******************************tab3下面方法与参数**********************************end
 </script>
 
 <style scoped lang="scss">
-.root{
+.root {
 	height: 100%;
+
 	.index-container {
 		display: flex;
 		width: 100%;
@@ -727,6 +843,7 @@ async function userDelete(id:number) {
 		.box-card.right {
 			width: 49%;
 			height: 80%;
+
 			h1 {
 				font-size: 20px;
 				font-weight: lighter;
@@ -811,6 +928,7 @@ async function userDelete(id:number) {
 	}
 
 }
+
 .permission-card {
 	position: absolute;
 	top: 50%;
@@ -818,7 +936,8 @@ async function userDelete(id:number) {
 	transform: translate(-50%, -50%);
 	width: 65%;
 	overflow: auto;
-	height: 90%;
+	//height: 90%;
+
 	&::-webkit-scrollbar {
 		width: 0;
 	}
@@ -867,7 +986,34 @@ async function userDelete(id:number) {
 			}
 		}
 	}
-
 }
 
+.shake-horizontal {
+	color: #ea0707;
+	animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
+}
+
+@keyframes shake-horizontal {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	10%,
+	30%,
+	50%,
+	70% {
+		transform: translateX(-10px);
+	}
+	20%,
+	40%,
+	60% {
+		transform: translateX(10px);
+	}
+	80% {
+		transform: translateX(8px);
+	}
+	90% {
+		transform: translateX(-8px);
+	}
+}
 </style>
