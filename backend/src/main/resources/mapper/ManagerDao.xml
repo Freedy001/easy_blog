@@ -2,6 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.freedy.backend.dao.ManagerDao">
+
+    <insert id="createRoot">
+        INSERT INTO blog_manager (id, nickname, username, password, email, head_img, create_time, update_time, status )
+        VALUES (#{id},#{nickname},#{username},#{password},#{email},#{headImg},#{createTime},#{updateTime},#{status})
+    </insert>
+
+
     <select id="getUsernamesByIds" resultType="java.lang.String">
         select username from blog_manager where id in
         (

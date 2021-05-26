@@ -108,18 +108,6 @@ async function success(response: any) {
 }
 onMounted(async () => {
 	getImageUrls().then()
-	// setTimeout(()=>{
-	// 	let scrollWindows=document.querySelector(".pic-area")
-	// 	scrollWindows.onscroll=()=>{
-	// 		let totalHeight=scrollWindows.scrollHeight
-	// 		let windowHeight=scrollWindows.clientHeight
-	// 		let top=scrollWindows.scrollTop
-	// 		if (totalHeight-windowHeight>top-150){//150是误差值
-	// 			page++;
-	// 			getImageUrls().then();
-	// 		}
-	// 	}
-	// },2000)
 })
 
 

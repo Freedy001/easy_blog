@@ -547,7 +547,7 @@ function emptyNewUser() {
 	if (newUser.id != null) {
 		newUser.id = null
 		newUser.username = ''
-		newUser.password = ''
+		newUser.password = null
 		newUser.email = ''
 		newUser.articlePermission = []
 		newUser.commentPermission = []

@@ -9,6 +9,7 @@
             #{item}
         </foreach>
         )
+        and permission_value!='root-admin'
     </delete>
 
     <select id="getPermissionsByManagerId" resultType="java.lang.String">

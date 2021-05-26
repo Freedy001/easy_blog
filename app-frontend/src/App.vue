@@ -50,10 +50,32 @@ router.afterEach(() => {
 	}, 500)
 })
 onMounted(() => {
-	getIndexSetting()
+	getIndexSetting().then(()=>{
+		init();
+	})
 	heartBeat();
 	modeChange(store.state.darkMode)
 })
+function init(){
+	changeFavicon(loadResource(store.state.indexSetting.logo)); // 动态修改网站图标
+	document.title = store.state.indexSetting.blogTitle; // 动态修改网站标题
+	console.log(store.state.indexSetting.blogTitle)
+}
+function changeFavicon(link:string) {
+	let $favicon:any = document.querySelector('link[rel="icon"]');
+	// If a <link rel="icon"> element already exists,
+	// change its href to the given link.
+	if ($favicon !== null) {
+		$favicon.href = link;
+		// Otherwise, create a new element and append it to <head>.
+	} else {
+		$favicon = document.createElement("link");
+		$favicon.rel = "icon";
+		$favicon.href = link;
+		document.head.appendChild($favicon);
+	}
+}
+
 watch(() => store.state.darkMode, modeChange)
 
 function modeChange(val: boolean) {

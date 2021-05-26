@@ -79,6 +79,10 @@
         select article_id id,count(*) count from blog_db.blog_comment where comment_status=1 group by article_id
     </select>
 
+    <select id="getCommentNumByArticleId" resultType="integer">
+        select count(*) from blog_db.blog_comment where article_id=#{id} and comment_status=1
+    </select>
+
     <update id="confirmExaminations">
         update blog_db.blog_comment set comment_status=1 where blog_db.blog_comment.id in
             (

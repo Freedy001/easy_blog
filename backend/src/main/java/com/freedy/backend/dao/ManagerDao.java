@@ -17,4 +17,9 @@ import java.util.List;
 public interface ManagerDao extends BaseMapper<ManagerEntity> {
 
     List<String>  getUsernamesByIds(List<Integer> ids);
+
+    /**
+     * 创建根管理员
+     */
+    void createRoot(ManagerEntity entity);
 }

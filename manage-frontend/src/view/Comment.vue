@@ -2,8 +2,8 @@
 <template>
 	<div class="root">
 		<div class="btn-area">
-			<el-button type="primary" @click="batchConfirm" round>批量通过</el-button>
-			<el-button type="danger" @click="batchDel" round>批量删除</el-button>
+			<el-button type="primary" @click="batchConfirm" >批量通过</el-button>
+			<el-button type="danger" @click="batchDel" >批量删除</el-button>
 		</div>
 		<el-table
 				class="article-table"

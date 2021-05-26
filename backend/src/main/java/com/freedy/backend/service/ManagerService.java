@@ -40,5 +40,10 @@ public interface ManagerService extends IService<ManagerEntity> {
      * 获取用户 重要的消息 如账号邮箱权限等等
      */
     NewUserVo getUserImportantInfo(Integer id) throws Exception;
+
+    /**
+     *  创建根用户
+     */
+    void createRootUser();
 }
 

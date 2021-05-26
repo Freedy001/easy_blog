@@ -2,6 +2,7 @@ package com.freedy.backend.SysSetting;
 
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.entity.SettingEntity;
+import com.freedy.backend.service.ManagerService;
 import com.freedy.backend.service.SettingService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
@@ -46,11 +48,19 @@ public class LoadSetting {
     private String webSiteDomainName;
     @Autowired
     private SettingService service;
-
+    @Autowired
+    private ManagerService managerService;
 
     @PostConstruct
     public void init(){
         refreshSetting();
+        if (managerService.count()==0){
+            log.warn("在数据库中没有发现管理员,开始创建根管理员.....");
+            managerService.createRootUser();
+            log.warn("创建成功！！！");
+            log.warn("初始用户名:root");
+            log.warn("初始密码:123456");
+        }
     }
 
     /**
@@ -59,7 +69,7 @@ public class LoadSetting {
     public void refreshSetting() {
         Map<String, String> settingMap = service.list().stream().collect(Collectors.toMap(SettingEntity::getItem, SettingEntity::getValue));
         Field[] fields = LoadSetting.class.getDeclaredFields();
-        if (settingMap.keySet().size()< fields.length-2){//排除掉sl4j的log 和service
+        if (settingMap.keySet().size()< fields.length-3){//排除掉sl4j的log 和service
             initSetting();
             return;
         }

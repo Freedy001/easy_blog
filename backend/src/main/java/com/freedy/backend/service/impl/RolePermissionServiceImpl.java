@@ -40,7 +40,7 @@ public class RolePermissionServiceImpl extends ServiceImpl<RolePermissionDao, Ro
 
     @Override
     public void deletePermissionByUserIds(List<Integer> ids) {
-        baseMapper.deletePermissionByUserIds(ids.stream().filter(id->id!=1).collect(Collectors.toList()));
+        baseMapper.deletePermissionByUserIds(ids);
     }
 
 }

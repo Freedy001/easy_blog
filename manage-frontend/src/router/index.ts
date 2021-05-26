@@ -59,6 +59,13 @@ const routes: Array<RouteRecordRaw> = [
                 }
             } ,
             {
+                path:"attachments",
+                component:()=>import('../view/Attachments.vue'),
+                meta:{
+                    isKeep: true,
+                }
+            },
+            {
                 path:"user",
                 component:()=>import('../view/User.vue'),
                 meta:{

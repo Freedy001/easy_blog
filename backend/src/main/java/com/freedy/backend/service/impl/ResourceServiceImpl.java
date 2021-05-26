@@ -26,6 +26,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceDao, ResourceEntity
                 new Query<ResourceEntity>().getPage(params),
                 new QueryWrapper<>()
         );
+        //返回压缩图片
         for (ResourceEntity record : page.getRecords()) {
             String[] split = record.getResourceUrl().split("-", 4);
             String zipUrl = split[0]+"-"+split[1]+"-"+split[2] + "-" + FileConstant.ZIP_IMAGE_INFIX + "-" + split[3];
@@ -33,4 +34,5 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceDao, ResourceEntity
         }
         return new PageUtils(page);
     }
+
 }

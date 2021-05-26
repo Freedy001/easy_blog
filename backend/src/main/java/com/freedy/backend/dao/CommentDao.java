@@ -68,4 +68,9 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      * 批量删除
      */
     void removeCommentByArticleIds(List<Long> articleId);
+
+    /**
+     * 获取指定文章的评论总数
+     */
+    Integer getCommentNumByArticleId(@Param("id") long id);
 }

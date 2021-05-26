@@ -105,14 +105,16 @@ public class ArticleSynchronize {
                 getRequest.fetchSourceContext(new FetchSourceContext(true, new String[]{"likeNum"}, null));
                 //查询出文章点赞数
                 Map<String, Object> likeNumMap = highLevelClient.get(getRequest, RequestOptions.DEFAULT).getSourceAsMap();
-                Integer likeNum = (Integer) likeNumMap.get("likeNum");
-                likeNumMap.put("likeNum", likeNum + Integer.parseInt(redisLikeNum));
-                UpdateRequest request = new UpdateRequest();
-                request.index("article");
-                request.id(articleId);
-                request.doc(likeNumMap);
-                // 更新文章点赞数
-                highLevelClient.update(request, RequestOptions.DEFAULT);
+                if (likeNumMap!=null&&likeNumMap.containsKey("likeNum")&&redisLikeNum!=null) {
+                    Integer likeNum = (Integer) likeNumMap.get("likeNum");
+                    likeNumMap.put("likeNum", likeNum + Integer.parseInt(redisLikeNum));
+                    UpdateRequest request = new UpdateRequest();
+                    request.index("article");
+                    request.id(articleId);
+                    request.doc(likeNumMap);
+                    // 更新文章点赞数
+                    highLevelClient.update(request, RequestOptions.DEFAULT);
+                }
             }
             articleService.addArticleParameter("like_num", map);
             redisTemplate.delete(keys);
@@ -124,21 +126,22 @@ public class ArticleSynchronize {
                 String articleId = key.split(":", 2)[1];
                 String redisVisitNum = ops.get(key);
                 map.put(articleId, redisVisitNum);
-
                 GetRequest getRequest = new GetRequest();
                 getRequest.index("article");
                 getRequest.id(articleId);
                 getRequest.fetchSourceContext(new FetchSourceContext(true, new String[]{"visitNum"}, null));
                 //查询出文章点赞数
-                Map<String, Object> likeNumMap = highLevelClient.get(getRequest, RequestOptions.DEFAULT).getSourceAsMap();
-                Integer visitNum = (Integer) likeNumMap.get("visitNum");
-                likeNumMap.put("visitNum", visitNum + Integer.parseInt(redisVisitNum));
-                UpdateRequest request = new UpdateRequest();
-                request.index("article");
-                request.id(articleId);
-                request.doc(likeNumMap);
-                // 更新文章点赞数
-                highLevelClient.update(request, RequestOptions.DEFAULT);
+                Map<String, Object> visitNumMap = highLevelClient.get(getRequest, RequestOptions.DEFAULT).getSourceAsMap();
+                if (visitNumMap!=null&&visitNumMap.containsKey("visitNum")&&redisVisitNum!=null) {
+                    Integer visitNum = (Integer) visitNumMap.get("visitNum");
+                    visitNumMap.put("visitNum", visitNum + Integer.parseInt(redisVisitNum));
+                    UpdateRequest request = new UpdateRequest();
+                    request.index("article");
+                    request.id(articleId);
+                    request.doc(visitNumMap);
+                    // 更新文章点赞数
+                    highLevelClient.update(request, RequestOptions.DEFAULT);
+                }
             }
             articleService.addArticleParameter("visit_num", map);
             redisTemplate.delete(keys);

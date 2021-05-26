@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Freedy
@@ -45,7 +46,7 @@ public class FrontCommentController {
     @ApiOperation("获取评论列表")
     @GetMapping("/getList")
     @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true)
-    public Result getComments(@RequestParam Map<String, Object> params){
+    public Result getComments(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {
         PageUtils page = commentService.queryPage(params);
         return Result.ok().setData(page);
     }

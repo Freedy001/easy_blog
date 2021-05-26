@@ -20,7 +20,7 @@ public interface CommentService extends IService<CommentEntity> {
     /**
      *  查询文章评论
      */
-    PageUtils queryPage(Map<String, Object> params);
+    PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException;
 
     /**
      * 发表文章

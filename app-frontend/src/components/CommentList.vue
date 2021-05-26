@@ -2,7 +2,7 @@
 	<div style="transition: all 0.5s ease;">
 		<div class="container">
 			<div class="header-img">
-				<img src="https://cdn.pixabay.com/photo/2020/11/14/13/29/tidal-5741708_1280.jpg" alt="">
+				<img :src="loadResource('')" alt="">
 			</div>
 			<div class="info">
 				<span class="name">{{ commentItem.username }}</span>
@@ -42,6 +42,7 @@
 <script setup lang="ts">
 import Comment from './Comment.vue'
 import {defineComponent, defineEmit, defineProps, getCurrentInstance, reactive, ref} from "vue";
+import {loadResource} from "../http";
 
 defineComponent({
 	Comment

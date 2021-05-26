@@ -150,6 +150,9 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         CompletableFuture<Void> f1 = null;
         CompletableFuture<Void> f2 = null;
         if (manager.getId() == null) {
+            //生成随机nickname和头像
+            entity.setNickname(UUID.randomUUID().toString().replaceAll("-","").substring(0,10));
+            entity.setHeadImg("/resource/Boy-0"+(System.currentTimeMillis()%5+1)+".svg");
             baseMapper.insert(entity);
         } else {
             if (entity.getPassword() != null) {
@@ -267,6 +270,26 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         }
         userVo.setPassword(null);
         return userVo;
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public void createRootUser() {
+        ManagerEntity entity = new ManagerEntity();
+        entity.setId(1);
+        entity.setUsername("root");
+        entity.setNickname(UUID.randomUUID().toString().replaceAll("-","").substring(0,10));
+        entity.setHeadImg("/resource/Boy-0"+(System.currentTimeMillis()%5+1)+".svg");
+        entity.setPassword(passwordEncoder.encode("123456"));
+        entity.setStatus(1);
+        entity.setEmail("xxxxxx@xxx.com");
+        entity.setCreateTime(System.currentTimeMillis());
+        entity.setUpdateTime(System.currentTimeMillis());
+        baseMapper.createRoot(entity);
+        RolePermissionEntity permissionEntity = new RolePermissionEntity();
+        permissionEntity.setManagerId(1);
+        permissionEntity.setPermissionValue("root-admin");
+        permissionService.save(permissionEntity);
     }
 
     private void permissionCheck(NewUserVo manager){

@@ -34,9 +34,9 @@
 		</transition>
 		<div v-if="article.articleComment==0">
 			<Comment :id="$route.query.id" class="comment-component" @commentCB="commentCB"></Comment>
-			<div class="comment-header" v-if="article.commentNum!=0">
+			<div class="comment-header" v-if="commentNum!=0">
 				<span id="CommentList">Comment List</span>
-				<span>({{ article.commentNum }})</span>
+				<span>({{ commentNum }})</span>
 			</div>
 			<div v-else class="no-comment">呜呜呜😭~没有评论,你赶紧评论一个吧！</div>
 			<transition-group enter-active-class="slide-in-bck-top">
@@ -343,6 +343,7 @@ interface ICommentItem {
 	child: Array<ICommentItem>
 }
 
+let commentNum = ref()
 let commentItem = reactive<Array<ICommentItem>>([])
 let page = 1;
 
@@ -355,6 +356,7 @@ async function getComments() {
 		const response = await get(`/comment/getList?articleId=${id}&page=${page}&limit=10`);
 		if (response.code == 200) {
 			const data: Array<ICommentItem> = response.data.list
+			commentNum.value = response.data.totalCount
 			if (data.length == 0) {
 				hasMore.value = false
 			}

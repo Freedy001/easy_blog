@@ -34,6 +34,8 @@ public enum ResultCode {
 
     /* 文件错误 */
     FILE_IS_EMPTY(4000,"文件为空"),
+    FILE_IS_NOT_SUIT(4001,"文件格式不支持"),
+    UP_LOAD_FAILED(4002,"文件上传失败"),
 
     /* 业务错误 */
     TAG_HAS_BEEN_USED(3000,"该值被其他地方所引用！"),

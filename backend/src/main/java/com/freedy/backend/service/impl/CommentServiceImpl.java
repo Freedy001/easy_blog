@@ -1,5 +1,6 @@
 package com.freedy.backend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.Local;
@@ -44,7 +45,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     private ThreadPoolExecutor executor;
 
     @Override
-    public PageUtils queryPage(Map<String, Object> params) {
+    public PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
         long id;
         int limit;
         int page;
@@ -55,6 +56,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
         } catch (NumberFormatException e) {
             throw new ArgumentErrorException();
         }
+        CompletableFuture<Integer> f1 = CompletableFuture.supplyAsync(() -> baseMapper.getCommentNumByArticleId(id), executor);
         //将其转化为链表 效率更高
         LinkedList<CommentEntity> commentList = new LinkedList<>(baseMapper.getCommentList(page, limit, id));
         ArrayList<CommentVo> parentNode = new ArrayList<>();
@@ -79,8 +81,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
             commentVo.getChildComment().sort((o1, o2) -> Math.toIntExact(DateUtils.formatTime(o2.getCreateTime()).getTime() - DateUtils.formatTime(o1.getCreateTime()).getTime()));
         }
         parentNode.sort((o1, o2) -> Math.toIntExact(DateUtils.formatTime(o2.getCreateTime()).getTime() - DateUtils.formatTime(o1.getCreateTime()).getTime()));
-
-        return new PageUtils(parentNode, 10, limit, page);
+        Integer num = f1.get();
+        return new PageUtils(parentNode, num, limit, page);
     }
 
     /**

@@ -45,6 +45,10 @@
 					<span>评论</span>
 					<span class="badge">{{ notReadNum }}</span>
 				</el-menu-item>
+				<el-menu-item index="/index/attachments">
+					<i class="el-icon-help"></i>
+					<span>附件</span>
+				</el-menu-item>
 				<el-menu-item index="/index/user">
 					<i class="el-icon-help"></i>
 					<span>用户</span>
