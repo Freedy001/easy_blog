@@ -1,8 +1,10 @@
 package com.freedy.backend.api;
 
 import com.freedy.backend.entity.vo.dashboard.DashBoardVo;
+import com.freedy.backend.scheduled.ArticleSynchronize;
 import com.freedy.backend.service.*;
 import com.freedy.backend.utils.Result;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,9 @@ public class SysController {
     @Autowired
     private ThreadPoolExecutor executor;
 
+    @Autowired
+    private ArticleSynchronize articleSynchronize;
+
     @Value("#{loadSetting.setupTime}")
     private String setupTime;
 
@@ -59,6 +64,13 @@ public class SysController {
         f1.get();
         f2.get();
         return Result.ok().setData(boardVo);
+    }
+
+    @ApiOperation("立即触发定时任务")
+    @GetMapping("/synchronizeToEs")
+    public Result hand(){
+        articleSynchronize.synchronizeArticleToEs();
+        return Result.ok();
     }
 
 }

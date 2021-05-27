@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseURL=import.meta.env.DEV?"http://192.168.1.105:1000/frontend":""
+const baseURL=import.meta.env.DEV?"http://192.168.1.105:1000/frontend":"/frontend"
 const ResourceURL=import.meta.env.DEV?"http://192.168.1.105:1000":""
 
 export async function get(uri:string) {
@@ -12,7 +12,7 @@ export async function post(uri:string,dataFiled:any) {
     return data
 }
 
-export function loadResource(uri:string){
+export function loadResource(uri:any){
     if ((""+uri).startsWith("http")) {
         return uri;
     } else {

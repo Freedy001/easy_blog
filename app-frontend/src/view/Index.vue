@@ -2,24 +2,24 @@
 <template>
 	<div class="root">
 		<teleport to="body">
-			<div id="cover" class="index-cover" ref="container">
+			<div id="cover" class="index-cover">
 				<div class="img" :style="moveStyle">
-					<img :src="loadResource($store.state.indexSetting.poster)" alt="">
+					<img :src="loadResource(store.state.indexSetting.poster)" alt="">
 				</div>
-				<div class="triangle" :style="{'border-bottom': `400vh solid ${$store.state.indexSetting.indexColor}`}"></div>
+				<div class="triangle" :style="{'borderBottom': `400vh solid ${store.state.indexSetting.indexColor}`}"></div>
 				<div class="cover-title">
 					<div class="time">
-						{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.publishTime : '' }}
+						{{ store.state.indexSetting.indexArticle ? store.state.indexSetting.indexArticle.publishTime : '' }}
 					</div>
 					<div class="title">
 						<router-link
-								:to="`/article?id=${$store.state.indexSetting.indexArticle?$store.state.indexSetting.indexArticle.id:''}`"
+								:to="`/article?id=${store.state.indexSetting.indexArticle?store.state.indexSetting.indexArticle.id:''}`"
 								tag="a" data-v-241ea8f0="" class="title-a">
-							{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.title : '' }}
+							{{ store.state.indexSetting.indexArticle ? store.state.indexSetting.indexArticle.title : '' }}
 						</router-link>
 					</div>
 					<div class="describe">
-						{{ $store.state.indexSetting.indexArticle ? $store.state.indexSetting.indexArticle.title : '' }}
+						{{ store.state.indexSetting.indexArticle ? store.state.indexSetting.indexArticle.title : '' }}
 					</div>
 				</div>
 			</div>
@@ -71,9 +71,9 @@ watch(() => store.state.notifyReloadArticle, () => {
 	})
 })
 
-let moveStyle = reactive<{ transform: string, transition: string | null }>({
+let moveStyle = reactive<any>({
 	transform: 'translate(0,-10vh)',
-	transition: null,
+	transition: 'null',
 });
 onMounted(() => {
 	initIndexMove()

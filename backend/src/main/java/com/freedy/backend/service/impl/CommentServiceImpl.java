@@ -1,6 +1,5 @@
 package com.freedy.backend.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.DateUtils;
 import com.freedy.backend.utils.Local;
@@ -17,10 +16,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -236,6 +232,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
     @Override
     public void removeCommentByArticleIds(List<Long> articleId) {
         baseMapper.removeCommentByArticleIds(articleId);
+    }
+
+    @Override
+    public int countNotRead(Integer id) {
+        return baseMapper.countNotRead(id);
     }
 
 

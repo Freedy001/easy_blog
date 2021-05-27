@@ -6,7 +6,7 @@
 		<div class="menu-item">
 			<div class="item" @click="$router.push('/');$emit('clickCb')" >index</div>
 			<div class="shorthand item" @click="$router.push('/shorthand');$emit('clickCb')">shorthand</div>
-			<div class="item" @click="$store.commit('changingMode');$emit('clickCb')">{{ !isDarkMode()?'dark mode':'light mode'}}</div>
+			<div class="item" @click="store.commit('changingMode');$emit('clickCb')">{{ !isDarkMode()?'dark mode':'light mode'}}</div>
 			<div class="subscribe item" @click="$router.push('/subscribe');$emit('clickCb')">subscribe</div>
 			<div class="about item" @click="$router.push('/about');$emit('clickCb')">about</div>
 		</div>
@@ -18,13 +18,14 @@ import {defineComponent, defineEmit, getCurrentInstance} from "vue";
 import searchInput from "./SearchInput.vue"
 import {useRouter} from "vue-router";
 import {darkModeClass, isDarkMode} from "../utils/common";
+import {useStore} from "vuex";
 defineEmit(['clickCb'])
 const router = useRouter();
 const {proxy}:any = getCurrentInstance();
+const store = useStore();
 defineComponent({
 	searchInput
 })
-
 
 </script>
 

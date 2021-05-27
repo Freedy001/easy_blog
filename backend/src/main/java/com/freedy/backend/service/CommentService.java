@@ -60,6 +60,11 @@ public interface CommentService extends IService<CommentEntity> {
      */
     void removeCommentByArticleIds(List<Long> articleId);
 
-
+    /**
+     * 获取指定用户未读的消息
+     * @param id 用户id
+     * @return
+     */
+    int countNotRead(Integer id);
 }
 

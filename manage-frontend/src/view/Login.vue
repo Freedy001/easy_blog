@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, getCurrentInstance, ref} from 'vue'
+import {defineComponent, getCurrentInstance, onMounted, ref} from 'vue'
 import {login} from "../http"
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
 
 export default defineComponent({
@@ -34,6 +34,15 @@ export default defineComponent({
 		const username = ref<string>("")
 		const password = ref<string>("")
 		const router = useRouter()
+		const route = useRoute();
+		onMounted(()=>{
+			if(route.query.reLogin){
+				proxy.$notify({
+					title: '提示',
+					message: "账号过期,请重新登录"
+				})
+			}
+		})
 
 		let tip = ref('')
 		const loginBtn=async ()=>{

@@ -90,7 +90,7 @@ public class LoadSetting {
                 log.info("加载系统设置{},值为{}", fieldName, value);
             } else {
                 //排除掉sl4j的log
-                if (!"log".equals(fieldName) && !"service".equals(fieldName)) {
+                if (!"log".equals(fieldName) && !"service".equals(fieldName) && !"managerService".equals(fieldName)) {
                     log.debug("没有发现系统设置{}",fieldName);
                 }
             }

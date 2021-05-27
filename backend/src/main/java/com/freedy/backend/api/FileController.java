@@ -3,9 +3,8 @@ package com.freedy.backend.api;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.enumerate.RecordEnum;
-import com.freedy.backend.utils.DateUtils;
-import com.freedy.backend.utils.PageUtils;
-import com.freedy.backend.utils.Result;
+import com.freedy.backend.exception.FileDeleteErrorException;
+import com.freedy.backend.utils.*;
 import com.freedy.backend.constant.FileConstant;
 import com.freedy.backend.entity.ResourceEntity;
 import com.freedy.backend.enumerate.ResultCode;
@@ -19,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.nio.file.FileSystemException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * @author Freedy
@@ -57,8 +58,10 @@ public class FileController {
                 //缩略图名称
                 String thumbnailsName = uuid + "-" + FileConstant.ZIP_IMAGE_INFIX + "-img." + suffix;
                 String date = DateUtils.formatDate(new Date());
+                Integer managerId = Local.MANAGER_LOCAL.get().getId();
                 CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
-                    ResourceEntity entity = new ResourceEntity("/image/" + date + "/" + fileName);
+                    ResourceEntity entity = new ResourceEntity(
+                            "/image/" + date + "/" + fileName, managerId);
                     //保存url
                     resourceService.save(entity);
                 }, executor);
@@ -87,19 +90,31 @@ public class FileController {
         return Result.ok().setData(page);
     }
 
-
+    @Transactional(rollbackFor = Throwable.class)
     @PostMapping("/delPic")
-    public Result delPic(@RequestBody List<String> urls){
-        // /image/2021-05-07/b7be10b1aa054b58bb9b5e16dba110f1-pexels-tobias-bjørkli-2113566.jpg
+    public Result delPic(@RequestBody List<String> urls) {
+        if (!AuthorityUtils.hasAuthority("root-admin")) {
+            List<String> collect = urls.stream().map(url -> ResourceUrlUtil.ConvertToHDUrl(url.replaceFirst(".*?/image/", "/image/"))).collect(Collectors.toList());
+            int count = resourceService.count(new QueryWrapper<ResourceEntity>().lambda()
+                    .in(ResourceEntity::getResourceUrl, collect)
+                    .and(wrapper -> wrapper.eq(ResourceEntity::getCreatorId, Local.MANAGER_LOCAL.get().getId())));
+            if (urls.size() != count) {
+                return Result.error(ResultCode.CAN_NOT_DEL_OTHER_ATTACHMENT.getCode(), ResultCode.CAN_NOT_DEL_OTHER_ATTACHMENT.getMessage());
+            }
+        }
         for (String url : urls) {
-            String file = url.replaceFirst("/image/", "");
-            File f1 = new File("file:" + System.getProperty("user.home") + "/.easy/image/" + file);
-            if (!f1.delete()){
-                return Result.error(ResultCode.UP_LOAD_FAILED.getCode(), ResultCode.UP_LOAD_FAILED.getMessage());
-            }else {
-                //删除成功
-                resourceService.remove(new QueryWrapper<ResourceEntity>().lambda()
-                        .eq(ResourceEntity::getResourceUrl,url));
+            String file = url.split("/image/", 2)[1];
+            //文件绝对路径
+            String fileName = System.getProperty("user.home") + "/.easy/image/" + file;
+            File sd = new File(fileName);
+            File hd = new File(ResourceUrlUtil.ConvertToHDUrl(fileName));
+            resourceService.remove(new QueryWrapper<ResourceEntity>().lambda()
+                    .eq(ResourceEntity::getResourceUrl, ResourceUrlUtil.ConvertToHDUrl("/image/" + file)));
+            if (!sd.delete()) {
+                throw new FileDeleteErrorException();
+            }
+            if (!hd.delete()) {
+                throw new FileDeleteErrorException();
             }
         }
         return Result.ok();

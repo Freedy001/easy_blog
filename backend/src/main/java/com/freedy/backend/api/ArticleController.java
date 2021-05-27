@@ -34,7 +34,8 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @Cacheable(cacheNames = CacheConstant.COMMENT_CACHE_NAME,sync = true, key = "T(com.freedy.backend.utils.AuthorityUtils).hasAuthority('comment-operation-to-others')+'-'+#root.methodName+'-'+#root.args[0]")
+    @Cacheable(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,sync = true,
+            key = "(T(com.freedy.backend.utils.AuthorityUtils).hasAuthority('article-operation-to-others')?'admin':T(com.freedy.backend.utils.Local).MANAGER_LOCAL.get().id)+'-'+#root.methodName+'-'+#root.args[0]")
     @ApiOperation("列出所有文章")
     @GetMapping("/list")
     public Result list(@RequestParam Map<String, Object> params) throws ExecutionException, InterruptedException {

@@ -1,7 +1,7 @@
 <template>
 	<div class="root">
-		<video autoplay="autoplay"
-		       preload
+		<video autoplay
+		       preload="auto"
 		       id="video" loop>
 			<source :src="loadResource('/resource/ocien.mp4')" type="video/mp4"/>
 			Your browser does not support the video tag.

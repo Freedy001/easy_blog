@@ -44,7 +44,7 @@ defineComponent({
 	FullScreen
 })
 const {proxy}: any = getCurrentInstance();
-let userInfo = reactive({})
+let userInfo = reactive<any>({})
 
 watch(() => proxy.userId, async (val) => {
 	const response = await get(`/manager/infoById?id=${val}`);

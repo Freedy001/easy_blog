@@ -1,0 +1,1 @@
+function n(n,c){Object.keys(n).forEach((e=>{c[e]=n[e]}))}function c(n,c){Object.keys(n).forEach((e=>{null!=n[e]?c[e]=n[e]:c[e]instanceof Array?c[e]=[]:c[e]instanceof String?c[e]="":c[e]instanceof Number?c[e]=0:c[e]instanceof Boolean?c[e]=!1:c[e]instanceof Object&&(c[e]={})}))}export{c as a,n as c};

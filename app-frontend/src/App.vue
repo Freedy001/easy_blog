@@ -1,7 +1,7 @@
 <template>
 	<LoadingTab v-if="isLoading"></LoadingTab>
 	<div class="logo-and-menu">
-		<img @click="$router.push('/')" :src="loadResource($store.state.indexSetting.logo)" alt=" ">
+		<img @click="$router.push('/')" :src="loadResource(store.state.indexSetting.logo)" alt=" ">
 		<div class="icon" @click="isShowMenu=!isShowMenu">
 			<div class="line"></div>
 			<div class="line"></div>
@@ -19,8 +19,8 @@
 	<transition enter-active-class="slide-in-top" leave-active-class="slide-out-top">
 		<Menu v-if="isShowMenu" @clickCb="isShowMenu=false"></Menu>
 	</transition>
-	<FullScreenChanging v-if="$store.state.modeChanging"></FullScreenChanging>
-	<div id="footer" v-html="$store.state.indexSetting.footInfo">
+	<FullScreenChanging v-if="store.state.modeChanging"></FullScreenChanging>
+	<div id="footer" v-html="store.state.indexSetting.footInfo">
 	</div>
 </template>
 
@@ -50,19 +50,24 @@ router.afterEach(() => {
 	}, 500)
 })
 onMounted(() => {
-	getIndexSetting().then(()=>{
+	getIndexSetting().then(() => {
 		init();
 	})
 	heartBeat();
 	modeChange(store.state.darkMode)
 })
-function init(){
+
+function init() {
 	changeFavicon(loadResource(store.state.indexSetting.logo)); // 动态修改网站图标
-	document.title = store.state.indexSetting.blogTitle; // 动态修改网站标题
-	console.log(store.state.indexSetting.blogTitle)
+	if (store.state.indexSetting.blogTitle) {
+		document.title = store.state.indexSetting.blogTitle; // 动态修改网站标题
+	} else {
+		document.title = 'EASY BLOG'; // 动态修改网站标题
+	}
 }
-function changeFavicon(link:string) {
-	let $favicon:any = document.querySelector('link[rel="icon"]');
+
+function changeFavicon(link: string) {
+	let $favicon: any = document.querySelector('link[rel="icon"]');
 	// If a <link rel="icon"> element already exists,
 	// change its href to the given link.
 	if ($favicon !== null) {

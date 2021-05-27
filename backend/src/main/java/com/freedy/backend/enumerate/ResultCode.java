@@ -36,6 +36,8 @@ public enum ResultCode {
     FILE_IS_EMPTY(4000,"文件为空"),
     FILE_IS_NOT_SUIT(4001,"文件格式不支持"),
     UP_LOAD_FAILED(4002,"文件上传失败"),
+    FILE_DELETE_ERROR(4003,"文件删除失败"),
+    CAN_NOT_DEL_OTHER_ATTACHMENT(4004,"不能删除他人上传的照片"),
 
     /* 业务错误 */
     TAG_HAS_BEEN_USED(3000,"该值被其他地方所引用！"),

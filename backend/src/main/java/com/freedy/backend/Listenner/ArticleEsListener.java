@@ -9,6 +9,7 @@ import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.middleWare.es.dao.ArticleRepository;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
+import com.freedy.backend.scheduled.ArticleSynchronize;
 import com.freedy.backend.service.ArticleService;
 import lombok.extern.slf4j.Slf4j;
 import com.rabbitmq.client.Channel;
@@ -52,6 +53,8 @@ public class ArticleEsListener {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RestHighLevelClient highLevelClient;
+    @Autowired
+    private ArticleSynchronize articleSynchronize;
 
     @RabbitListener(queues = RabbitConstant.ES_QUEUE_NAME)
     public void handle(EsTypeDto entity, Message message, Channel channel) throws IOException {
@@ -73,6 +76,10 @@ public class ArticleEsListener {
                 redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(),
                         ResultCode.NOTIFY_ARTICLE_UPDATE.name(), 5, TimeUnit.SECONDS);
                 articleRepository.deleteById(entity.getId());
+            }
+            if (entity.getType() == EsType.RELOAD){
+                //重新上架文章
+                articleSynchronize.synchronizeArticleToEs();
             }
             //手动确定
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

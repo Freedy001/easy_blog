@@ -42,7 +42,7 @@
 					label="状态">
 				<template #default="scope">
 					<div class="status">
-						<span class="dot" :style="{'background-color':scope.row.dotColor}"></span>
+						<span class="dot" :style="{'backgroundColor':scope.row.dotColor}"></span>
 						<span class="test">{{ scope.row.status }}</span>
 					</div>
 				</template>

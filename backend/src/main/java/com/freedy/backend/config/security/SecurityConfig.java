@@ -99,6 +99,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/resource/**").permitAll()
                 //允许前台页面访问
                 .antMatchers("/frontend/**").permitAll()
+                .antMatchers("/admin/**").permitAll()
+                .antMatchers("/assets/**").permitAll()
                 //配置允许匿名访问的路径
                 .anyRequest().authenticated();
         // 解决跨域问题（重要）  只有在前端请求接口时才发现需要这个

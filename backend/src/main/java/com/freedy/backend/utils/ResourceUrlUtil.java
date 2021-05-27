@@ -17,7 +17,7 @@ public class ResourceUrlUtil {
      * /image/2021-05-07/facf3e527aaa475daecea71dc061ae62-alex-azabache-3214944.jpg
      */
     public static String ConvertToHDUrl(String url){
-        if (url.startsWith("/image/")){
+        if (url.startsWith("/image/")||url.startsWith(System.getProperty("user.home"))){
             String[] split = url.split("-", 5);
             if (split[3].equals(FileConstant.ZIP_IMAGE_INFIX)){
                 //转化为高清图

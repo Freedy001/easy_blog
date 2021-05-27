@@ -6,6 +6,9 @@ import java.util.concurrent.ExecutionException;
 
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.constant.RabbitConstant;
+import com.freedy.backend.entity.dto.EsTypeDto;
+import com.freedy.backend.enumerate.EsType;
 import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.exception.NoPermissionsException;
 import com.freedy.backend.utils.AuthorityUtils;
@@ -18,6 +21,7 @@ import com.freedy.backend.entity.vo.manager.UserInfoVo;
 import com.freedy.backend.entity.vo.manager.UserPasswordVo;
 import com.freedy.backend.enumerate.ResultCode;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,6 +49,8 @@ public class ManagerController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @ApiOperation("查询当前用户消息")
     @GetMapping("/getUserInfo")
@@ -78,8 +84,11 @@ public class ManagerController {
     public Result updateUserInfo(@RequestBody ManagerEntity manager) {
         ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
         String originUsername = oldUserEntity.getUsername();
+        String originNickname = oldUserEntity.getNickname();
         manager.setId(oldUserEntity.getId());
         Result result;
+        //表示修改了nickname 文章需要重新上架
+        boolean flag= manager.getNickname() != null && !originUsername.equals(manager.getNickname());
         if (manager.getUsername()!=null&&!originUsername.equals(manager.getUsername())) {
             //用户修改了用户名需要下线
             redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + originUsername);
@@ -106,6 +115,10 @@ public class ManagerController {
                         ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
             }
         }
+        EsTypeDto dto = new EsTypeDto();
+        dto.setType(EsType.RELOAD);
+        if (flag) rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME
+                ,RabbitConstant.ES_QUEUE_NAME,dto);
         return result;
     }
 

@@ -9,7 +9,7 @@
 				<div class="checked">
 					<img :src="check" alt="">
 				</div>
-				<img class="pic-item" :src="loadResource(url)" alt="">
+				<el-image class="pic-item" :key="url" :src="loadResource(url)" lazy></el-image>
 			</div>
 		</div>
 		<transition name="el-fade-in-linear">
@@ -43,14 +43,15 @@ defineComponent({
 	LoadMore,
 	FullScreen
 })
-let interval;
+let interval:number;
 let pre = new Date().getTime()
 onMounted(() => {
 	getImageUrls().then(() => {
 		setTimeout(() => {
 			waterFall()
+			const content:any = document.querySelector("#content");
 			window.onresize = () => waterFall();
-			document.querySelector("#content").onscroll = (event) => {
+			content.onscroll = (event:any) => {
 				if (new Date().getTime() - pre > 50) {
 					doScroll(event)
 				}
@@ -92,11 +93,11 @@ async function success(response: any) {
 	}
 }
 
-let SelectedList = [];
+let SelectedList:any = [];
 //点击图片
 function handleClick(url: string, index: number) {
-	const ele: HTMLElement = document.getElementsByClassName("item")[index];
-	const check: HTMLElement = document.getElementsByClassName("checked")[index];
+	const ele: any = document.getElementsByClassName("item")[index];
+	const check: any = document.getElementsByClassName("checked")[index];
 	let picIndex;
 	if ((picIndex = SelectedList.indexOf(index)) == -1) {
 		SelectedList.push(index)
@@ -111,17 +112,17 @@ function handleClick(url: string, index: number) {
 //删除图片
 async function del() {
 	const ele = document.getElementsByClassName("pic-item");
-	let urlList=[]
-	SelectedList.forEach(index=>urlList.push(ele[index].getAttribute('src')))
+	let urlList:any=[]
+	SelectedList.forEach((index:any)=>urlList.push(ele[index].getAttribute('src')))
 	const response = await post('/file/delPic',urlList);
 	if (response.code==200){
 		proxy.$notify({
 			title: '成功！',
 			message: "删除成功",
 		})
-		const ele: HTMLElement = document.getElementsByClassName("item");
-		const check: HTMLElement = document.getElementsByClassName("checked");
-		SelectedList.forEach(index=>{
+		const ele: any = document.getElementsByClassName("item");
+		const check: any = document.getElementsByClassName("checked");
+		SelectedList.forEach((index:any)=>{
 			ele[index].classList.remove('select')
 			check[index].style.display = 'none'
 		})
@@ -157,13 +158,14 @@ async function getImageUrls() {
 
 
 function waterFall() {
-	let items = document.getElementsByClassName('item');
-	let gap = 10
+	let items:any = document.getElementsByClassName('item');
+	let gap:any = 10
 	//首先确定列数 = 页面的宽度 / 图片的宽度
-	let pageWidth = document.querySelector("#content").clientWidth - 50;
-	let itemWidth = items[0].offsetWidth;
-	let columns = parseInt(pageWidth / (itemWidth + gap));
-	let arr = [];//定义一个数组，用来存储元素的高度
+	const content:any = document.querySelector("#content");
+	let pageWidth:any = content.clientWidth-50 ;
+	let itemWidth:any = items[0].offsetWidth;
+	let columns:any = parseInt(String(pageWidth / (itemWidth + gap)));
+	let arr:any = [];//定义一个数组，用来存储元素的高度
 	for (let i = 0; i < items.length; i++) {
 		if (i < columns) {
 			//满足这个条件则说明在第一行，文章里面有提到
@@ -212,12 +214,12 @@ function waterFall() {
 
 		.item {
 			position: absolute;
-			width: 250px;
+			width: 300px;
 			border-radius: 10px;
 			transition: all .3s ease;
 			cursor: pointer;
 
-			img {
+			.el-image{
 				width: 100%;
 				border-radius: 10px;
 				background-color: #0b9aff;
@@ -228,7 +230,7 @@ function waterFall() {
 				top: 3%;
 				left: 3%;
 				display: none;
-
+				z-index: 999999;
 				img {
 					width: 35px;
 					border: none;
@@ -238,11 +240,11 @@ function waterFall() {
 		}
 
 		.select {
-			img {
+			.el-image {
 				border: 2px solid #0b9aff;
 			}
 
-			transform: scale(1.05);
+			transform: scale(1.03);
 		}
 	}
 

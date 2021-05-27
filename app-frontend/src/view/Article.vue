@@ -33,7 +33,7 @@
 			<div class="table-of-content" :class="addDarkClass()" v-show="showToc" id="toc"></div>
 		</transition>
 		<div v-if="article.articleComment==0">
-			<Comment :id="$route.query.id" class="comment-component" @commentCB="commentCB"></Comment>
+			<Comment :id="commentId" class="comment-component" @commentCB="commentCB"></Comment>
 			<div class="comment-header" v-if="commentNum!=0">
 				<span id="CommentList">Comment List</span>
 				<span>({{ commentNum }})</span>
@@ -67,9 +67,9 @@ import FullScreenLoading from "../components/FullScreenChanging.vue";
 import {ElMessage} from "element-plus";
 import {addDarkClass, copyProperties, isDarkMode} from "../utils/common";
 import {useStore} from "vuex";
-
 const route = useRoute();
 const router = useRouter();
+let commentId:any=route.query.id
 defineComponent({
 	Comment,
 	CommentList,
@@ -94,7 +94,7 @@ function handleUserInfo(name: any, event: any) {
 
 //以下是喜欢样式
 let likeStyle = reactive({
-	"background-color": "rgb(205,205,205)"
+	"backgroundColor": "rgb(205,205,205)"
 })
 //红心波浪
 let showWave = ref(false)
@@ -105,13 +105,13 @@ let enableLeave = true
 
 function enterLike() {
 	showWave.value = true
-	likeStyle["background-color"] = "tomato"
+	likeStyle["backgroundColor"] = "tomato"
 }
 
 function leaveLike() {
 	if (enableLeave) {
 		showWave.value = false
-		likeStyle["background-color"] = "rgb(205,205,205)"
+		likeStyle["backgroundColor"] = "rgb(205,205,205)"
 	}
 }
 
@@ -128,7 +128,7 @@ async function like() {
 			article.likeNum++;
 			localStorage.setItem(route.query.id + "", "like");
 			enableLeave = false
-			likeStyle["background-color"] = "tomato"
+			likeStyle["backgroundColor"] = "tomato"
 			clickClass.value = true
 			showWave.value = true
 			timeout = setTimeout(() => {
@@ -141,7 +141,7 @@ async function like() {
 onMounted(() => {
 	if (localStorage.getItem(route.query.id + "")) {
 		enableLeave = false
-		likeStyle["background-color"] = "tomato"
+		likeStyle["backgroundColor"] = "tomato"
 		showWave.value = true
 	}
 })

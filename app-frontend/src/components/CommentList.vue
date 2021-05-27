@@ -2,7 +2,7 @@
 	<div style="transition: all 0.5s ease;">
 		<div class="container">
 			<div class="header-img">
-				<img :src="loadResource('')" alt="">
+				<img :src="loadResource(`/resource/Boy-0${new Date().getTime()%5+1}.svg`)" alt="">
 			</div>
 			<div class="info">
 				<span class="name">{{ commentItem.username }}</span>
@@ -49,7 +49,7 @@ defineComponent({
 })
 defineProps(['commentItem'])
 defineEmit(['commentCB'])
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 
 let showBox = ref(false)
 /**
@@ -65,7 +65,7 @@ async function handleCommentSuccess(data:any) {
 
 let fatherCommentId = ref()
 let myplaceholder = ref()
-let cid;
+let cid:any;
 let commentRef = ref(null)
 /**
  * 处理点击回复按钮
@@ -81,7 +81,7 @@ async function handleReplay(id: number, username: string) {
 	myplaceholder.value = "回复 @" + username + ":"
 	setTimeout(() => {
 		if (showBox.value) {
-			const element: HTMLElement = commentRef.value;
+			const element: any = commentRef.value;
 			window.scrollTo({
 				top: element.offsetTop - element.clientHeight,
 				behavior: "smooth"

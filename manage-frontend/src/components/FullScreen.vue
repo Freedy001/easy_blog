@@ -1,6 +1,6 @@
 <!--suppress ALL -->
 <template>
-	<div class="full-screen" @click="$emit('clickOutSide')" :style="{'background-color':`rgba(0, 0, 0,${opacity})`,'z-index':index}">
+	<div class="full-screen" @click="$emit('clickOutSide')" :style="{'backgroundColor':`rgba(0, 0, 0,${opacity})`,'zIndex':index}">
 		<div @click.stop="">
 			<slot></slot>
 		</div>

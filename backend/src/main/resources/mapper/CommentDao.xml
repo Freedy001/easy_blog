@@ -83,6 +83,13 @@
         select count(*) from blog_db.blog_comment where article_id=#{id} and comment_status=1
     </select>
 
+    <select id="countNotRead" resultType="integer">
+        select count(*) from blog_comment
+         left join blog_article ba on blog_comment.article_id = ba.id
+         left join blog_manager bm on ba.author_id=bm.id
+        where bm.id=#{id} and has_read=0
+    </select>
+
     <update id="confirmExaminations">
         update blog_db.blog_comment set comment_status=1 where blog_db.blog_comment.id in
             (

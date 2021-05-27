@@ -50,13 +50,10 @@ public class ArticleSynchronize {
     private RestHighLevelClient highLevelClient;
 
     /**
-     * 每天凌晨3点检查数据库与es 保证数据最终一致性
+     * 每天凌晨检查数据库与es 保证数据最终一致性
      */
-    //todo 修改corn表达式
-//    @Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
-//    @Scheduled(cron = "0 * * * * ?")
-    @GetMapping("/frontend/es")
-    public String synchronizeArticleToEs() {
+    @Scheduled(cron = "0 0 2,3,5 * * ?")
+    public void synchronizeArticleToEs() {
         log.info("开始检查ES与数据库中文章的数据!");
         int count = articleService.count();
         for (int i = 0; i < count / 100 + 1; i++) {
@@ -80,15 +77,12 @@ public class ArticleSynchronize {
                 }
             });
         }
-        return "ok";
     }
 
-    //每十分钟统计一次
-//    @Scheduled(cron = "0 0,10,20,30,40,50 * * * ?")
-    //@Scheduled(cron = "0,20,40 * * * * ?")
+    //每小时统计一次
+    @Scheduled(cron = "0 0 * * * ?")
     @Transactional(rollbackFor = Throwable.class)
-    @GetMapping("/frontend/db")
-    public String synchronizeArticleParameter() throws IOException {
+    public void synchronizeArticleParameter() throws IOException {
         log.debug("开始统计数据");
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         {
@@ -147,7 +141,6 @@ public class ArticleSynchronize {
             redisTemplate.delete(keys);
         }
         articleService.updateComment(commentService.getArticleCommentNum());
-        return "ok";
     }
 
 

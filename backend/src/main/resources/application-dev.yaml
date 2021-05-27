@@ -1,41 +1,6 @@
 server:
   port: 1000
 
-spring:
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
-    username: root
-    password: Kz99596589
-  redis:
-    host: 192.168.169.2
-  rabbitmq:
-    addresses: 192.168.169.2
-    port: 5672
-    virtual-host: /
-    publisher-confirm-type: correlated #开启发送端确认
-    publisher-returns: true # 开启发送端消息抵达队列的确认
-    template:
-      mandatory: true #只要抵达队列,以异步的方式优先回调returnConfirm
-    listener:
-      simple:
-        acknowledge-mode: manual #手动确认消息
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
-  cache:
-    type: redis
-    redis:
-      time-to-live: 3600000
-      use-key-prefix: true
-      cache-null-values: true
-  web:
-    resources:
-      static-locations:
-
-
 easy:
   thread:
     core-size: 50
@@ -57,7 +22,7 @@ easy:
   jwt:
     header: Authorization
     base64-secret: sanbayan
-    token-validity-in-seconds: 14400000
+    token-validity-in-seconds: 864000 #用户过期时间10天
   elastic-search:
     addr: 192.168.169.2
     port: 9200
@@ -68,5 +33,4 @@ logging:
   level:
     com.freedy.backend: debug
 
-mybatis-plus:
-  mapper-locations: classpath:/mapper/*.xml
+

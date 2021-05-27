@@ -1,7 +1,8 @@
 import axios from 'axios'
 import {ElMessage} from "element-plus";
 import router from "./router";
-const baseURL = import.meta.env.DEV ? "http://192.168.1.105:1000/backend" : ""
+
+const baseURL = import.meta.env.DEV ? "http://192.168.1.105:1000/backend" : "/backend"
 const ResourceURL = import.meta.env.DEV ? "http://192.168.1.105:1000" : ""
 
 export interface ILogin {
@@ -10,7 +11,6 @@ export interface ILogin {
 }
 
 export async function login(info: ILogin) {
-    console.log(info)
     let {data} = await axios.post(`${baseURL}/login?username=${info.username}&password=${info.password}`);
     if (data.code === 201) {
         localStorage.setItem("Authorization", data.token);
@@ -47,7 +47,7 @@ export async function get(uri: string) {
     });
     if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        await router.push('/login')
+        await router.push('/login?reLogin=true')
     }
     return data
 }
@@ -59,13 +59,13 @@ export async function post(uri: string, dataFiled: any) {
     });
     if (data.code == 2001) {
         localStorage.removeItem("Authorization")
-        await router.push('/login')
+        await router.push('/login?reLogin=true')
     }
     return data
 }
 
-export function loadResource(uri: string) {
-    if ((""+uri).startsWith("http")) {
+export function loadResource(uri: any) {
+    if (("" + uri).startsWith("http")) {
         return uri;
     } else {
         return ResourceURL + uri;

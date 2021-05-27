@@ -204,7 +204,7 @@ async function batchConfirm() {
 	}
 }
 
-let replay = reactive({
+let replay = reactive<any>({
 	articleId: '',
 	fatherCommentId: '',
 	replayName: '',
@@ -217,7 +217,6 @@ function doAnswer(id: string, articleId: string, username: string) {
 	replay.replayName = username
 	replay.fatherCommentId = id;
 	replay.articleId = articleId;
-	console.log(replay)
 }
 
 //回复某人

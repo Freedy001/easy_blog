@@ -1,6 +1,10 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.entity.OperationLogEntity;
+import com.freedy.backend.enumerate.RecordEnum;
+import com.freedy.backend.service.OperationLogService;
 import com.freedy.backend.utils.JwtTokenUtil;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
@@ -20,6 +24,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,6 +48,8 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
     @Autowired
     private JwtProperties properties;
 
+    @Autowired
+    private OperationLogService logService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -67,9 +75,23 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                 .put("token", userToken);
         //将生成的authentication放入容器中，生成安全的上下文
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        loginLog(username);
         String json = JSON.toJSONString(token);
         response.setContentType("text/json;charset=utf-8");
         response.getWriter().write(json);
+    }
+
+    private void loginLog(String username){
+        OperationLogEntity logEntity = new OperationLogEntity();
+        logEntity.setCreatTime(System.currentTimeMillis());
+        logEntity.setOperator(username);
+        logEntity.setIsSuccess(0);
+        logEntity.setOperationName("用户登录成功");
+        logEntity.setOperationType(RecordEnum.LOGOUT.name());
+        logService.save(logEntity);
+        //删除缓存
+        Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");
+        if (cacheKeys!=null&&cacheKeys.size()>0)
+            redisTemplate.delete(Objects.requireNonNull(cacheKeys));
     }
 }

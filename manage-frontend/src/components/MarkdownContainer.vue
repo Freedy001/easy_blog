@@ -18,11 +18,13 @@ const {proxy}:any = getCurrentInstance();
 defineEmit(['getArticle'])
 defineProps(['initText'])
 onMounted(()=>{
+	const editorContainer:any = document.querySelector('#editor');
 	editor = new Editor({
-		el: document.querySelector('#editor'),
+		el: editorContainer,
 		height: '85%',
 		initialEditType: 'markdown',
 		previewStyle: 'vertical',
+		// @ts-ignore
 		plugins: [[codeSyntaxHighlight, { hljs }]],
 		language:'zh-CN',
 		usageStatistics: false,
@@ -43,10 +45,6 @@ onMounted(()=>{
 		});
 		next(loadResource(response.data.url),file.name)
 	})
-	setTimeout(()=>{
-		const selector:HTMLElement = document.querySelector('.tui-editor-contents');
-		// selector.style.fontSize='1.1rem'
-	},500)
 })
 
 

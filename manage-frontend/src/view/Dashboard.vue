@@ -10,7 +10,7 @@
 			</el-card>
 			<el-card class="box-card" shadow="hover">
 				<div class="title">
-				<h1>评论</h1>
+					<h1>评论</h1>
 					<img :src="answerLogo" alt="" @click="$router.push('/index/comment')">
 				</div>
 				<span>{{ analyzeData.commentNum }}</span>
@@ -41,17 +41,18 @@
 				<h1>操作记录</h1>
 				<div class="operation-log">
 					<transition-group name="el-fade-in-linear">
-						<div class="operation-item" v-for="log in operationLog" :key="log.id">
+						<div class="operation-item" v-for="(log,i) in operationLog" :key="log.id">
 							<div class="operation-name">
-								<div class="info"><span>{{ log.operationName }}</span></div>
-								<span class="time">{{ log.creatTime }}</span>
+								<div class="info"><span>{{log.operationName == null ? '' : log.operationName }}</span></div>
+								<span class="time">{{log.creatTime == null ? '' : log.creatTime }}</span>
 							</div>
 							<div class="operator">
 								<div class="info">
-									<div class="dot" :style="{'background-color':log.operationStatus=='成功'?'#4fc719':'#ff3232'}"></div>
-									<span :style="{'color':log.operationStatus==='成功'?'#4fc719':'#ff3232'}">{{ log.operationStatus }}</span>
+									<div class="dot"
+									     :style="{'backgroundColor':log.operationStatus==null?'#ff3232':log.operationStatus==='成功'?'#4fc719':'#ff3232'}"></div>
+									<span :style="{'color':log.operationStatus==='成功'?'#4fc719':'#ff3232'}">{{log.operationStatus == null ? '' : log.operationStatus }}</span>
 								</div>
-								<span>{{ log.operator }}</span>
+								<span>{{log.operator == null ? '' : log.operator }}</span>
 							</div>
 						</div>
 					</transition-group>
@@ -72,11 +73,13 @@ import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {get, post} from "../http";
 import {ElMessage} from "element-plus";
 import {onBeforeRouteLeave} from "vue-router";
-const {proxy}:any = getCurrentInstance();
+
+const {proxy}: any = getCurrentInstance();
 let shotHand = ref('')
 let isLoading = ref(false)
+
 async function publish() {
-	if (shotHand.value==''){
+	if (shotHand.value == '') {
 		proxy.$notify({
 			title: '额',
 			message: '你好像什么都没填😥!',
@@ -84,32 +87,34 @@ async function publish() {
 		});
 		return;
 	}
-	isLoading.value=true;
-	const response =await post('/shorthand/publish',{
-		content:shotHand.value
+	isLoading.value = true;
+	const response = await post('/shorthand/publish', {
+		content: shotHand.value
 	});
-	if (response.code==200){
-		setTimeout(()=>{
+	if (response.code == 200) {
+		setTimeout(() => {
 			proxy.$notify({
 				title: '成功',
 				message: '发布成功!',
 				type: 'success'
 			});
-			isLoading.value=false;
-			shotHand.value=''
-		},500)
+			isLoading.value = false;
+			shotHand.value = ''
+		}, 500)
 	}
 
 }
 
 
-let operationLog =ref([]);
+let operationLog = reactive<any>([]);
 
 //获取操作日志
 async function getOperation() {
 	const response = await get('/operationLog/getOperationLog?page=1&limit=20&sidx=creat_time&order=desc');
 	if (response.code == 200) {
-		operationLog.value=response.data.list;
+		response.data.list.forEach((item:any) => {
+			operationLog.push(item)
+		})
 	}
 }
 
@@ -131,16 +136,16 @@ onMounted(() => {
 		visitor();
 	});
 	getOperation().then();
-	interval=setInterval(()=>{
+	interval = setInterval(() => {
 		getOperation().then();
-	},5000)
+	}, 5000)
 })
-onBeforeRouteLeave(()=>{
+onBeforeRouteLeave(() => {
 	clearInterval(interval)
 })
 
 
-let flag=true
+let flag = true
 
 function articleDistribute() {
 	let chartDom: any = document.getElementById('articleDistribute');
@@ -167,7 +172,7 @@ function articleDistribute() {
 			levels: [{}, {
 				r0: 30,
 				r: 130,
-			},  {
+			}, {
 				r0: 160,
 				r: 200,
 				itemStyle: {
@@ -187,31 +192,30 @@ function articleDistribute() {
 		}
 	};
 	myChart.on('click', function (params) {
-		if (params.treePathInfo.length==3&&flag){
+		if (params.treePathInfo.length == 3 && flag) {
 			ElMessage({
 				dangerouslyUseHTMLString: true,
-				showClose:true,
-				duration:2000,
+				showClose: true,
+				duration: 2000,
 				message: `
 <div>
 	<strong>去 ${params.treePathInfo[2].name} 看看？</strong>
 	<a href="/#/article?articleName=${params.treePathInfo[2].name}" style="color: #3a9ff5;text-decoration: none">go</a>
 </div>`
 			});
-			console.log(params.treePathInfo[2])
 		}
 	});
 	myChart.setOption(option);
 }
 
 function articlePopular() {
-	let chartDom:any = document.getElementById('articlePopular');
+	let chartDom: any = document.getElementById('articlePopular');
 	let myChart = echarts.init(chartDom);
-	let xData: any[]=[];
-	let like: any[]=[];
-	let comment: any[]=[];
-	let visit: any[]=[];
-	analyzeData.articlePopular.forEach((value: any[])=>{
+	let xData: any[] = [];
+	let like: any[] = [];
+	let comment: any[] = [];
+	let visit: any[] = [];
+	analyzeData.articlePopular.forEach((value: any[]) => {
 		xData.push(value[0])
 		like.push(value[1])
 		comment.push(value[2])
@@ -375,12 +379,14 @@ function visitor() {
 .card-row.first {
 	.box-card {
 		width: 22%;
+
 		h1 {
 			font-weight: lighter;
 			font-size: 20px;
 			margin-bottom: 20px;
 		}
-		.title{
+
+		.title {
 			display: flex;
 			justify-content: space-between;
 
@@ -390,6 +396,7 @@ function visitor() {
 				cursor: pointer;
 			}
 		}
+
 		span {
 			font-weight: bold;
 			font-size: 25px;
@@ -406,11 +413,13 @@ function visitor() {
 
 	.textarea {
 		height: 415px;
-		resize:none;
-		:deep(.el-textarea){
+		resize: none;
+
+		:deep(.el-textarea) {
 			margin-top: 15px;
 		}
-		:deep(.el-textarea__inner){
+
+		:deep(.el-textarea__inner) {
 			resize: none;
 		}
 

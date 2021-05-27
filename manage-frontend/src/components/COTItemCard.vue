@@ -14,12 +14,12 @@ import {useStore} from "vuex";
 import {get} from '../http'
 import {ElMessage} from "element-plus";
 const store = useStore();
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 defineProps(['name'])
 //点击标签事件
 let checked = computed(()=>reactive(store.state.COT.checked))
 
-function onChange(data,index) {
+function onChange(data:any,index:any) {
 	store.commit('clickLabel',{
 		data:data,
 		index:index,
@@ -96,14 +96,14 @@ onMounted(async ()=>{
 			display: flex;
 			justify-content: space-between;
 
-			::v-deep(.el-form-item__label) {
+			:deep(.el-form-item__label) {
 				padding: 0;
 				width: 20px;
 				flex-grow: 1;
 				text-align: left;
 			}
 
-			::v-deep(.el-form-item__content) {
+			:deep(.el-form-item__content) {
 				flex-grow: 1;
 				width: 300px;
 			}

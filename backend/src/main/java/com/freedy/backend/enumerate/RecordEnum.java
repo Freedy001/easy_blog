@@ -15,5 +15,5 @@ public enum RecordEnum {
     COMMENT,
     UPLOAD,
     USER,
-    SETTING
+    SETTING,
 }

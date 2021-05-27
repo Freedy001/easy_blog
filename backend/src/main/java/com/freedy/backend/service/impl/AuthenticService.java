@@ -2,12 +2,17 @@ package com.freedy.backend.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.dao.ManagerDao;
 import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.entity.OperationLogEntity;
 import com.freedy.backend.entity.dto.UserTokenInfo;
+import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.service.RolePermissionService;
+import com.freedy.backend.utils.Local;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,6 +26,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Freedy
@@ -35,6 +42,7 @@ public class AuthenticService implements UserDetailsService {
     private ManagerDao managerDao;
     @Autowired
     private RolePermissionService permissionService;
+
     /**
      * springSecurity 权限认证
      */

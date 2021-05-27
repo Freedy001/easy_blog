@@ -1,7 +1,14 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.aspect.annotation.RecordLog;
+import com.freedy.backend.constant.CacheConstant;
+import com.freedy.backend.entity.OperationLogEntity;
+import com.freedy.backend.enumerate.RecordEnum;
+import com.freedy.backend.exception.ParentResultException;
+import com.freedy.backend.service.OperationLogService;
 import com.freedy.backend.utils.JwtTokenUtil;
+import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.enumerate.ResultCode;
@@ -18,6 +25,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Freedy
@@ -36,8 +45,12 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private JwtTokenUtil util;
 
+    @Autowired
+    private OperationLogService logService;
+
+
     @Override
-    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException{
         log.debug("退出登录");
         String token = request.getHeader(jwtProperties.getHeader());
         String username = util.getUsernameFromToken(token);
@@ -47,21 +60,30 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
             log.debug("authentication {}", authentication);
             log.debug("logout success!");
             SecurityContextHolder.clearContext();
-            response(response,ResultCode.SUCCESS);
+            String json =  JSON.toJSONString(Result.ok(ResultCode.SUCCESS.getCode(),
+                    ResultCode.SUCCESS.getMessage()));
+            // 指定响应格式是json
+            response.setContentType("text/json;charset=utf-8");
+            response.getWriter().write(json);
+            logOutLog(username,false);
         } else {
-            response(response,ResultCode.LOGOUT_ERROR);
+            logOutLog(username,true);
+            throw new ParentResultException("LOGOUT_ERROR");
         }
     }
 
-    private void response(HttpServletResponse response,ResultCode code){
-        String json =  JSON.toJSONString(Result.ok(code.getCode(),
-                code.getMessage()));
-        // 指定响应格式是json
-        response.setContentType("text/json;charset=utf-8");
-        try {
-            response.getWriter().write(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void logOutLog(String username,boolean error){
+        OperationLogEntity logEntity = new OperationLogEntity();
+        logEntity.setCreatTime(System.currentTimeMillis());
+        logEntity.setOperator(username);
+        logEntity.setIsSuccess(error?1:0);
+        logEntity.setOperationName("用户退出登录");
+        logEntity.setOperationType(RecordEnum.LOGOUT.name());
+        logService.save(logEntity);
+        //删除缓存
+        Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");
+        if (cacheKeys!=null&&cacheKeys.size()>0)
+            redisTemplate.delete(Objects.requireNonNull(cacheKeys));
     }
+
 }

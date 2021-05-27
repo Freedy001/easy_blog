@@ -46,11 +46,11 @@ async function getShortHand() {
 let scale = reactive<any>({})
 const ele: any = document.getElementsByClassName("shorthand");
 
-function enter(index: number) {
+function enter(index: any) {
 	ele[index].style.transform = "scale(1.03)"
 }
 
-function leave(index: number) {
+function leave(index: any) {
 	ele[index].style.transform = "scale(1)"
 }
 </script>

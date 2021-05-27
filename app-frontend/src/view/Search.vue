@@ -7,7 +7,7 @@
 				<div class="title-content">
 					<h2 class="title" v-html="result.title" @click="$router.push(`article?id=${result.id}`)"></h2>
 					<div class="content">
-						<img :src="loadResource(result.articlePoster)" alt="asd" @click="$router.push(`article?id=${result.id}`)">
+						<img :src="loadResource(result.articlePoster)" class="img-box" alt="asd" @click="$router.push(`article?id=${result.id}`)">
 						<div class="details-area">
 							<div v-for="hitContent in result.hitItem" class="details-item">
 								<el-tooltip placement="top" :content="hitContent.field=='articleDesc'?'文章描述':'文章内容'" :effect="isDarkMode()?'dark':'light'">
@@ -176,11 +176,17 @@ async function search(searchString: string | any) {
 					overflow: hidden;
 
 					img {
+						position: relative;
 						width: 150px;
 						height: 100px;
+						margin: 5px;
 						object-fit: cover;
 						border-radius: 10px;
 						cursor: pointer;
+						transition: all .3s ease;
+						&:hover{
+							transform: scale(1.03);
+						}
 					}
 
 					.details-area {

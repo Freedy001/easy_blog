@@ -45,13 +45,13 @@
 				<h1>个人资料</h1>
 				<el-tabs v-model="activeName" @tab-click="handleClick">
 					<el-tab-pane label="基本资料" name="first">
-						<el-form ref="form"
+						<el-form ref="infoForm"
 						         :model="userInfoDetail"
 						         :rules="userInfoRules">
 							<el-form-item label="登录用户名" prop="username" style="margin-bottom: 15px">
 								<el-input v-model="userInfoDetail.username"></el-input>
 							</el-form-item>
-							<el-form-item label="昵称" prop="nickname" style="margin-bottom: 15px">
+							<el-form-item label="昵称 (不建议经常更改,可能会影响性能)" prop="nickname" style="margin-bottom: 15px">
 								<el-input v-model="userInfoDetail.nickname"></el-input>
 							</el-form-item>
 							<el-form-item label="电子邮件" prop="email" style="margin-bottom: 15px">
@@ -67,6 +67,7 @@
 					</el-tab-pane>
 					<el-tab-pane label="修改密码" name="second">
 						<el-form :model="ruleForm"
+						         ref="passwordForm"
 						         status-icon
 						         :rules="rules"
 						         class="demo-ruleForm">
@@ -241,7 +242,8 @@
 								</div>
 							</div>
 						</div>
-						<el-divider class="outer-divider" v-if="PermissionItem.isManager!==null&&PermissionItem.isManager"></el-divider>
+						<el-divider class="outer-divider"
+						            v-if="PermissionItem.isManager!==null&&PermissionItem.isManager"></el-divider>
 						<div class="item">
 							<el-button type="primary" :class="{'shake-horizontal':tip!==''}" @click.stop="createOrUpdateNewUser">保存
 							</el-button>
@@ -307,7 +309,7 @@ let userInfoRules = reactive({
 	],
 	nickname: [
 		{required: true, message: '昵称不能为空', trigger: 'blur'},
-		{min: 5, max: 20, message: '密码长度在 8 到 20 个字符！', trigger: 'blur'}
+		{min: 5, max: 30, message: '昵称长度在 8 到 30 个字符！', trigger: 'blur'}
 	],
 	email: [
 		{required: true, message: '请输入邮箱地址', trigger: 'blur'},
@@ -412,7 +414,21 @@ async function initData() {
 	}
 }
 
-async function saveInfo() {
+let infoForm = ref()
+
+function saveInfo() {
+	infoForm.value.validate((valid:any) => {
+		if (valid) {
+			submit()
+		} else {
+			console.log('error submit!!');
+			return false;
+		}
+	});
+}
+
+//提交
+async function submit() {
 	const response = await post('/manager/updateUserInfo', {
 		username: userInfoDetail.username,
 		nickname: userInfoDetail.nickname,
@@ -441,24 +457,33 @@ async function saveInfo() {
 	}
 }
 
-async function changePassword() {
-	const response = await post('/manager/updateUserPassword', {
-		oldPassword: ruleForm.oldPass,
-		newPassword: ruleForm.checkPass
-	})
-	if (response.code == 2002) {
-		proxy.$notify({
-			title: '成功',
-			message: '修改成功，请重新登录!',
-			type: 'success'
-		})
-		await router.push('/login');
-	} else {
-		proxy.$notify.error({
-			title: '出差啦😢！',
-			message: response.msg
-		})
-	}
+let passwordForm = ref();
+
+function changePassword() {
+	passwordForm.value.validate(async (valid:any) => {
+		if (valid) {
+			const response = await post('/manager/updateUserPassword', {
+				oldPassword: ruleForm.oldPass,
+				newPassword: ruleForm.checkPass
+			})
+			if (response.code == 2002) {
+				proxy.$notify({
+					title: '成功',
+					message: '修改成功，请重新登录!',
+					type: 'success'
+				})
+				await router.push('/login');
+			} else {
+				proxy.$notify.error({
+					title: '出差啦😢！',
+					message: response.msg
+				})
+			}
+		} else {
+			console.log('error submit!!');
+			return false;
+		}
+	});
 }
 
 //******************************tab3下面方法与参数**********************************start
@@ -520,11 +545,12 @@ interface IPermissionItem {
 }
 
 //所有权限的列表
-let PermissionItem: IPermissionItem = reactive<IPermissionItem>({
+let PermissionItem = reactive<any>({
 	articlePermission: [],
 	commentPermission: [],
 	userPermission: [],
-	settingPermission: []
+	settingPermission: [],
+	isManager: false,
 });
 
 //打开创建新用户窗口
@@ -534,7 +560,7 @@ async function openNewUserWindow() {
 	if (response.code == 200) {
 		showCard.value = true;
 		const item: IPermissionItem = response.data
-		copyProperties(item,PermissionItem)
+		copyProperties(item, PermissionItem)
 	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
@@ -678,11 +704,11 @@ async function createOrUpdateNewUser() {
 }
 
 function valid() {
-	if (newUser.id!=null){
-		if (newUser.password!=null&&(newUser.password.length < 8 || newUser.password.length > 20)) {
+	if (newUser.id != null) {
+		if (newUser.password != null && (newUser.password.length < 8 || newUser.password.length > 20)) {
 			tip.value = '密码长度在 8 到 20 个字符！'
 			throw new Error();
-		}else if (!newUser.email.match('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$')) {
+		} else if (!newUser.email.match('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$')) {
 			tip.value = '邮箱格式不正确~~ 😥😥'
 			throw new Error();
 		}
@@ -849,15 +875,15 @@ async function userDelete(id: number) {
 				font-weight: lighter;
 			}
 
-			::v-deep(#pane-first .el-form-item) {
+			:deep(#pane-first .el-form-item) {
 				margin-bottom: 0;
 			}
 
-			::v-deep(.el-textarea__inner) {
+			:deep(.el-textarea__inner) {
 				height: 180px;
 			}
 
-			::v-deep(.el-table__expanded-cell) {
+			:deep(.el-table__expanded-cell) {
 				padding: 20px;
 			}
 

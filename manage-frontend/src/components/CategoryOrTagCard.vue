@@ -254,14 +254,14 @@ async function loadTag() {
 			display: flex;
 			justify-content: space-between;
 
-			::v-deep(.el-form-item__label) {
+			:deep(.el-form-item__label) {
 				padding: 0;
 				width: 20px;
 				flex-grow: 1;
 				text-align: left;
 			}
 
-			::v-deep(.el-form-item__content) {
+			:deep(.el-form-item__content) {
 				flex-grow: 1;
 				width: 300px;
 			}
@@ -278,7 +278,7 @@ async function loadTag() {
 	}
 }
 
-::v-deep(.form-area .el-card__body) {
+:deep(.form-area .el-card__body) {
 	height: 100%;
 	display: flex;
 	flex-direction: column;

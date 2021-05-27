@@ -424,7 +424,7 @@ async function initDate() {
 
 }
 
-::v-deep(.el-textarea__inner) {
+:deep(.el-textarea__inner) {
 	height: 200px;
 }
 
@@ -453,11 +453,11 @@ async function initDate() {
 	background-color: rgba(0, 0, 0, 0.9);
 }
 
-::v-deep(.tag-area) {
+:deep(.tag-area) {
 	display: none;
 }
 
-::v-deep(.box-card) {
+:deep(.box-card) {
 	width: 100%;
 }
 

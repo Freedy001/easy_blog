@@ -171,10 +171,10 @@ let common = reactive<any>({
 });
 //透明三角形样式
 let triangle = reactive({
-	"border-bottom": "500vh solid rgba(45, 37, 73, 0.7)"
+	"borderBottom": "500vh solid rgba(45, 37, 73, 0.7)"
 })
 watch(() => common.indexColor, () => {
-	triangle["border-bottom"] = `500vh solid ${common.indexColor}`
+	triangle["borderBottom"] = `500vh solid ${common.indexColor}`
 })
 
 let loading = ref(false)

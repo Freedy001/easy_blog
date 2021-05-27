@@ -1,7 +1,7 @@
 <!--suppress ALL -->
 <template>
 	<div class="full-screen" @click="$emit('clickOutSide')"
-	     :style="{'background-color':`rgba(0, 0, 0,${dynamicOpacity})`,'z-index':proxy.index}">
+	     :style="{'backgroundColor':`rgba(0, 0, 0,${dynamicOpacity})`,'zIndex':proxy.index}">
 		<div @click.stop="" class="stop">
 			<slot></slot>
 		</div>

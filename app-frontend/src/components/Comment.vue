@@ -11,12 +11,12 @@
 					placement="top"
 					title="success"
 					trigger="manual"
-					:content="$store.state.indexSetting.examination?'评论成功请耐心等待管理员审核哦！':'评论发布成功😎!'"
+					:content="store.state.indexSetting.examination?'评论成功请耐心等待管理员审核哦！':'评论发布成功😎!'"
 					v-model:visible="visible"
 			>
 				<template #reference>
 					<button type="button"
-					        :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':$store.state.darkMode}"
+					        :class="{'el-button':true,'shake-horizontal':tip!=='','button-dark':store.state.darkMode}"
 					        @click.stop="submit">SUBMIT
 					</button>
 				</template>
@@ -33,11 +33,13 @@ import {defineEmit, defineProps, getCurrentInstance, onMounted, reactive, ref, w
 import {useRoute} from "vue-router";
 import {post} from "../http";
 import {addDarkClass} from "../utils/common";
+import {useStore} from "vuex";
 
 defineProps(['fatherCommentId', 'myplaceholder'])
 defineEmit(['commentCB'])
 const {proxy}: any = getCurrentInstance();
 const router = useRoute();
+const store = useStore();
 
 let comment = reactive<any>({
 	articleId: '',
@@ -49,9 +51,10 @@ let tip = ref('')
 let visible = ref(false)
 
 async function submit() {
+	let pattern=/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
 	if (comment.username == '' || comment.email == '' || comment.content === '') {
 		tip.value = '内容不能为空哦~~ 😥😥'
-	} else if (!comment.email.match('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$')) {
+	} else if (!pattern.test(comment.email)) {
 		tip.value = '邮箱格式不正确~~ 😥😥'
 	} else {
 		const id = router.query.id;

@@ -59,7 +59,7 @@ function returnBtn(){
 	form.url=''
 	form.priority=''
 }
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 watch(()=>store.state.COT.form,()=>{
 	if (proxy.name){
 		const data=store.state.COT.form
@@ -92,14 +92,14 @@ watch(()=>store.state.COT.form,()=>{
 			display: flex;
 			justify-content: space-between;
 
-			::v-deep(.el-form-item__label) {
+			:deep(.el-form-item__label) {
 				padding: 0;
 				width: 20px;
 				flex-grow: 1;
 				text-align: left;
 			}
 
-			::v-deep(.el-form-item__content) {
+			:deep(.el-form-item__content) {
 				flex-grow: 1;
 				width: 300px;
 			}
@@ -116,7 +116,7 @@ watch(()=>store.state.COT.form,()=>{
 	}
 }
 
-::v-deep(.form-area .el-card__body) {
+:deep(.form-area .el-card__body) {
 	height: 100%;
 	display: flex;
 	flex-direction: column;

@@ -110,7 +110,7 @@ function doScroll(event: any) {
 				height: 6px;
 			}
 
-			::v-deep .el-pagination {
+			:deep .el-pagination {
 				position: absolute;
 				bottom: 20px;
 				left: 0;

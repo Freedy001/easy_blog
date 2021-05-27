@@ -7,5 +7,6 @@ package com.freedy.backend.enumerate;
 public enum EsType {
     SAVE,
     UPDATE,
-    DELETE
+    DELETE,
+    RELOAD
 }

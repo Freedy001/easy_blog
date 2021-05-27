@@ -1,10 +1,10 @@
 <template>
 	<div class="post">
-		<div :style="{right:left?null:0}" class="img-box" :class="addDarkClass()">
+		<div :style="{right:left?'none':0}" class="img-box" :class="addDarkClass()">
 			<img style="border-radius: 5px;cursor: pointer" @click="handleJump" :src="loadResource(articleItem.articlePoster)"
-			     alt="">
+			     alt="net error">
 		</div>
-		<div :style="{right:left?0:null,left:left?null:0}" class="info" :class="addDarkClass()">
+		<div :style="{right:left?0:'none',left:left?'none':0}" class="info" :class="addDarkClass()">
 			<div class="time">{{ articleItem.publishTime }}</div>
 			<div class="title">
 				<router-link class="title-content" @click="handleJump" tag="a" to="">{{ articleItem.title }}</router-link>
@@ -27,7 +27,7 @@
 						<svg class="icon" aria-hidden="true">
 							<use xlink:href="#icon-biaoqian"></use>
 						</svg>
-						<span v-for="(item,i) in articleItem.articleTags" :key="i">{{ item }}</span>
+						<span v-for="(item,i) in articleItem.articleTags" :key="guid()">{{ item }}</span>
 					</div>
 				</el-tooltip>
 			</div>
@@ -79,13 +79,20 @@ import overhead from '../assets/icon/overhead.svg'
 import overheadDark from '../assets/icon/overhead-dark.svg'
 
 defineProps(['articleItem', 'left'])
-const {proxy} = getCurrentInstance();
+const {proxy}:any = getCurrentInstance();
 const router = useRouter();
 
 function handleJump() {
 	router.push(`/article?id=${proxy.articleItem.id}`)
 }
 
+function guid() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+		let r = Math.random() * 16 | 0,
+				v = c == 'x' ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	});
+}
 
 </script>
 
@@ -104,7 +111,7 @@ function handleJump() {
 		min-width: 500px;
 		overflow: hidden;
 		border: 1px solid #f3fafd;
-		transition: all 0.3s;
+		transition: all 0.3s ease;
 		position: absolute;
 		border-radius: 10px;
 
@@ -114,6 +121,9 @@ function handleJump() {
 			height: 100%;
 			object-fit: cover;
 			border-radius: 10px;
+		}
+		&:hover{
+			transform: scale(1.01);
 		}
 	}
 

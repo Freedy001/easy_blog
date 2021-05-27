@@ -73,4 +73,10 @@ public interface CommentDao extends BaseMapper<CommentEntity> {
      * 获取指定文章的评论总数
      */
     Integer getCommentNumByArticleId(@Param("id") long id);
+
+    /**
+     * 获取指定用户未读的消息
+     * @param id 用户id
+     */
+    Integer countNotRead(@Param("id") Integer id);
 }

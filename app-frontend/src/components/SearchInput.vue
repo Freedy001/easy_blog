@@ -77,7 +77,7 @@ interface ISuggest {
 let search = ref()
 let showPop = ref(false)
 let queryString = ref<string|any>('')
-let suggest = reactive<Array<ISuggest>>([])
+let suggest = reactive<Array<any>>([])
 let timeout: number | null | undefined;
 watch(queryString, (val) => {
 	if (timeout) {

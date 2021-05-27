@@ -3,13 +3,13 @@
 	<div class="root">
 		<div class="indexContainer">
 			<div class="title-row">
-				<h1>{{ $store.state.articleTitle === '' ? '新文章' : $store.state.articleTitle }}</h1>
+				<h1>{{ articleTitle === '' ? '新文章' : articleTitle }}</h1>
 				<div>
 					<el-button type="danger" @click="saveDraft">保存草稿</el-button>
 					<el-button type="primary" @click="publishArticle">发布</el-button>
 				</div>
 			</div>
-			<el-input v-model="$store.state.articleTitle" placeholder="请输入标题"></el-input>
+			<el-input v-model="title" placeholder="请输入标题"></el-input>
 		</div>
 		<editor :initText="initArticle" @getArticle="getArticle"></editor>
 		<ArticleSettingDrawer :id="$route.query.id"
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, getCurrentInstance, onMounted, ref, watch} from "vue";
+import {computed, defineComponent, getCurrentInstance, onMounted, ref, watch} from "vue";
 import editor from '../components/MarkdownContainer.vue';
 import ArticleSettingDrawer from '../components/ArticleSettingDrawer.vue'
 import {get, post} from "../http";
@@ -40,10 +40,12 @@ export default defineComponent({
 		const store = useStore();
 		//是否打开侧边栏
 		let drawer = ref(false)
-		// noinspection TypeScriptExplicitMemberType
 		const {proxy}: any = getCurrentInstance();
-		let initArticle = ref<string>();
+		const articleTitle = computed(()=>store.state.articleTitle);
+		let title=ref();
+		watch(title,()=>{store.commit('setTitle',title)})
 
+		let initArticle = ref<string>();
 		onMounted(() => {
 			if (store.state.articleContent !== '') {
 				initArticle.value = store.state.articleContent
@@ -165,6 +167,8 @@ export default defineComponent({
 		return {
 			drawer,
 			initArticle,
+			articleTitle,
+			title,
 			save,
 			getArticle,
 			getContent,
@@ -259,7 +263,7 @@ export default defineComponent({
 
 }
 
-::v-deep(.el-textarea__inner) {
+:deep(.el-textarea__inner) {
 	height: 200px;
 }
 
@@ -288,11 +292,11 @@ export default defineComponent({
 	background-color: rgba(0, 0, 0, 0.9);
 }
 
-::v-deep(.tag-area) {
+:deep(.tag-area) {
 	display: none;
 }
 
-::v-deep(.box-card) {
+:deep(.box-card) {
 	width: 100%;
 }
 

@@ -9,7 +9,7 @@
 import {get, loadResource} from "../http";
 import {onBeforeRouteLeave} from "vue-router";
 import {onMounted, reactive} from "vue";
-import {copyProperties} from "../utils/common";
+import {copyProperties, isDarkMode} from "../utils/common";
 
 let article = reactive<any>({})
 onMounted(async () => {
@@ -17,7 +17,6 @@ onMounted(async () => {
 	const response = await get(`/article/get?id=1`);
 	if (response.code == 200) {
 		copyProperties(response.data, article)
-		console.log(article)
 	}
 })
 
@@ -28,10 +27,10 @@ function loadStyle() {
 	const head = document.getElementsByTagName('head')[0];
 	const mdLink = document.createElement('link');
 	const hjLink = document.createElement('link');
-	mdLink.href = loadResource('/css/md.css')
+	mdLink.href = loadResource(isDarkMode() ? '/resource/md-dark.css' : '/resource/md.css')
 	mdLink.setAttribute("rel", "stylesheet")
 	mdLink.setAttribute("class", "md-css")
-	hjLink.href = loadResource('/css/hj.css')
+	hjLink.href = loadResource(isDarkMode() ? '/resource/hj-dark.css' : '/resource/hj.css')
 	hjLink.setAttribute("rel", "stylesheet")
 	hjLink.setAttribute("class", "md-css")
 	head.appendChild(mdLink);
