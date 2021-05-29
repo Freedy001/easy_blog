@@ -1,0 +1,49 @@
+# yaml 配置
+version: '3'
+services:
+  redis:
+    image: "redis"
+    container_name: redis
+    restart: always
+    volumes:
+      - /easy_blog/redis/conf/redis.conf:/etc/redis/redis.conf
+  mysql:
+    build:
+      context: .
+      dockerfile: DockerfileMySql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    container_name: mysql
+    restart: always
+  elastic-search:
+    build:
+      context: .
+      dockerfile: DockerfileEs
+    environment:
+      - discovery.type=single-node
+      - 'ES_JAVA_OPTS=-Xms64m -Xmx512m'
+    container_name: elasticSearch_ik
+    restart: always
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: DockerfileRabbitMq
+    container_name: rabbitmq_delayedQueue
+    restart: always
+  app:
+    build:
+      context: .
+      dockerfile: DockerfileApp
+    ports:
+      - 80:80
+    depends_on:
+      - redis
+      - mysql
+      - elastic-search
+      - rabbitmq
+    container_name: blog-app
+    restart: always
+    volumes:
+      - /easy_blog:/root/.easy
+
+

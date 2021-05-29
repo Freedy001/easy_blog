@@ -2,8 +2,8 @@
 <template>
 	<div class="root">
 		<div class="btn-area">
-			<el-button type="primary" @click="batchConfirm" >批量通过</el-button>
-			<el-button type="danger" @click="batchDel" >批量删除</el-button>
+			<el-button type="primary" @click="batchConfirm">批量通过</el-button>
+			<el-button type="danger" @click="batchDel">批量删除</el-button>
 		</div>
 		<el-table
 				class="article-table"
@@ -88,20 +88,22 @@
 				:page-count="totalPage"
 				@current-change="changePage">
 		</el-pagination>
-		<transition name="el-fade-in">
-			<FullScreen opacity="0.1" v-if="showReplayCard">
-				<div class="content">
-					<div class="toWho">
-						<span>回复: {{ replay.replayName }}</span>
-						<img :src="close" alt="" @click="doClose">
+		<teleport to="body">
+			<transition name="el-fade-in">
+				<FullScreen opacity="0.1" v-if="showReplayCard">
+					<div class="content">
+						<div class="toWho">
+							<span>回复: {{ replay.replayName }}</span>
+							<img :src="close" alt="" @click="doClose">
+						</div>
+						<textarea placeholder="请输入内容" v-model="replay.content"></textarea>
+						<div class="button">
+							<el-button type="primary" round @click="doReplay">@回复他</el-button>
+						</div>
 					</div>
-					<textarea placeholder="请输入内容" v-model="replay.content"></textarea>
-					<div class="button">
-						<el-button type="primary" round @click="doReplay">@回复他</el-button>
-					</div>
-				</div>
-			</FullScreen>
-		</transition>
+				</FullScreen>
+			</transition>
+		</teleport>
 	</div>
 </template>
 
@@ -227,7 +229,7 @@ async function doReplay() {
 		await getComment();
 		success("回复成功!")
 		doClose()
-		Object.keys(replay).forEach(key=>replay[key]='')
+		Object.keys(replay).forEach(key => replay[key] = '')
 	}
 }
 
@@ -401,7 +403,7 @@ function success(msg: string) {
 	}
 }
 
-:deep(.el-table__body-wrapper.is-scrolling-none){
+:deep(.el-table__body-wrapper.is-scrolling-none) {
 	margin-bottom: 50px;
 }
 

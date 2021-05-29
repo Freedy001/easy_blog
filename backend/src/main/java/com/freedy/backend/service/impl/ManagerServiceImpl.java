@@ -97,12 +97,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         if (userEntity.getStatus().equals(EntityConstant.ROOT_ADMIN)) {
             infoVo.setRootAdmin(true);
         }
-        //获取主页uri
-        CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> {
-            SettingEntity page = settingService.getOne(new QueryWrapper<SettingEntity>().lambda()
-                    .eq(SettingEntity::getItem, SettingEnum.pageUrl.name()));
-            infoVo.setPageUrl(page.getItem());
-        }, executor);
+        infoVo.setPageUrl("/");
         //获取文章总数
         CompletableFuture<Void> f3 = CompletableFuture.runAsync(() -> {
             int totalArticle = articleService.count(new QueryWrapper<ArticleEntity>().eq("author_id", managerId));
@@ -128,7 +123,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         //获取访问总数
         Long totalVisit = articleService.getTotalVisit();
         infoVo.setTotalVisit(totalVisit == null ? 0 : totalVisit);
-        CompletableFuture.allOf(f2, f3, f4, f5, f6).get();
+        CompletableFuture.allOf( f3, f4, f5, f6).get();
         return infoVo;
     }
 

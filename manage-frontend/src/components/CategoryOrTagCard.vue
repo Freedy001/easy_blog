@@ -12,12 +12,12 @@
 						          show-word-limit
 						></el-input>
 					</el-form-item>
-					<el-form-item label="图片url">
-						<el-input type="text"
-						          v-model="form.url"
-						          placeholder="请输入图片url"
-						></el-input>
-					</el-form-item>
+<!--					<el-form-item label="图片url">-->
+<!--						<el-input type="text"-->
+<!--						          v-model="form.url"-->
+<!--						          placeholder="请输入图片url"-->
+<!--						></el-input>-->
+<!--					</el-form-item>-->
 					<el-form-item label="优先级">
 						<el-select v-model="form.priority" placeholder="请选择标签优先级">
 							<el-option label="最高" :value="1"></el-option>
@@ -234,7 +234,7 @@ async function loadTag() {
 .card-row {
 	display: flex;
 	justify-content: space-between;
-	height: 45%;
+	height: 40%;
 }
 
 .box-card {
@@ -247,13 +247,14 @@ async function loadTag() {
 		font-weight: lighter;
 	}
 
+	//noinspection CssInvalidPropertyValue
 	.el-form {
 		padding: auto 0;
 
 		.el-form-item {
 			display: flex;
 			justify-content: space-between;
-
+			margin-bottom: 30px;
 			:deep(.el-form-item__label) {
 				padding: 0;
 				width: 20px;
@@ -264,6 +265,9 @@ async function loadTag() {
 			:deep(.el-form-item__content) {
 				flex-grow: 1;
 				width: 300px;
+			}
+			.el-select{
+				width: 100%;
 			}
 		}
 	}
@@ -282,6 +286,6 @@ async function loadTag() {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	justify-content: space-around;
 }
 </style>

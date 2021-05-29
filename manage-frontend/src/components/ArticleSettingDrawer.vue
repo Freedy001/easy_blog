@@ -188,6 +188,7 @@ let options = reactive([{
 	label: ''
 }])
 let loading=ref(false)
+//获取建议
 async function remoteMethod(queryString:string) {
 	loading.value=true;
 	const response =await get(`/tag/getSuggestion?queryString=${queryString}`);
@@ -204,12 +205,7 @@ async function remoteMethod(queryString:string) {
 }
 
 //分类数组
-let categoryArr = reactive([{
-	id: 1,
-	name: 'blank',
-	url: 'blank',
-	priority: 1,
-}]);
+let categoryArr = reactive<any>([]);
 
 //增加分类
 function addCategory() {

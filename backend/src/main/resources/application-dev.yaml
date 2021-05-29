@@ -1,36 +1,7 @@
 server:
   port: 1000
 
-easy:
-  thread:
-    core-size: 50
-    max-size: 200
-    keep-alive-time: 10
-  PermissionItem:
-    article-permission:
-      article-operation-to-others: 可操作他人
-    comment-permission:
-      comment-operation-to-others: 可操作他人
-    user-permission:
-      user-manager: 可管理用户(但不能管理用户的权限)
-      user-permission-manager: 可管理用户权限
-    setting-permission:
-      setting-common: 常规设置
-      setting-smtp: SMTP设置
-      setting-comment: 评论设置
-      setting-attachment : 附件设置
-  jwt:
-    header: Authorization
-    base64-secret: sanbayan
-    token-validity-in-seconds: 864000 #用户过期时间10天
-  elastic-search:
-    addr: 192.168.169.2
-    port: 9200
-
-
 # Logger Config
 logging:
   level:
     com.freedy.backend: debug
-
-

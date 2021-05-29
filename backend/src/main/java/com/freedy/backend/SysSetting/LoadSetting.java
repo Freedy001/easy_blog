@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.service.ManagerService;
 import com.freedy.backend.service.SettingService;
+import com.freedy.backend.utils.RunSqlScript;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.security.Permission;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,10 +50,11 @@ public class LoadSetting {
     @Autowired
     private ManagerService managerService;
 
+
     @PostConstruct
-    public void init(){
+    public void init() {
         refreshSetting();
-        if (managerService.count()==0){
+        if (managerService.count() == 0) {
             log.warn("在数据库中没有发现管理员,开始创建根管理员.....");
             managerService.createRootUser();
             log.warn("创建成功！！！");
@@ -69,7 +69,7 @@ public class LoadSetting {
     public void refreshSetting() {
         Map<String, String> settingMap = service.list().stream().collect(Collectors.toMap(SettingEntity::getItem, SettingEntity::getValue));
         Field[] fields = LoadSetting.class.getDeclaredFields();
-        if (settingMap.keySet().size()< fields.length-3){//排除掉sl4j的log 和service
+        if (settingMap.keySet().size() < fields.length - 4) {//排除掉sl4j的log 和service
             initSetting();
             return;
         }
@@ -91,7 +91,7 @@ public class LoadSetting {
             } else {
                 //排除掉sl4j的log
                 if (!"log".equals(fieldName) && !"service".equals(fieldName) && !"managerService".equals(fieldName)) {
-                    log.debug("没有发现系统设置{}",fieldName);
+                    log.debug("没有发现系统设置{}", fieldName);
                 }
             }
         }
@@ -106,10 +106,15 @@ public class LoadSetting {
             ArrayList<SettingEntity> list = new ArrayList<>();
             for (Field field : currentClazz.getDeclaredFields()) {
                 String fieldName = field.getName();
-                if (!"log".equals(fieldName) && !"service".equals(fieldName)) {
+                if (!"log".equals(fieldName) && !fieldName.toLowerCase(Locale.ROOT).contains("service")) {
                     SettingEntity entity = new SettingEntity();
                     entity.setItem(fieldName);
-                    String value = String.valueOf(field.get(loadSetting));
+                    String value;
+                    if ("setupTime".equals(fieldName)) {
+                        value = String.valueOf(System.currentTimeMillis());
+                    } else {
+                        value = String.valueOf(field.get(loadSetting));
+                    }
                     entity.setValue(value);
                     list.add(entity);
                     log.info("初始化系统设置{}-->{}", fieldName, value);

@@ -1,7 +1,7 @@
 {
   "blogTitle": "哈哈",
-  "emailAuthentication": "EPGQIUWTXDOCEIIG",
-  "emailFrom": "freedyamazing@126.com",
+  "emailAuthentication": "xxx",
+  "emailFrom": "xxxx@126.com",
   "emailHostName": "smtp.126.com",
   "examination": true,
   "footInfo": "example",
@@ -9,10 +9,10 @@
   "indexColor": "rgba(116, 116, 116, 0.2)",
   "logo": "/resource/easyBlog.svg",
   "newCommentNotification": true,
-  "poster": "/resource/StarrySky.jpg",
+  "poster": "/resource/pexels-harrison-candlin-2441454.jpg",
   "replayNotification": true,
-  "senderName": "Freedy I LOVE YOU HAHAHA",
-  "setupTime": "1619530585804",
+  "senderName": "easy blog",
+  "setupTime": "",
   "sslPort": "465",
   "webSiteDomainName": "https://www.example.com"
 }

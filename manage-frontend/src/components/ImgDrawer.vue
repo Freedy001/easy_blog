@@ -31,22 +31,24 @@
 			</div>
 		</div>
 	</el-drawer>
-	<transition name="el-fade-in-linear">
-		<FullScreen :opacity="0" :index="3000" v-if="showCard" @click="showCard=false">
-			<el-upload
-					@click.stop=""
-					class="upload-demo"
-					drag
-					:action="loadResource('/backend/file/upload')"
-					list-type="picture"
-					:headers="token"
-					:on-success="success"
-					multiple>
-				<i class="el-icon-upload"></i>
-				<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-			</el-upload>
-		</FullScreen>
-	</transition>
+	<teleport to="body">
+		<transition name="el-fade-in-linear">
+			<FullScreen :opacity="0.5" :index="3000" v-if="showCard" @click="showCard=false">
+				<el-upload
+						@click.stop=""
+						class="upload-demo"
+						drag
+						:action="loadResource('/backend/file/upload')"
+						list-type="picture"
+						:headers="token"
+						:on-success="success"
+						multiple>
+					<i class="el-icon-upload"></i>
+					<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+				</el-upload>
+			</FullScreen>
+		</transition>
+	</teleport>
 </template>
 
 <script setup lang="ts">
@@ -87,6 +89,7 @@ function handClick(url:string) {
 //关闭上传后重新加载
 watch(showCard,(val)=>{
 	if (!val){
+		resource.length=0
 		page=1;
 		getImageUrls().then();
 	}
@@ -115,9 +118,7 @@ async function getImageUrls() {
 	const response = await get(`/file/getImages?page=${page}&limit=10&sidx=id&order=desc`);
 	if (response.code == 200) {
 		const list: Array<any> = response.data.list
-		list.forEach((value, index) => {
-			resource.push(value.resourceUrl)
-		})
+		list.forEach(value => resource.push(value.resourceUrl))
 	}
 }
 

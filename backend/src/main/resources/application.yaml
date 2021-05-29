@@ -2,8 +2,8 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
-    username: root
+    url: jdbc:mysql://@rm-uf6g6g2246i5v159x1o.mysql.rds.aliyuncs.com:3306/blog_db?serverTimezone=UTC
+    username: freedy
     password: Kz99596589
   redis:
     host: 192.168.169.2
@@ -34,7 +34,33 @@ spring:
   profiles:
     active: dev
 
-
+easy:
+  thread:
+    core-size: 50
+    max-size: 200
+    keep-alive-time: 10
+  PermissionItem:
+    article-permission:
+      article-operation-to-others: 可操作他人
+    comment-permission:
+      comment-operation-to-others: 可操作他人
+    user-permission:
+      user-manager: 可管理用户(但不能管理用户的权限)
+      user-permission-manager: 可管理用户权限
+    setting-permission:
+      setting-common: 常规设置
+      setting-smtp: SMTP设置
+      setting-comment: 评论设置
+      setting-attachment : 附件设置
+  jwt:
+    header: Authorization
+    base64-secret: sanbayan
+    token-validity-in-seconds: 864000 #用户过期时间10天
+  elastic-search:
+    addr: 192.168.169.2
+    port: 9200
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
+
+

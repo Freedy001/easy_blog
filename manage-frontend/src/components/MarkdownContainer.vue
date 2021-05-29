@@ -13,6 +13,9 @@ import hljs from 'highlight.js';
 import '@toast-ui/editor/dist/i18n/zh-cn'
 import axios from "axios";
 import {loadResource} from "../http";
+
+
+
 let editor: Editor;
 const {proxy}:any = getCurrentInstance();
 defineEmit(['getArticle'])
@@ -45,8 +48,8 @@ onMounted(()=>{
 		});
 		next(loadResource(response.data.url),file.name)
 	})
-})
 
+})
 
 
 watch(()=>proxy.initText,(val)=>{

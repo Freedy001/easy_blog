@@ -1,11 +1,16 @@
 <template>
 	<div class="root">
 		<div class="btn-area">
-			<el-button type="primary" @click="showCard=true">上传</el-button>
-			<el-button type="danger" @click="del">删除</el-button>
+			<div>
+				<el-button type="primary" v-if="hasSelect" @click="showPicUri">显示选中图片的地址</el-button>
+			</div>
+			<div>
+				<el-button type="primary" @click="showCard=true">上传</el-button>
+				<el-button type="danger" @click="del">删除</el-button>
+			</div>
 		</div>
 		<div class="img-area">
-			<div class="item" @click="handleClick(url,i)" v-for="(url,i) in resource" :key='i'>
+			<div class="item" @click="handleClick(url,i)" v-for="(url,i) in resource" :key='url'>
 				<div class="checked">
 					<img :src="check" alt="">
 				</div>
@@ -32,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, getCurrentInstance, onMounted, onUnmounted, reactive, ref} from "vue";
+import {defineComponent, getCurrentInstance, h, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {get, loadResource, post} from "../http";
 import LoadMore from '../components/LoadMore.vue'
 import check from '../assets/check.svg'
@@ -92,8 +97,8 @@ async function success(response: any) {
 		getImageUrls().then();
 	}
 }
-
 let SelectedList:any = [];
+let hasSelect=ref(false)
 //点击图片
 function handleClick(url: string, index: number) {
 	const ele: any = document.getElementsByClassName("item")[index];
@@ -103,23 +108,25 @@ function handleClick(url: string, index: number) {
 		SelectedList.push(index)
 		ele.classList.add('select')
 		check.style.display = 'block'
+		hasSelect.value=true;
 	} else {
 		SelectedList.splice(picIndex, 1);
 		ele.classList.remove('select')
 		check.style.display = 'none'
+		hasSelect.value=SelectedList.length>0
 	}
 }
 //删除图片
 async function del() {
-	const ele = document.getElementsByClassName("pic-item");
 	let urlList:any=[]
-	SelectedList.forEach((index:any)=>urlList.push(ele[index].getAttribute('src')))
+	SelectedList.forEach((index:any)=>urlList.push(resource[index]))
 	const response = await post('/file/delPic',urlList);
 	if (response.code==200){
 		proxy.$notify({
 			title: '成功！',
 			message: "删除成功",
 		})
+		//取消选中
 		const ele: any = document.getElementsByClassName("item");
 		const check: any = document.getElementsByClassName("checked");
 		SelectedList.forEach((index:any)=>{
@@ -137,6 +144,20 @@ async function del() {
 			duration: 5000
 		})
 	}
+}
+
+function showPicUri() {
+//	/image/2021-05-29/5e8714af48344a39947e8cbe3a74ecb1-thumbnails-img.png
+	let message:string='';
+	SelectedList.forEach((index:any)=>{
+		const split = resource[index].split("-", 5);
+		message+=`<p style="margin: 15px;line-height: 25px">${loadResource(split[0]+"-"+split[1]+"-"+split[2]+"-"+split[4])}</p>`
+	})
+
+	ElMessage({
+		dangerouslyUseHTMLString: true,
+		message: `<div>${message}</div>`
+	});
 }
 
 
@@ -202,7 +223,7 @@ function waterFall() {
 	.btn-area {
 		width: 100%;
 		display: flex;
-		justify-content: flex-end;
+		justify-content: space-between;
 
 		.el-button {
 			margin: 10px;
@@ -219,12 +240,6 @@ function waterFall() {
 			transition: all .3s ease;
 			cursor: pointer;
 
-			.el-image{
-				width: 100%;
-				border-radius: 10px;
-				background-color: #0b9aff;
-			}
-
 			.checked {
 				position: absolute;
 				top: 3%;
@@ -236,6 +251,12 @@ function waterFall() {
 					border: none;
 					background-color: rgba(255, 255, 255, 0);
 				}
+			}
+
+			.el-image{
+				width: 100%;
+				border-radius: 10px;
+				background-color: #0b9aff;
 			}
 		}
 

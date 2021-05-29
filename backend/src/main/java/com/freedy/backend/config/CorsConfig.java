@@ -23,7 +23,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
        if (environment.acceptsProfiles(Profiles.of("dev"))){
-           log.debug("--->开启跨域");
+           log.info("--->开启跨域");
            // 设置允许跨域的路由
            registry.addMapping("/**")
                    // 设置允许跨域请求的域名
