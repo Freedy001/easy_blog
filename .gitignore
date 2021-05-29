@@ -66,3 +66,5 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 manage-frontend/node_modules/**
+
+docker
