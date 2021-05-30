@@ -1,6 +1,0 @@
-FROM openjdk:11
-
-COPY *.jar /app.jar
-COPY application.yaml /application.yaml
-
-ENTRYPOINT ["java","-jar","/app.jar"]
