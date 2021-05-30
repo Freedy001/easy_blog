@@ -6,9 +6,15 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.freedy.backend.valid.Front;
 import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
 /**
  * 评论表
  * 
@@ -35,12 +41,16 @@ public class CommentEntity implements Serializable {
 	@ApiModelProperty("评论的楼数")
 	private Integer flore;
 
+	@NotEmpty
 	@ApiModelProperty("评论类容")
 	private String content;
 
+	@NotEmpty(message = "邮箱不能为空",groups = Front.class)
 	@ApiModelProperty("评论人名称")
 	private String username;
 
+	@Email(message = "邮箱不正确",groups = Front.class)
+	@NotEmpty(message = "邮箱不能为空",groups =  Front.class)
 	@ApiModelProperty("评论人邮箱")
 	private String email;
 

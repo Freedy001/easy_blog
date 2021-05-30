@@ -12,13 +12,18 @@ import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.exception.NoPermissionsException;
+import com.freedy.backend.valid.Update;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.CategoryEntity;
 import com.freedy.backend.service.CategoryService;
 import com.freedy.backend.utils.PageUtils;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -28,6 +33,7 @@ import com.freedy.backend.utils.PageUtils;
  * @email 985948228@qq.com
  * @date 2021-04-25 14:00:46
  */
+@Validated
 @RestController
 @RequestMapping("backend/category")
 public class CategoryController {
@@ -45,7 +51,7 @@ public class CategoryController {
     @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("保存分类")
     @PostMapping("/save")
-    public Result saveCategory(@RequestBody CategoryEntity category) {
+    public Result saveCategory(@Validated @RequestBody CategoryEntity category) {
         category.setCreatorId(Local.MANAGER_LOCAL.get().getId());
         categoryService.save(category);
         return Result.ok();
@@ -54,7 +60,7 @@ public class CategoryController {
     @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("更新分类")
     @PostMapping("/update")
-    public Result updateCategory(@RequestBody CategoryEntity category) {
+    public Result updateCategory(@Validated(Update.class) @RequestBody CategoryEntity category) {
         //修改他人且没权限
         ManagerEntity entity = Local.MANAGER_LOCAL.get();
         if (!category.getCreatorId().equals(entity.getId())&&entity.getStatus()!=1)
@@ -67,7 +73,7 @@ public class CategoryController {
     @RecordLog(type = RecordEnum.CATEGORY)
     @ApiOperation("删除分类")
     @GetMapping("/delete")
-    public Result deleteCategory(Integer[] ids) {
+    public Result deleteCategory(@NotNull Integer[] ids) {
         categoryService.deleteCategories(Arrays.asList(ids));
         return Result.ok();
     }

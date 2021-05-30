@@ -13,13 +13,18 @@ import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.exception.NoPermissionsException;
+import com.freedy.backend.valid.Update;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.TagEntity;
 import com.freedy.backend.service.TagService;
 import com.freedy.backend.utils.PageUtils;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -29,6 +34,7 @@ import com.freedy.backend.utils.PageUtils;
  * @email 985948228@qq.com
  * @date 2021-04-25 14:00:46
  */
+@Validated
 @RestController
 @RequestMapping("backend/tag")
 public class TagController {
@@ -45,7 +51,7 @@ public class TagController {
     @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("保存标签")
     @PostMapping("/save")
-    public Result saveTag(@RequestBody TagEntity tag) {
+    public Result saveTag(@Validated @RequestBody TagEntity tag) {
         tag.setCreatorId(Local.MANAGER_LOCAL.get().getId());
         tagService.save(tag);
         return Result.ok();
@@ -54,7 +60,7 @@ public class TagController {
     @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("修改标签")
     @PostMapping("/update")
-    public Result updateTag(@RequestBody TagEntity tag) {
+    public Result updateTag(@Validated(Update.class) @RequestBody TagEntity tag) {
         ManagerEntity entity = Local.MANAGER_LOCAL.get();
         //修改他人且没权限
         if (!tag.getCreatorId().equals(entity.getId())&&entity.getStatus()!=1)
@@ -66,7 +72,7 @@ public class TagController {
     @RecordLog(type = RecordEnum.TAG)
     @ApiOperation("删除标签")
     @GetMapping("/delete")
-    public Result deleteTag(Integer[] ids) {
+    public Result deleteTag(@NotNull Integer[] ids) {
         tagService.deleteTags(Arrays.asList(ids));
         return Result.ok();
     }
@@ -74,7 +80,7 @@ public class TagController {
 
     @ApiOperation("获取建议")
     @GetMapping("/getSuggestion")
-    public Result getSuggestion(@RequestParam String queryString) {
+    public Result getSuggestion(@NotEmpty @RequestParam String queryString) {
         List<TagEntity> list = tagService.list(new QueryWrapper<TagEntity>()
                 .lambda().like(TagEntity::getTagName, queryString)
         );

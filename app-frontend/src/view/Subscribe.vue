@@ -16,7 +16,7 @@
 						<span v-if="onError" style="color: red;font-size: 12px;position: absolute; left: 20px ;bottom: -25px">你输入的邮箱格式好像不正确😢</span>
 						<div class="email-input">
 							<input type="text" placeholder="你的邮箱地址" v-model="email" @keypress.enter="subscribe">
-							<el-button round :loading="emailLoading" :class="{onError:onError}" @click="subscribe">
+							<el-button round :disabled="disabled" :loading="emailLoading" :class="{onError:onError}" @click="subscribe">
 								<span>订阅</span>
 							</el-button>
 						</div>
@@ -52,6 +52,7 @@ const proxy:any = getCurrentInstance()?.proxy;
 let reSendLoading = ref(true)
 let timeout = ref(60)
 let runTime = reactive<any>({})
+//倒计时
 function timeoutFun() {
 	const interval = setInterval(() => {
 		if (--timeout.value == 0) {
@@ -65,6 +66,7 @@ timeoutFun()
 let firstPage = ref(1)
 //上面都是样式
 let emailLoading = ref(false)
+let disabled=ref(false)
 let email = ref()
 let onError=ref(false)
 let uuid: any;
@@ -79,20 +81,33 @@ async function subscribe() {
 	}
 	emailLoading.value = true
 	const response = await get(`/sys/subscribe?email=${email.value}`);
-	if (response.code == 200) {
-		uuid=response.data
-		setTimeout(()=>{
+	setTimeout(()=>{
+		if (response.code == 200) {
+			uuid=response.data
 			timeout.value=60;
 			firstPage.value = 2
-		},500)
-	}else if (response.code == 3007) {
-		proxy.$notify({
-			title: '提示',
-			message: response.msg
-		})
-		firstPage.value=3
-		localStorage.setItem("subscribe",uuid)
-	}
+		}else if (response.code == 3007) {
+			proxy.$notify({
+				title: '提示',
+				message: response.msg
+			})
+			firstPage.value=3
+			localStorage.setItem("subscribe",uuid)
+		}else if(response.code == 3008){
+			proxy.$notify({
+				title: '提示',
+				message: response.msg
+			})
+			emailLoading.value = false
+			disabled.value=true
+		}
+		else{
+			proxy.$notify({
+				title: '提示',
+				message: response.msg
+			})
+		}
+	},500)
 }
 
 let verifyLoading = ref(false)

@@ -2,6 +2,7 @@ package com.freedy.backend.SysSetting;
 
 import com.alibaba.fastjson.JSON;
 import com.freedy.backend.entity.SettingEntity;
+import com.freedy.backend.service.ArticleService;
 import com.freedy.backend.service.ManagerService;
 import com.freedy.backend.service.SettingService;
 import com.freedy.backend.utils.RunSqlScript;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -26,8 +28,9 @@ import java.util.stream.Collectors;
  * @date 2021/5/16 13:33
  */
 @Data
-@Component
 @Slf4j
+@Component
+@DependsOn("runSqlScript")
 public class LoadSetting {
     private String setupTime;
     private String blogTitle;
@@ -49,10 +52,12 @@ public class LoadSetting {
     private SettingService service;
     @Autowired
     private ManagerService managerService;
+    @Autowired
+    private ArticleService articleService;
 
 
     @PostConstruct
-    public void init() {
+    public void init() throws Exception{
         refreshSetting();
         if (managerService.count() == 0) {
             log.warn("在数据库中没有发现管理员,开始创建根管理员.....");
@@ -60,6 +65,11 @@ public class LoadSetting {
             log.warn("创建成功！！！");
             log.warn("初始用户名:root");
             log.warn("初始密码:123456");
+        }
+        if (articleService.getById(1)==null){
+            log.warn("在数据库中没有发现关于页面,开始创建根关于页面.....");
+            articleService.initArticle();
+            log.warn("创建成功！！！");
         }
     }
 
@@ -90,14 +100,14 @@ public class LoadSetting {
                 log.info("加载系统设置{},值为{}", fieldName, value);
             } else {
                 //排除掉sl4j的log
-                if (!"log".equals(fieldName) && !"service".equals(fieldName) && !"managerService".equals(fieldName)) {
+                if (!"log".equals(fieldName) && !fieldName.toLowerCase(Locale.ROOT).contains("service")) {
                     log.debug("没有发现系统设置{}", fieldName);
                 }
             }
         }
     }
 
-    private void initSetting() {
+    private void initSetting(){
         try {
             Class<? extends LoadSetting> currentClazz = LoadSetting.class;
             InputStream fis = currentClazz.getClassLoader().getResourceAsStream("ini.json");

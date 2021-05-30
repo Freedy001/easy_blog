@@ -10,6 +10,9 @@
 				</div>
 			</div>
 		</div>
+		<div  class="tip" v-if="dataList.length===0">
+			<span>没有发布任何速记，可以前往后台首页发送哦。</span>
+		</div>
 	<UserInfo :startX="x" :startY="y" :userId="userId" ></UserInfo>
 	</div>
 </template>
@@ -34,12 +37,12 @@ function handleClick(id:number,event:any) {
 onMounted(() => {
 	getShortHand()
 })
-let dataList = ref();
+let dataList = reactive<any>([]);
 let page = 1;
 async function getShortHand() {
 	const response = await get(`/shorthand/list?page=${page}&limit=10`);
 	if (response.code == 200) {
-		dataList.value = response.data.list
+		response.data.list.forEach((value: any)=>dataList.push(value))
 	}
 }
 //下面都是样式
@@ -109,6 +112,12 @@ function leave(index: any) {
 
 			}
 		}
+	}
+
+	.tip{
+		margin-top: 300px;
+		text-align: center;
+		font-size: 20px;
 	}
 }
 

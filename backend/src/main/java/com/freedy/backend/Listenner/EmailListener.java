@@ -70,6 +70,8 @@ public class EmailListener {
                         commentEntity.getContent(),
                         setting.getWebSiteDomainName() + "/article?id=" + commentEntity.getArticleId()
                 ));
+                //防止下面return 一直无法消费
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             }
             if (EntityConstant.COMMENT_EXAMINATION.equals(commentEntity.getCommentStatus())) {
                 return;

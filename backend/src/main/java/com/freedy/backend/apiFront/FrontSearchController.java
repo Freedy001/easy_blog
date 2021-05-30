@@ -7,11 +7,14 @@ import com.freedy.backend.service.SearchService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,6 +22,7 @@ import java.util.List;
  * @author Freedy
  * @date 2021/5/13 19:25
  */
+@Validated
 @Slf4j
 @RestController
 @RequestMapping("/frontend/search")
@@ -29,15 +33,15 @@ public class FrontSearchController {
 
     @ApiOperation("获取搜索建议")
     @GetMapping("/getSuggestions")
-    public Result getSuggestions(@RequestParam String queryString) throws IOException {
+    public Result getSuggestions(@NotEmpty @RequestParam String queryString) throws IOException {
         List<SuggestionVo> suggestions = service.getSuggestions(queryString);
         return Result.ok().setData(suggestions);
     }
 
     @ApiOperation("搜索")
     @GetMapping("/doSearch")
-    public Result search(@RequestParam(name = "searchString") String searchString ,
-            @RequestParam(name = "page") Integer page) throws IOException {
+    public Result search(@NotEmpty @RequestParam(name = "searchString") String searchString ,
+                         @NotNull @RequestParam(name = "page") Integer page) throws IOException {
         List<SearchResult> results=service.doSearch(searchString,page);
         return Result.ok().setData(results);
     }

@@ -1,8 +1,11 @@
 package com.freedy.backend.utils;
 
+import com.freedy.backend.SysSetting.LoadSetting;
+import com.freedy.backend.aspect.OperationLog;
 import com.freedy.backend.exception.EmailSendErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,35 +16,27 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class EmailSender {
-    @Value("#{loadSetting.emailHostName}")
-    private String emailHostName;
-    @Value("#{loadSetting.emailFrom}")
-    private  String emailFrom;
-    @Value("#{loadSetting.emailAuthentication}")
-    private  String emailAuthentication;
-     @Value("#{loadSetting.sslPort}")
-    private  Integer SSLPort;
-     @Value("#{loadSetting.senderName}")
-    private  String senderName;
 
+    @Autowired
+    private LoadSetting loadSetting;
 
-    public void sendHtml(String sendToWho,String title,String content){
-        log.debug("准备给{}发送邮件,标题是{}类容是{}",sendToWho,title,content);
-        // 发送简单的email,不能添加附件
-        HtmlEmail email=new HtmlEmail();
-        // 邮件服务器域名
-        email.setHostName(emailHostName);
-        // 邮件服务器smtp协议的SSL端口
-        email.setSmtpPort(SSLPort);
-        // 用户名和密码为邮箱的账号和密码
-        email.setAuthenticator(new DefaultAuthenticator(emailFrom, emailAuthentication));
-        // SSL安全连接
-        email.setSSLOnConnect(true);
-        // 设置字符编码方式
-        email.setCharset("UTF-8");
-        // 发件人
+    public void sendHtml(String sendToWho, String title, String content) {
         try {
-            email.setFrom(emailFrom,senderName);
+            log.debug("准备给{}发送邮件,标题是{}类容是{}", sendToWho, title, content);
+            // 发送简单的email,不能添加附件
+            HtmlEmail email = new HtmlEmail();
+            // 邮件服务器域名
+            email.setHostName(loadSetting.getEmailHostName());
+            // 邮件服务器smtp协议的SSL端口
+            email.setSmtpPort(Integer.parseInt(loadSetting.getSslPort()));
+            // 用户名和密码为邮箱的账号和密码
+            email.setAuthenticator(new DefaultAuthenticator(loadSetting.getEmailFrom(), loadSetting.getEmailAuthentication()));
+            // SSL安全连接
+            email.setSSLOnConnect(true);
+            // 设置字符编码方式
+            email.setCharset("UTF-8");
+            // 发件人
+            email.setFrom(loadSetting.getEmailFrom(), loadSetting.getSenderName());
             // 收件人
             email.addTo(sendToWho);
             //title
@@ -51,9 +46,12 @@ public class EmailSender {
             // 发送
             email.send();
             log.debug("发送成功!");
-        } catch (EmailException e) {
-            e.printStackTrace();
-            throw new EmailSendErrorException();
+        } catch (NullPointerException e) {
+            log.error("没有配置smtp服务，无法发送邮件");
+            OperationLog.RecordLogManually("没有配置smtp服务，无法发送邮件", false, "system");
+        } catch (Exception e) {
+            log.error("邮件发送出错==>{}", e.getMessage());
+            OperationLog.RecordLogManually("smtp服务出错==>" + e.getMessage(), false, "system");
         }
     }
 

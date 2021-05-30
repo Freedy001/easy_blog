@@ -44,6 +44,11 @@
         update blog_article set comment_num=comment_num+1 where id=#{articleId}
     </insert>
 
+    <insert id="insertWithId">
+        INSERT INTO blog_article  (id, title, article_desc, author_id,  content, word_num, article_status, article_comment, article_category_id, create_time, update_time, publish_time )  VALUES
+        (#{id},#{title},#{articleDesc},#{authorId},#{content},#{wordNum},#{articleStatus},#{articleComment},#{articleCategoryId},#{createTime},#{updateTime},#{publishTime})
+    </insert>
+
     <update id="updateArticleStatus">
         update blog_db.blog_article set blog_db.blog_article.article_status = #{articleStatus} where id = #{id}
     </update>

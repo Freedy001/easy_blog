@@ -1,8 +1,8 @@
 {
   "blogTitle": "哈哈",
-  "emailAuthentication": "xxx",
-  "emailFrom": "xxxx@126.com",
-  "emailHostName": "smtp.126.com",
+  "emailAuthentication": "",
+  "emailFrom": "",
+  "emailHostName": "",
   "examination": true,
   "footInfo": "example",
   "indexArticleIdAndTitle": "",

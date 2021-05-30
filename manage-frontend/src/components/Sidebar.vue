@@ -4,7 +4,7 @@
 			<div class="info">
 				<el-dropdown>
 					<div class="photo" style="cursor:pointer;">
-						<img :src="loadResource(headImg)" alt="">
+						<img :src="loadResource(store.state.userInfo.headImg)" alt="">
 					</div>
 					<template #dropdown>
 						<el-dropdown-menu>
@@ -16,7 +16,7 @@
 						</el-dropdown-menu>
 					</template>
 				</el-dropdown>
-				<p class="name">{{ nickname }}</p>
+				<p class="name">{{ store.state.userInfo.nickname }}</p>
 			</div>
 			<el-menu
 					mode="horizontal"
@@ -43,18 +43,22 @@
 				<el-menu-item index="/index/comment">
 					<i class="el-icon-help"></i>
 					<span>评论</span>
-					<span class="badge">{{ notReadNum }}</span>
+					<span class="badge" :class="{twinkle:twinkle}">{{ notReadNum }}</span>
 				</el-menu-item>
 				<el-menu-item index="/index/attachments">
 					<i class="el-icon-help"></i>
 					<span>附件</span>
 				</el-menu-item>
-				<el-menu-item index="/index/user">
+				<el-menu-item v-if="showSetting" index="/index/user">
 					<i class="el-icon-help"></i>
 					<span>用户</span>
 				</el-menu-item>
 				<div class="divide-line"></div>
-				<el-menu-item index="/index/setting">
+				<el-menu-item v-if="!showSetting" index="/index/user">
+					<i class="el-icon-help"></i>
+					<span>用户</span>
+				</el-menu-item>
+				<el-menu-item v-if="showSetting" index="/index/setting">
 					<i class="el-icon-help"></i>
 					<span>设置</span>
 				</el-menu-item>
@@ -68,44 +72,67 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import {get, loadResource, logout} from '../http'
 import {useRouter} from "vue-router";
 import {ElMessage} from "element-plus";
 import {useStore} from "vuex";
 
-const scale = ref(false)
+const scale = ref(false);
 const router = useRouter();
 const store = useStore();
 
+//退出登录
 async function lg() {
 	await logout()
 	await router.push('/login')
 }
 
-let nickname = ref()
-let headImg = ref()
-let notReadNum = ref(0)
+let interval: any;
 onMounted(async () => {
-	getNickNameAndHeadImg().then();
-	getNotReadNum().then();
+	getUserInfo().then(() => {
+		checkPermission()
+	});
+	getNotReadNum().then()
+	//每30秒获取一次评论数
+	interval = setInterval(() => {
+		getNotReadNum()
+	}, 30000);
 })
+let showSetting = ref(false)
+let commonReg = /setting-common/
+let smtpReg = /setting-smtp/
+let commentReg = /setting-comment/
+let aboutReg = /setting-about/
+
+//判断是否显示设置
+function checkPermission() {
+	let permissionStr = store.state.userInfo.permissionStr
+	showSetting.value = commonReg.test(permissionStr) || smtpReg.test(permissionStr) || commentReg.test(permissionStr) || aboutReg.test(permissionStr);
+}
+
+
+//通知
 watch(() => store.state.notifyReloadNickNameAndHeadImg, () => {
-	getNickNameAndHeadImg()
+	getUserInfo()
 })
 
-async function getNickNameAndHeadImg() {
+//获取登录用户信息
+async function getUserInfo() {
 	const response = await get('/manager/getUserInfo');
 	if (response.code == 200) {
-		nickname.value = response.data.nickname;
-		headImg.value = response.data.headImg;
+		store.commit('setUserInfo', response.data)
 	}
 }
 
+//通知
 watch(() => store.state.notifyReloadReadNum, () => {
 	getNotReadNum()
 })
-
+let twinkle=ref(false)
+let notReadNum = ref(0)
+watch(notReadNum,num=>twinkle.value=num>0);
+//获取评论数
 async function getNotReadNum() {
 	const num = await get('/comment/getNotReadNum')
 	if (num.code == 200) {
@@ -113,6 +140,9 @@ async function getNotReadNum() {
 	}
 }
 
+onUnmounted(() => {
+	clearTimeout(interval)
+})
 
 </script>
 
@@ -184,6 +214,10 @@ async function getNotReadNum() {
 			position: relative;
 
 			.badge {
+				display: none;
+			}
+
+			.twinkle {
 				top: 20%;
 				right: 50%;
 				position: absolute;
@@ -195,11 +229,21 @@ async function getNotReadNum() {
 				align-items: center;
 				justify-content: center;
 				border-radius: 100%;
-				color: #0b9aff;
+				color: #ff0000;
 				text-align: center;
 				margin-left: 5px;
-				font-size: 5px;
+				font-size: 13px;
 				font-weight: 500;
+				animation: Eye-catching 0.8s ease infinite alternate both;
+			}
+
+			@keyframes Eye-catching {
+				0% {
+					transform: scale(0.5);
+				}
+				100% {
+					transform: scale(1);
+				}
 			}
 
 			i {
@@ -219,25 +263,6 @@ async function getNotReadNum() {
 
 				i {
 					color: #0084ff;
-				}
-
-				.badge {
-					top: 20%;
-					right: 50%;
-					position: absolute;
-					flex-shrink: 0;
-					width: 20px;
-					height: 20px;
-					display: flex;
-					background-color: #0084ff;
-					align-items: center;
-					justify-content: center;
-					border-radius: 100%;
-					color: #fafafa;
-					text-align: center;
-					margin-left: 5px;
-					font-size: 5px;
-					font-weight: 500;
 				}
 			}
 

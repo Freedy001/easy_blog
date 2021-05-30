@@ -14,9 +14,12 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.nio.file.FileSystemException;
 import java.util.*;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
  * @author Freedy
  * @date 2021/5/6 23:21
  */
+@Validated
 @Slf4j
 @RestController()
 @RequestMapping("/backend/file")
@@ -92,7 +96,7 @@ public class FileController {
 
     @Transactional(rollbackFor = Throwable.class)
     @PostMapping("/delPic")
-    public Result delPic(@RequestBody List<String> urls) {
+    public Result delPic(@NotNull @NotEmpty @RequestBody List<String> urls) {
         if (!AuthorityUtils.hasAuthority("root-admin")) {
             List<String> collect = urls.stream().map(url -> ResourceUrlUtil.ConvertToHDUrl(url.replaceFirst(".*?/image/", "/image/"))).collect(Collectors.toList());
             int count = resourceService.count(new QueryWrapper<ResourceEntity>().lambda()

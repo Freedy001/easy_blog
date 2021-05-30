@@ -20,6 +20,7 @@ import java.sql.*;
  * @author Freedy
  * @date 2021/5/29 15:40
  */
+@Component
 @Slf4j
 public class RunSqlScript {
     @Value("${spring.datasource.url}")
@@ -29,7 +30,7 @@ public class RunSqlScript {
     @Value("${spring.datasource.password}")
     private String password;
 
-
+    @PostConstruct
     public void checkDb(){
         try {
             // jdbc 连接信息: 注: 现在版本的JDBC不需要配置driver，因为不需要Class.forName手动加载驱动

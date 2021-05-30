@@ -2,11 +2,15 @@
 <template>
 	<div class="indexContainer">
 		<el-tabs v-model="activeName">
-			<el-tab-pane label="常规设置" name="1">
+			<el-tab-pane label="常规设置" v-if="commonReg.test(store.state.userInfo.permissionStr)" name="1">
 				<div class="common-setting">
 					<div class="item">
 						<h1>博客标题</h1>
 						<el-input v-model="common.blogTitle" placeholder="请输入内容"></el-input>
+					</div>
+					<div class="item">
+						<h1>博客域名</h1>
+						<el-input v-model="common.webSiteDomainName" placeholder="请输入内容"></el-input>
 					</div>
 					<div class="item">
 						<h1>首页文章</h1>
@@ -60,7 +64,7 @@
 					<el-button type="primary" @click="saveCommon">保存</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="SMTP设置" name="2">
+			<el-tab-pane label="SMTP设置" v-if="smtpReg.test(store.state.userInfo.permissionStr)" name="2">
 				<div class="smtp">
 					<div class="item">
 						<h1>SMTP地址</h1>
@@ -85,7 +89,7 @@
 					<el-button type="primary" @click="saveSMTP">保存</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="评论设置" name="3">
+			<el-tab-pane label="评论设置" v-if="commentReg.test(store.state.userInfo.permissionStr)" name="3">
 				<div class="comment">
 					<div class="item">
 						<h1>评论需要审核</h1>
@@ -103,10 +107,11 @@
 						</el-switch>
 					</div>
 					<el-button type="primary" @click="savaComment"
-					           style="margin-top: 30px">保存</el-button>
+					           style="margin-top: 30px">保存
+					</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="关于页面" name="4">
+			<el-tab-pane label="关于页面" v-if="aboutReg.test(store.state.userInfo.permissionStr)" name="4">
 				<div class="other">
 					<div class="item">
 						<div class="about">
@@ -132,23 +137,46 @@ import {defineComponent, getCurrentInstance, onMounted, reactive, ref, watch} fr
 import {get, getFrontApi, loadResource, post} from "../http";
 import ImgDrawer from '../components/ImgDrawer.vue'
 import {ElMessage} from "element-plus";
-import {copyProperties} from "../util/Common";
+import {copyProperties, noPermission} from "../util/Common";
 import {useRoute} from "vue-router";
-const {proxy}:any = getCurrentInstance();
+import {useStore} from "vuex";
+
+const {proxy}: any = getCurrentInstance();
 defineComponent({
 	ImgDrawer
 })
 const route = useRoute();
-onMounted(()=>{
-	initCommonValue();
-	initSMTPValue();
-	initCommentValue();
-	if (route.query.toForth){
-		activeName.value="4"
+const store = useStore();
+let commonReg = /setting-common/
+let smtpReg = /setting-smtp/
+let commentReg = /setting-comment/
+let aboutReg = /setting-about/
+
+onMounted(() => {
+	if (commonReg.test(store.state.userInfo.permissionStr)) {
+		initCommonValue();
+	}
+	// initSMTPValue();
+	// initCommentValue();
+	// initAbout();
+	if (route.query.toForth) {
+		activeName.value = "4"
 	}
 })
+
 let showDrawer = ref(0)
 let activeName = ref("1")
+watch(activeName, (tab) => {
+	if (tab == "1") {
+		initCommonValue();
+	} else if (tab == "2") {
+		initSMTPValue();
+	} else if (tab == "3") {
+		initCommentValue();
+	} else if (tab == "4") {
+		initAbout();
+	}
+})
 
 //***************************常规设置***********************************
 interface ICommon {
@@ -161,12 +189,14 @@ interface ICommon {
 	poster: string,
 	indexColor: string,
 	footInfo: string
+	webSiteDomainName:string
 }
+
 //页面的数据
 let common = reactive<any>({
-	indexArticle:{
-		id:'',
-		title:''
+	indexArticle: {
+		id: '',
+		title: ''
 	}
 });
 //透明三角形样式
@@ -181,10 +211,10 @@ let loading = ref(false)
 //建议数据
 let recommend = reactive<any>([])
 
-watch(()=>common.indexArticle.id,(val)=>{
-	recommend.forEach((item: { id: any,label:any })=>{
-		if (item.id==val){
-			common.indexArticle.title=item.label
+watch(() => common.indexArticle.id, (val) => {
+	recommend.forEach((item: { id: any, label: any }) => {
+		if (item.id == val) {
+			common.indexArticle.title = item.label
 		}
 	})
 })
@@ -192,59 +222,59 @@ watch(()=>common.indexArticle.id,(val)=>{
 
 //获取文章建议
 async function querySearch(queryString: string) {
-	loading.value=true
+	loading.value = true
 	//这里要掉前台的接口
 	const response = await getFrontApi(`/frontend/search/getSuggestions?queryString=${queryString}`);
-	if (response.code==200){
-		recommend.length=1;
-		const data:Array<any> = response.data;
+	if (response.code == 200) {
+		recommend.length = 1;
+		const data: Array<any> = response.data;
 		data.forEach((value, index) => {
-			if (recommend[0].id!=value.id){
+			if (recommend[0].id != value.id) {
 				recommend.push({
 					id: value.id,
 					label: value.title,
 				})
 			}
 		})
-		loading.value=false;
-	}else {
-		proxy.$notify({
-			title: '出差啦😢！',
-			message: response.msg,
-			type: 'error'
-		});
+		loading.value = false;
+	} else if (response.code === 3001) {
+		noPermission()
 	}
 }
+
 //表示要更换图片的那个一项
 let chose: string;
+
 //点击logo
 function changeLogo() {
 	showDrawer.value++;//打开抽屉
 	chose = "logo";
 }
+
 //点击首页图片
 function changePoster() {
 	showDrawer.value++;//打开抽屉
 	chose = "poster";
 }
+
 //选择图片后的回调
 function clickCallback(url: string) {
 	common[chose] = url;
 }
+
 //初始化常规设置 (数据回显)
 async function initCommonValue() {
 	const response = await get('/setting/getCommonSetting');
 	if (response.code == 200) {
 		const data: any | ICommon = response.data;
-		copyProperties(data,common)
-		// Object.keys(data).forEach((key, index) => {
-		// 	common[key] = data[key];
-		// })
+		copyProperties(data, common)
 		recommend.push({
-			id:data.indexArticle.id,
-			label:data.indexArticle.title,
+			id: data.indexArticle.id,
+			label: data.indexArticle.title,
 		})
-	}else {
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
 		proxy.$notify({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -252,16 +282,19 @@ async function initCommonValue() {
 		});
 	}
 }
+
 //保存数据
 async function saveCommon() {
 	const response = await post('/setting/saveCommon', common);
-	if (response.code==200){
-	proxy.$notify({
+	if (response.code == 200) {
+		proxy.$notify({
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
 		});
-	}else {
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
 		proxy.$notify({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -269,6 +302,7 @@ async function saveCommon() {
 		});
 	}
 }
+
 //*****************************SMTP设置**********************************
 interface ISMPTData {
 	emailHostName: string
@@ -277,33 +311,40 @@ interface ISMPTData {
 	emailAuthentication: string
 	senderName: string
 }
-let SMPTData = reactive<ISMPTData|any>({})
+
+let SMPTData = reactive<ISMPTData | any>({})
+
 //初始化smtp数据
-async function initSMTPValue(){
-		const response =await get('/setting/getSMTPSetting');
-		if (response.code==200){
-			const data:any = response.data;
-			Object.keys(data).forEach((value, index) => {
-				SMPTData[value]=data[value];
-			})
-		}else {
-			proxy.$notify({
-				title: '出差啦😢！',
-				message: response.msg,
-				type: 'error'
-			});
-		}
+async function initSMTPValue() {
+	const response = await get('/setting/getSMTPSetting');
+	if (response.code == 200) {
+		const data: any = response.data;
+		Object.keys(data).forEach((value, index) => {
+			SMPTData[value] = data[value];
+		})
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
+	}
 }
+
 //保存smtp设置
 async function saveSMTP() {
-	const response =await post('/setting/saveSMTP',SMPTData);
-	if (response.code==200){
+	const response = await post('/setting/saveSMTP', SMPTData);
+	if (response.code == 200) {
 		proxy.$notify({
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
 		});
-	}else {
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
 		proxy.$notify({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -311,16 +352,20 @@ async function saveSMTP() {
 		});
 	}
 }
+
 //*******************************评论设置*****************************************
 let comment = reactive<any>({});
+
 async function initCommentValue() {
 	const response = await get('/setting/getCommentSetting');
-	if (response.code==200){
-		const data:any = response.data;
+	if (response.code == 200) {
+		const data: any = response.data;
 		Object.keys(data).forEach((value, index) => {
-			comment[value]=data[value];
+			comment[value] = data[value];
 		})
-	}else {
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
 		proxy.$notify({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -328,16 +373,19 @@ async function initCommentValue() {
 		});
 	}
 }
+
 //保存评论数据
 async function savaComment() {
-	const response =await post('/setting/saveComment',comment);
-	if (response.code==200){
+	const response = await post('/setting/saveComment', comment);
+	if (response.code == 200) {
 		proxy.$notify({
 			title: '成功',
 			message: '保存成功!',
 			type: 'success'
 		});
-	}else {
+	} else if (response.code == 3001) {
+		noPermission()
+	} else {
 		proxy.$notify({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -345,14 +393,18 @@ async function savaComment() {
 		});
 	}
 }
+
 //********************************关于页面**************************************
 let article = reactive<any>({})
-onMounted(async () => {
+
+async function initAbout() {
 	const response = await getFrontApi('/frontend/article/get?id=1')
 	if (response.code == 200) {
 		copyProperties(response.data, article)
+	} else if (response.code == 3001) {
+		noPermission()
 	}
-})
+}
 
 </script>
 
@@ -447,7 +499,7 @@ onMounted(async () => {
 		}
 	}
 
-	.about{
+	.about {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;

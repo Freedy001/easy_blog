@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -24,10 +26,13 @@ public class NewUserVo implements Serializable {
      */
     @ApiModelProperty("id")
     private Integer id;
+    @NotEmpty
     @ApiModelProperty("新用户的用户名")
     private String username;
     @ApiModelProperty("新用户的密码")
     private String password;
+    @Email
+    @NotEmpty
     @ApiModelProperty("新用户的邮箱")
     private String email;
     @ApiModelProperty("文章权限")

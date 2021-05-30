@@ -2,7 +2,7 @@
 	<div class="main">
 		<Sidebar class="side"></Sidebar>
 		<div class="container">
-			<div class="content" @scroll="doScroll" id="content">
+			<div class="content" id="content">
 				<router-view v-slot="{ Component }">
 					<transition enter-active-class="fade-in"
 					            leave-active-class="fade-out"
@@ -16,27 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, onMounted} from 'vue'
+import {defineComponent} from 'vue'
 import Sidebar from "../components/Sidebar.vue";
-import {useStore} from "vuex";
-
 defineComponent({
 	Sidebar
 })
-const store = useStore();
-let timeout: any;
-
-function doScroll(event: any) {
-	const scroll = event.srcElement
-	if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50)) {
-		if (timeout) {
-			clearTimeout(timeout)
-		}
-		timeout = setTimeout(() => {
-			store.commit('addScroll')
-		}, 300);
-	}
-}
 </script>
 
 <style scoped lang="scss">

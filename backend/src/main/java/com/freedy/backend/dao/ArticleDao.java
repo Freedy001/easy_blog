@@ -103,4 +103,9 @@ public interface ArticleDao extends BaseMapper<ArticleEntity> {
      */
     void updateComment(@Param("map") Map<String, String> map);
 
+    /**
+     * 带有id的插入
+     */
+    void insertWithId(ArticleEntity entity);
+
 }

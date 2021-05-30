@@ -1,5 +1,6 @@
 package com.freedy.backend.service.impl;
 
+import com.freedy.backend.exception.ArgumentErrorException;
 import com.freedy.backend.utils.AuthorityUtils;
 import com.freedy.backend.utils.Local;
 import com.freedy.backend.constant.EntityConstant;
@@ -91,6 +92,8 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         Integer managerId = userEntity.getId();
         UserInfoVo infoVo = new UserInfoVo();
         BeanUtils.copyProperties(userEntity, infoVo);
+        //获取权限字符串
+        infoVo.setPermissionStr(Local.PERMISSION_LOCAL.get());
         //获取创建时长
         long timeLong = System.currentTimeMillis() - userEntity.getCreateTime();
         infoVo.setCreateDuration((timeLong / (1000 * 60 * 60 * 24)) + "天");
@@ -136,7 +139,9 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         long time = System.currentTimeMillis();
         ManagerEntity entity = new ManagerEntity();
         if (manager.getId() == null) {
-            String encodedPassword = passwordEncoder.encode(manager.getPassword());
+            String password = manager.getPassword();
+            if (!StringUtils.hasText(password)) throw new ArgumentErrorException();
+            String encodedPassword = passwordEncoder.encode(password);
             manager.setPassword(encodedPassword);
             entity.setCreateTime(time);
         }

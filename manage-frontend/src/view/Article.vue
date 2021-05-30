@@ -5,7 +5,8 @@
 			<div class="title-row">
 				<h1>{{ articleTitle === '' ? '新文章' : articleTitle }}</h1>
 				<div>
-					<el-button type="danger" @click="saveDraft">保存草稿</el-button>
+					<el-button type="danger" @click="clearArticle">清空文章</el-button>
+					<el-button type="success" @click="saveDraft">保存草稿</el-button>
 					<el-button type="primary" @click="publishArticle">发布</el-button>
 				</div>
 			</div>
@@ -44,11 +45,14 @@ export default defineComponent({
 		const articleTitle = computed(()=>store.state.articleTitle);
 		let title=ref();
 		watch(title,()=>{store.commit('setTitle',title)})
-
+		watch(()=>store.state.articleTitle,value => title.value=value)
 		let initArticle = ref<string>();
 		onMounted(() => {
 			if (store.state.articleContent !== '') {
 				initArticle.value = store.state.articleContent
+			}
+			if (store.state.articleTitle!==''){
+				title.value=store.state.articleTitle
 			}
 		})
 
@@ -60,6 +64,19 @@ export default defineComponent({
 		 */
 		function getArticle(text: string) {
 			store.commit('changeArticleContent', text)
+		}
+
+		function clearArticle() {
+			proxy.$confirm('确定清空吗?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				title.value='';
+				initArticle.value='';
+			}).catch(() => {
+
+			});
 		}
 
 		/**
@@ -169,6 +186,7 @@ export default defineComponent({
 			initArticle,
 			articleTitle,
 			title,
+			clearArticle,
 			save,
 			getArticle,
 			getContent,

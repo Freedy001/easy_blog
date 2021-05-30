@@ -69,7 +69,7 @@
 import * as echarts from 'echarts'
 import answerLogo from '../assets/answer.svg'
 import plus from '../assets/plus.svg'
-import {getCurrentInstance, onMounted, reactive, ref} from "vue";
+import {getCurrentInstance, onMounted, onUnmounted, reactive, ref} from "vue";
 import {get, post} from "../http";
 import {ElMessage} from "element-plus";
 import {onBeforeRouteLeave} from "vue-router";
@@ -77,7 +77,7 @@ import {onBeforeRouteLeave} from "vue-router";
 const {proxy}: any = getCurrentInstance();
 let shotHand = ref('')
 let isLoading = ref(false)
-
+//发表速记
 async function publish() {
 	if (shotHand.value == '') {
 		proxy.$notify({
@@ -108,10 +108,12 @@ async function publish() {
 
 let operationLog = reactive<any>([]);
 
+let page=1;
 //获取操作日志
 async function getOperation() {
-	const response = await get('/operationLog/getOperationLog?page=1&limit=20&sidx=creat_time&order=desc');
+	const response = await get(`/operationLog/getOperationLog?page=${page}&limit=20&sidx=creat_time&order=desc`);
 	if (response.code == 200) {
+		if (page==1) operationLog.length=0;
 		response.data.list.forEach((item:any) => {
 			operationLog.push(item)
 		})
@@ -119,7 +121,7 @@ async function getOperation() {
 }
 
 let analyzeData = reactive<any>({})
-
+//获取分析数据
 async function getAnalyzeData() {
 	const response = await get('/sys/getDashboardData');
 	if (response.code == 200) {
@@ -138,9 +140,9 @@ onMounted(() => {
 	getOperation().then();
 	interval = setInterval(() => {
 		getOperation().then();
-	}, 5000)
+	}, 30000)
 })
-onBeforeRouteLeave(() => {
+onUnmounted(() => {
 	clearInterval(interval)
 })
 
@@ -439,7 +441,6 @@ function visitor() {
 
 		.operation-item {
 			width: 100%;
-			height: 50px;
 			margin: 15px 0;
 			display: flex;
 			justify-content: space-between;
@@ -472,7 +473,7 @@ function visitor() {
 				.info {
 					display: flex;
 					align-items: center;
-
+					justify-content: flex-end;
 					.dot {
 						top: -10px;
 						right: 0;

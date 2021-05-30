@@ -5,6 +5,7 @@ import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
+import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.exception.EmailAlreadyExistsException;
 import com.freedy.backend.exception.VerifyErrorException;
 import com.freedy.backend.utils.*;
@@ -15,7 +16,7 @@ import com.freedy.backend.service.ArticleService;
 import com.freedy.backend.service.SubscriberService;
 import com.google.common.base.VerifyException;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.mail.Email;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
  * @author Freedy
  * @date 2021/5/15 20:27
  */
+@Validated
 @RestController
 @RequestMapping("/frontend/sys")
 public class FrontSysController {
@@ -56,9 +61,15 @@ public class FrontSysController {
 
     @ApiOperation("订阅文章")
     @GetMapping("/subscribe")
-    public Result subscribe(@RequestParam(name = "email") String email) {
+    public Result subscribe(@NotEmpty @Email @RequestParam(name = "email") String email) {
+        if (loadSetting.getEmailHostName() == null ||
+                loadSetting.getEmailAuthentication() == null ||
+                loadSetting.getEmailFrom() == null ||
+                loadSetting.getSslPort() == null ||
+                loadSetting.getSenderName() == null)
+            return Result.error(ResultCode.NO_SMTP_CONFIG.getCode(), ResultCode.NO_SMTP_CONFIG.getMessage());
         SubscriberEntity one = subscriberService.getOne(new QueryWrapper<SubscriberEntity>().lambda().eq(SubscriberEntity::getSubscriberEmail, email));
-        if (one!=null){
+        if (one != null) {
             throw new EmailAlreadyExistsException();
         }
         SubscriberEntity entity = new SubscriberEntity();
@@ -72,12 +83,12 @@ public class FrontSysController {
 
     @ApiOperation("验证邮箱")
     @GetMapping("/verify")
-    public Result verify(@RequestParam(name = "code") String code
-            , @RequestParam(name = "UUID") String UUID) {
+    public Result verify(@Length(min = 6, max = 6) @RequestParam(name = "code") String code,
+                         @NotEmpty @RequestParam(name = "UUID") String UUID) {
         String verifyCode = redisTemplate.opsForValue().get(RedisConstant.SUBSCRIBE_HEADER + UUID);
-        if (StringUtils.hasText(verifyCode)){
+        if (StringUtils.hasText(verifyCode)) {
             String[] split = verifyCode.split("-");
-            if (split[0].equals(code)){
+            if (split[0].equals(code)) {
                 //验证成功
                 SubscriberEntity entity = new SubscriberEntity();
                 entity.setSubscriberEmail(split[1]);
@@ -96,7 +107,7 @@ public class FrontSysController {
     public Result getIndexSetting() {
         CommonSettingVo settingVo = new CommonSettingVo();
         BeanUtils.copyProperties(loadSetting, settingVo);
-        if (StringUtils.hasText(loadSetting.getIndexArticleIdAndTitle())){
+        if (StringUtils.hasText(loadSetting.getIndexArticleIdAndTitle())) {
             //构建首页文章
             ArticleEntity article = articleService.getOne(new QueryWrapper<ArticleEntity>()
                     .lambda().eq(ArticleEntity::getId,

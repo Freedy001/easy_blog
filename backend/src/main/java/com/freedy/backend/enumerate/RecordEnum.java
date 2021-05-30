@@ -16,4 +16,5 @@ public enum RecordEnum {
     UPLOAD,
     USER,
     SETTING,
+    MANUALLY,
 }

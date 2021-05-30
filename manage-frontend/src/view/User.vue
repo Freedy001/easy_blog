@@ -153,107 +153,109 @@
 				</el-tabs>
 			</el-card>
 		</div>
-		<transition name="el-fade-in-linear">
-			<FullScreen v-if="showCard" @click="showCard=false" :opacity="0.5">
-				<el-card class="permission-card" @click.stop="tip=''">
-					<div class="newUserForm">
-						<div class="item">
-							<span>用户名:</span>
-							<el-input placeholder="请输入用户名" v-model="newUser.username"></el-input>
-						</div>
-						<div class="item">
-							<span>密码:</span>
-							<el-input placeholder="请输入密码" show-password v-model="newUser.password"></el-input>
-						</div>
-						<div class="item">
-							<span>邮箱:</span>
-							<el-input placeholder="请输入邮箱" v-model="newUser.email"></el-input>
-						</div>
-						<el-divider class="outer-divider"></el-divider>
-						<div class="permission item" v-if="PermissionItem.isManager!==null&&PermissionItem.isManager">
-							<div style="width: 100%"><p style="margin-left: 10px">权限:</p></div>
-							<div class="permissionContainer">
-								<span>文章:</span>
-								<div class="article line">
-									<div style="display: flex;justify-content: space-between">
-										<el-checkbox style="margin-bottom: 10px"
-										             :indeterminate="selectAll.articleIsIndeterminate"
-										             v-model="selectAll.articleCheckAll"
-										             @change="handleArticleCheckAllChange">全选
-										</el-checkbox>
+		<teleport to="body">
+			<transition name="el-fade-in-linear">
+				<FullScreen v-if="showCard" @click="showCard=false" :opacity="0.5">
+					<el-card class="permission-card" @click.stop="tip=''">
+						<div class="newUserForm">
+							<div class="item">
+								<span>用户名:</span>
+								<el-input placeholder="请输入用户名" v-model="newUser.username"></el-input>
+							</div>
+							<div class="item">
+								<span>密码:</span>
+								<el-input placeholder="请输入密码" show-password v-model="newUser.password"></el-input>
+							</div>
+							<div class="item">
+								<span>邮箱:</span>
+								<el-input placeholder="请输入邮箱" v-model="newUser.email"></el-input>
+							</div>
+							<el-divider class="outer-divider"></el-divider>
+							<div class="permission item" v-if="PermissionItem.isManager!==null&&PermissionItem.isManager">
+								<div style="width: 100%"><p style="margin-left: 10px">权限:</p></div>
+								<div class="permissionContainer">
+									<span>文章:</span>
+									<div class="article line">
+										<div style="display: flex;justify-content: space-between">
+											<el-checkbox style="margin-bottom: 10px"
+											             :indeterminate="selectAll.articleIsIndeterminate"
+											             v-model="selectAll.articleCheckAll"
+											             @change="handleArticleCheckAllChange">全选
+											</el-checkbox>
+										</div>
+										<el-checkbox-group
+												v-model="newUser.articlePermission"
+												@change="handleArticleCheckedCitiesChange">
+											<el-checkbox v-for="(item,i) in PermissionItem.articlePermission" :key="i"
+											             :label="item"></el-checkbox>
+										</el-checkbox-group>
 									</div>
-									<el-checkbox-group
-											v-model="newUser.articlePermission"
-											@change="handleArticleCheckedCitiesChange">
-										<el-checkbox v-for="(item,i) in PermissionItem.articlePermission" :key="i"
-										             :label="item"></el-checkbox>
-									</el-checkbox-group>
-								</div>
-								<el-divider></el-divider>
-								<span>评论:</span>
-								<div class="user line">
-									<div style="display: flex;justify-content: space-between">
-										<el-checkbox style="margin-bottom: 10px"
-										             :indeterminate="selectAll.commentIsIndeterminate"
-										             v-model="selectAll.commentCheckAll"
-										             @change="handleCommentCheckAllChange">全选
-										</el-checkbox>
+									<el-divider></el-divider>
+									<span>评论:</span>
+									<div class="user line">
+										<div style="display: flex;justify-content: space-between">
+											<el-checkbox style="margin-bottom: 10px"
+											             :indeterminate="selectAll.commentIsIndeterminate"
+											             v-model="selectAll.commentCheckAll"
+											             @change="handleCommentCheckAllChange">全选
+											</el-checkbox>
+										</div>
+										<el-checkbox-group
+												v-model="newUser.commentPermission"
+												@change="handleCommentCheckedCitiesChange">
+											<el-checkbox v-for="(item,i) in PermissionItem.commentPermission" :key="i"
+											             :label="item"></el-checkbox>
+										</el-checkbox-group>
 									</div>
-									<el-checkbox-group
-											v-model="newUser.commentPermission"
-											@change="handleCommentCheckedCitiesChange">
-										<el-checkbox v-for="(item,i) in PermissionItem.commentPermission" :key="i"
-										             :label="item"></el-checkbox>
-									</el-checkbox-group>
-								</div>
-								<el-divider></el-divider>
-								<span>用户:</span>
-								<div class="user line">
-									<div style="display: flex;justify-content: space-between">
-										<el-checkbox style="margin-bottom: 10px"
-										             :indeterminate="selectAll.userIsIndeterminate"
-										             v-model="selectAll.userCheckAll"
-										             @change="handleUserCheckAllChange">全选
-										</el-checkbox>
+									<el-divider></el-divider>
+									<span>用户:</span>
+									<div class="user line">
+										<div style="display: flex;justify-content: space-between">
+											<el-checkbox style="margin-bottom: 10px"
+											             :indeterminate="selectAll.userIsIndeterminate"
+											             v-model="selectAll.userCheckAll"
+											             @change="handleUserCheckAllChange">全选
+											</el-checkbox>
+										</div>
+										<el-checkbox-group
+												v-model="newUser.userPermission"
+												@change="handleUserCheckedCitiesChange">
+											<el-checkbox v-for="(item,i) in PermissionItem.userPermission" :key="i"
+											             :label="item"></el-checkbox>
+										</el-checkbox-group>
 									</div>
-									<el-checkbox-group
-											v-model="newUser.userPermission"
-											@change="handleUserCheckedCitiesChange">
-										<el-checkbox v-for="(item,i) in PermissionItem.userPermission" :key="i"
-										             :label="item"></el-checkbox>
-									</el-checkbox-group>
-								</div>
-								<el-divider></el-divider>
-								<span>设置:</span>
-								<div class="setting line">
-									<div style="display: flex;justify-content: space-between">
-										<el-checkbox style="margin-bottom: 10px"
-										             :indeterminate="selectAll.settingIsIndeterminate"
-										             v-model="selectAll.settingCheckAll"
-										             @change="handleSettingCheckAllChange">全选
-										</el-checkbox>
+									<el-divider></el-divider>
+									<span>设置:</span>
+									<div class="setting line">
+										<div style="display: flex;justify-content: space-between">
+											<el-checkbox style="margin-bottom: 10px"
+											             :indeterminate="selectAll.settingIsIndeterminate"
+											             v-model="selectAll.settingCheckAll"
+											             @change="handleSettingCheckAllChange">全选
+											</el-checkbox>
+										</div>
+										<el-checkbox-group
+												v-model="newUser.settingPermission"
+												@change="handleSettingCheckedCitiesChange">
+											<el-checkbox v-for="(item,i) in PermissionItem.settingPermission" :key="i"
+											             :label="item"></el-checkbox>
+										</el-checkbox-group>
 									</div>
-									<el-checkbox-group
-											v-model="newUser.settingPermission"
-											@change="handleSettingCheckedCitiesChange">
-										<el-checkbox v-for="(item,i) in PermissionItem.settingPermission" :key="i"
-										             :label="item"></el-checkbox>
-									</el-checkbox-group>
 								</div>
 							</div>
+							<el-divider class="outer-divider"
+							            v-if="PermissionItem.isManager!==null&&PermissionItem.isManager"></el-divider>
+							<div class="item">
+								<el-button type="primary" :class="{'shake-horizontal':tip!==''}" @click.stop="createOrUpdateNewUser">保存
+								</el-button>
+								<el-button @click="showCard=false">取消</el-button>
+								<span style="color: #ff268b;margin-left: 20px;width: 100%">{{ tip }}</span>
+							</div>
 						</div>
-						<el-divider class="outer-divider"
-						            v-if="PermissionItem.isManager!==null&&PermissionItem.isManager"></el-divider>
-						<div class="item">
-							<el-button type="primary" :class="{'shake-horizontal':tip!==''}" @click.stop="createOrUpdateNewUser">保存
-							</el-button>
-							<el-button @click="showCard=false">取消</el-button>
-							<span style="color: #ff268b;margin-left: 20px;width: 100%">{{ tip }}</span>
-						</div>
-					</div>
-				</el-card>
-			</FullScreen>
-		</transition>
+					</el-card>
+				</FullScreen>
+			</transition>
+		</teleport>
 		<ImgDrawer
 				:isDrawer="drawer"
 				@clickCallback="handlePickPic"
@@ -305,7 +307,7 @@ async function handlePickPic(url: string) {
 let userInfoRules = reactive({
 	username: [
 		{required: true, message: '用户名不能为空', trigger: 'blur'},
-		{min: 5, max: 20, message: '用户名长度在 5 到 20 个字符', trigger: 'blur'}
+		{min: 4, max: 20, message: '用户名长度在 4 到 20 个字符', trigger: 'blur'}
 	],
 	nickname: [
 		{required: true, message: '昵称不能为空', trigger: 'blur'},
@@ -402,15 +404,20 @@ let page = 1
  * 获取个人用户消息
  */
 async function initData() {
-	const response = await get('/manager/getUserInfo');
-	if (response.code == 200) {
-		const resData: userInfo = response.data
-		copyProperties(resData, userInfoDetail)
-	} else {
-		proxy.$notify.error({
-			title: '出差啦😢！',
-			message: response.msg
-		})
+	const userInfo = store.state.userInfo;
+	if (Object.keys(userInfo).length!==0){
+		copyProperties(userInfo, userInfoDetail)
+	}else {
+		const response = await get('/manager/getUserInfo');
+		if (response.code == 200) {
+			const resData: userInfo = response.data
+			copyProperties(resData, userInfoDetail)
+		} else {
+			proxy.$notify.error({
+				title: '出差啦😢！',
+				message: response.msg
+			})
+		}
 	}
 }
 
@@ -715,8 +722,8 @@ function valid() {
 	} else if (!hasText(newUser.username) || !hasText(newUser.email) || !hasText(newUser.password)) {
 		tip.value = '用户名密码邮箱都不能为空哦！'
 		throw new Error();
-	} else if (newUser.username.length < 5 || newUser.username.length > 20) {
-		tip.value = '用户名长度在 5 到 20 个字符！'
+	} else if (newUser.username.length < 4 || newUser.username.length > 20) {
+		tip.value = '用户名长度在 4 到 20 个字符！'
 		throw new Error();
 	} else if (newUser.password.length < 8 || newUser.password.length > 20) {
 		tip.value = '密码长度在 8 到 20 个字符！'

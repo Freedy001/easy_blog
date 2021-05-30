@@ -25,6 +25,8 @@ public class UserInfoVo {
     private String introduce;
     @ApiModelProperty("头像")
     private String headImg;
+    @ApiModelProperty("用户权限字符串")
+    private String permissionStr;
     @ApiModelProperty("是否是根管理员")
     private Boolean rootAdmin;
     @ApiModelProperty("是否是根管理员")

@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,9 +20,11 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("主键")
     private Long id;
 
+    @NotEmpty
     @ApiModelProperty("标题")
     private String title;
 
+    @NotEmpty
     @ApiModelProperty("文章类容")
     private String content;
 
@@ -33,20 +37,25 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("文章作者的id")
     private Integer authorId;
 
+    @NotNull
     @ApiModelProperty("是否开启评论")
     private Boolean isComment;//这里一定要使用包装类 不然传值时会发生数据错误
 
+    @NotNull
     @ApiModelProperty("是否顶置")
     private Boolean isOverhead;//这里一定要使用包装类 不然传值时会发生数据错误
 
+    @NotNull
     @ApiModelProperty("分类id")
     private Integer articleCategoryId;
 
+    @NotEmpty(message = "文章描述必须填写")
     @ApiModelProperty("文章描述")
     private String articleDesc;
 
     @ApiModelProperty("图片url")
     private String articlePoster;
+
 
     @ApiModelProperty("要与之关联的teg->已存在的tegId")
     private List<Integer> existedTags;

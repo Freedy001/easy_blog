@@ -1,3 +1,5 @@
+import {ElMessage} from "element-plus";
+
 export function copyProperties(source: any, dest: any) {
     Object.keys(source).forEach(key => {
         dest[key] = source[key];
@@ -35,7 +37,33 @@ export function MakeObjEmpty(any: any) {
         } else if (any[key] instanceof Boolean) {
             any[key] = false
         } else if (any[key] instanceof Object) {
-            any[key]={}
+            any[key] = {}
         }
     })
+}
+
+
+let pre: any;
+export function noPermission() {
+    if (pre) {
+        clearTimeout(pre)
+        pre=null;
+    }
+    pre = setTimeout(() => {
+        ElMessage.error({
+            center: true,
+            customClass: "",
+            dangerouslyUseHTMLString: false,
+            duration: 3000,
+            iconClass: "",
+            id: "",
+            offset: 0,
+            onClose(): void {
+            },
+            type: "error",
+            zIndex: 0,
+            showClose: true,
+            message:'没有权限访问！如果你是管理员可以去(用户=>用户管理=>设置)给账户添加权限！'
+        });
+    }, 500);
 }

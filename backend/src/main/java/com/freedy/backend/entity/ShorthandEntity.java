@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+
 /**
  * @author Freedy
  * @date 2021/5/20 1:54
@@ -16,6 +18,7 @@ import lombok.Data;
 public class ShorthandEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
+    @NotEmpty
     private String content;
     private Long createTime;
     private Integer managerId;

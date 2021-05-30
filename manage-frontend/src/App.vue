@@ -18,6 +18,7 @@ const store = useStore();
 defineComponent({
 	LoadingTab
 })
+
 const router = useRouter();
 let isLoading = ref(false)
 document.title='EASY BLOG'

@@ -7,11 +7,13 @@ import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
+import com.freedy.backend.valid.Front;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +38,7 @@ public class FrontCommentController {
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME,allEntries = true)
     @ApiOperation("发布评论")
     @PostMapping("/publish")
-    public Result publishComment(@RequestBody CommentEntity comment, HttpServletRequest httpRequest){
+    public Result publishComment(@Validated(Front.class) @RequestBody CommentEntity comment, HttpServletRequest httpRequest){
         comment.setIp(IPUtil.getRemoteIpAddr(httpRequest));
         comment.setCommentStatus(setting.getExamination() ? 0 : 1);
         commentService.publishComment(comment);

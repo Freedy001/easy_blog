@@ -162,14 +162,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Override
     @Transactional(rollbackFor = Throwable.class)
     public void saveArticle(ArticleVo article) throws ExecutionException, InterruptedException {
-        if (article.getId() != null &&
-                !article.getAuthorId().equals(Local.MANAGER_LOCAL.get().getId()) &&
-                !AuthorityUtils.hasAuthority("article-operation-to-others")
-        ) throw new NoPermissionsException();
-        if (article.getId() != null && article.getId() == 1) {
-            //清除缓存
-            redisTemplate.delete(Objects.requireNonNull(redisTemplate.keys(CacheConstant.ABOUT_CACHE_NAME + "*")));
-        }
+        checkAuthority(article);
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
@@ -191,33 +184,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> {
             if (article.getId() == null) {
                 baseMapper.insert(entity);
-                //将文章保存到es
-                EsTypeDto dto = new EsTypeDto();
-                dto.setId(entity.getId());
-                dto.setType(EsType.SAVE);
-                dto.setPublishTime(entity.getPublishTime());
-                //判断是否顶置
-                dto.setOverHead(article.getIsOverhead());
-                rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
-                        RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
-                        dto);
             } else {
                 baseMapper.updateById(entity);
-                EsTypeDto dto = new EsTypeDto();
-                dto.setId(entity.getId());
-                dto.setType(EsType.UPDATE);
-                dto.setPublishTime(entity.getPublishTime());
-                //判断是否顶置
-                dto.setOverHead(article.getIsOverhead());
-                rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
-                        RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
-                        dto);
             }
         }, executor);
         //创建用户新建的标签
         List<TagEntity> newTags = new ArrayList<>();
         List<String> notExistedTag = article.getNotExistedTag();
-        if (notExistedTag.size() > 0) {
+        //非空判断
+        if (notExistedTag != null && notExistedTag.size() > 0) {
             notExistedTag.forEach(item -> {
                 TagEntity tagEntity = new TagEntity();
                 tagEntity.setTagName(item);
@@ -227,6 +202,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             });
             tagService.createTagsByName(newTags);
         }
+        f1.get();
         //创建标签与文章的关系
         List<ArticleTagRelationEntity> relationEntityList = new ArrayList<>();
         newTags.forEach(item -> {
@@ -235,17 +211,60 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             relationEntity.setArticleId(entity.getId());
             relationEntityList.add(relationEntity);
         });
-        f1.get();
-        article.getExistedTags().forEach(item -> {
-            ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
-            relationEntity.setTagId(item);
-            relationEntity.setArticleId(entity.getId());
-            relationEntityList.add(relationEntity);
-        });
+        List<Integer> existedTags = article.getExistedTags();
+        //非空判断
+        if (existedTags != null && existedTags.size() > 0) {
+            existedTags.forEach(item -> {
+                ArticleTagRelationEntity relationEntity = new ArticleTagRelationEntity();
+                relationEntity.setTagId(item);
+                relationEntity.setArticleId(entity.getId());
+                relationEntityList.add(relationEntity);
+            });
+        }
         relationService.remove(new QueryWrapper<ArticleTagRelationEntity>()
                 .eq("article_id", entity.getId()));
         if (relationEntityList.size() > 0)
             relationService.saveBatch(relationEntityList);
+        if (article.getId() == null) {
+            //将文章保存到es
+            EsTypeDto dto = new EsTypeDto();
+            dto.setId(entity.getId());
+            dto.setType(EsType.SAVE);
+            dto.setPublishTime(entity.getPublishTime());
+            //判断是否顶置
+            dto.setOverHead(article.getIsOverhead());
+            rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                    RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
+                    dto);
+        } else {
+            EsTypeDto dto = new EsTypeDto();
+            dto.setId(entity.getId());
+            dto.setType(EsType.UPDATE);
+            dto.setPublishTime(entity.getPublishTime());
+            //判断是否顶置
+            dto.setOverHead(article.getIsOverhead());
+            rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME,
+                    RabbitConstant.ES_ROUTE_KEY + ".saveOrUpdate",
+                    dto);
+        }
+    }
+
+    /**
+     * 验证权限
+     */
+    private void checkAuthority(ArticleVo article){
+        if (article.getId() != null && article.getId() == 1) {
+            if (AuthorityUtils.hasAuthority("about-setting")) {
+                //清除缓存
+                redisTemplate.delete(Objects.requireNonNull(redisTemplate.keys(CacheConstant.ABOUT_CACHE_NAME + "*")));
+            } else {
+                throw new NoPermissionsException();
+            }
+        }
+        if (article.getId() != null &&
+                !article.getAuthorId().equals(Local.MANAGER_LOCAL.get().getId()) &&
+                !AuthorityUtils.hasAuthority("article-operation-to-others")
+        ) throw new NoPermissionsException();
     }
 
     @Override
@@ -329,16 +348,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         //所有文章
         List<ArticleEntity> articleList = new LinkedList<>(baseMapper.getAllArticleTitleAndCategoryId());
         //设置文章欢迎度
-        Object[][] articlePopular = new Object[articleList.size() + 1][4];
+        Object[][] articlePopular = new Object[articleList.size()][4];
         for (int i = 0; i < articleList.size(); i++) {
             ArticleEntity entity = articleList.get(i);
-            articlePopular[i + 1][0] = entity.getTitle();
-            articlePopular[i + 1][1] = entity.getLikeNum();
-            articlePopular[i + 1][2] = entity.getCommentNum();
-            articlePopular[i + 1][3] = entity.getVisitNum();
+            articlePopular[i][0] = entity.getTitle();
+            articlePopular[i][1] = entity.getLikeNum();
+            articlePopular[i][2] = entity.getCommentNum();
+            articlePopular[i][3] = entity.getVisitNum();
         }
         dashBoardVo.setArticlePopular(articlePopular);
-        dashBoardVo.setArticleNum(articleList.size());
+        //这里减去关于文章
+        dashBoardVo.setArticleNum(articleList.size()-1);
 
         List<CategoryEntity> categoryList = f3.get();
         ArrayList<DashBoardVo.ArticleDistribution> articleDistributions = new ArrayList<>();
@@ -359,6 +379,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                     children.setValue(articleEntity.getLikeNum() == 0 ? 1 : Math.toIntExact(articleEntity.getLikeNum()));
                     childrenList.add(children);
                     articleList.remove(articleEntity);
+                    //移除元素后要让指针不变
+                    i--;
                 }
             }
             distribution.setChildren(childrenList);
@@ -407,6 +429,65 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         if (!map.isEmpty()) {
             baseMapper.updateComment(map);
         }
+    }
+
+    @Override
+    public void initArticle() throws Exception {
+        ArticleEntity about = new ArticleEntity();
+        about.setId(1L);
+        about.setTitle("about");
+        about.setAuthorId(AuthorityUtils.ROOT_ADMIN);
+        about.setArticleStatus(EntityConstant.ARTICLE_PUBLISHED);
+        about.setContent("# 这是一个自动生成的关于页面，你可以去后台前往设置->关于那里找到它。\n" +
+                "\n" +
+                "*在这个博客系统*\n" +
+                "- 你可以写笔记\n" +
+                "- 你可以记录生活\n" +
+                "- 你可以分享自己的经验\n" +
+                "- 你可以记录有趣的事情\n" +
+                "- 你也可以与他人互动\n" +
+                "- ......\n" +
+                "\n" +
+                "下面开始你的记录之旅吧！");
+        about.setArticleComment(EntityConstant.ARTICLE_CAN_NOT_COMMENT);
+        about.setPublishTime(System.currentTimeMillis());
+        about.setCreateTime(System.currentTimeMillis());
+        about.setUpdateTime(System.currentTimeMillis());
+        baseMapper.insertWithId(about);
+        CategoryEntity categoryEntity = new CategoryEntity();
+        categoryEntity.setPriority(EntityConstant.PRIORITY_NORMAL);
+        categoryEntity.setCategoryName("Readme");
+        categoryEntity.setCreatorId(AuthorityUtils.ROOT_ADMIN);
+        categoryService.save(categoryEntity);
+        ManagerEntity manager = new ManagerEntity();
+        manager.setId(AuthorityUtils.ROOT_ADMIN);
+        Local.MANAGER_LOCAL.set(manager);
+        ArticleVo welcomeArticle = new ArticleVo();
+        welcomeArticle.setTitle("看到这篇文章代表你已经部署成功了！");
+        welcomeArticle.setArticleStatus(EntityConstant.ARTICLE_PUBLISHED);
+        welcomeArticle.setIsComment(true);
+        welcomeArticle.setIsOverhead(true);
+        welcomeArticle.setArticleDesc("这是一篇自动生成的文章，你可以去后台的文章列表里面修改或者删除它！");
+        welcomeArticle.setNotExistedTag(Arrays.asList("第一篇文章", "博客"));
+        welcomeArticle.setArticleCategoryId(categoryEntity.getId());
+        welcomeArticle.setContent("# 看到这篇文章代表你已经部署成功了！\n" +
+                "\n" +
+                "> 这是一篇自动生成的文章，你可以去后台的文章列表里面修改或者删除它！\n" +
+                "\n" +
+                "\n" +
+                "欢迎来到你的专属博客！\n" +
+                "**在这里**\n" +
+                "- 你可以写笔记\n" +
+                "- 你可以记录生活\n" +
+                "- 你可以分享自己的经验\n" +
+                "- 你可以记录有趣的事情\n" +
+                "- 你也可以与他人互动\n" +
+                "......\n" +
+                "\n" +
+                "下面就开始你的记录之旅吧！");
+        welcomeArticle.setPublishTime(System.currentTimeMillis());
+        saveArticle(welcomeArticle);
+        Local.MANAGER_LOCAL.remove();
     }
 
 }

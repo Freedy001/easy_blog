@@ -14,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -29,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
  * @email 985948228@qq.com
  * @date 2021-04-25 14:00:46
  */
+@Validated
 @RestController
 @RequestMapping("backend/comment")
 public class CommentController {
@@ -62,7 +66,7 @@ public class CommentController {
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME, allEntries = true)
     @ApiOperation("回复评论")
     @PostMapping("/replay")
-    public Result replayComment(@RequestBody CommentEntity commentEntity, HttpServletRequest request) {
+    public Result replayComment(@Validated @RequestBody CommentEntity commentEntity, HttpServletRequest request) {
         commentEntity.setIp(IPUtil.getRemoteIpAddr(request));
         commentService.replay(commentEntity);
         return Result.ok();
@@ -72,7 +76,7 @@ public class CommentController {
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME, allEntries = true)
     @ApiOperation("审核通过")
     @GetMapping("/confirmExaminations")
-    public Result confirmComment(Long[] ids) {
+    public Result confirmComment(@NotNull Long[] ids) {
         commentService.confirmExaminations(Arrays.asList(ids));
         return Result.ok();
     }
@@ -81,7 +85,7 @@ public class CommentController {
     @ApiOperation("删除")
     @CacheEvict(cacheNames = CacheConstant.COMMENT_CACHE_NAME, allEntries = true)
     @GetMapping("/delete")
-    public Result deleteComment(Long[] ids) {
+    public Result deleteComment(@NotNull  Long[] ids) {
         commentService.deleteComment(Arrays.asList(ids));
         return Result.ok();
     }

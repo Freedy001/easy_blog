@@ -11,15 +11,20 @@ import com.freedy.backend.utils.Result;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 /**
  * @author Freedy
  * @date 2021/5/21 15:31
  */
+@Validated
 @RestController
 @RequestMapping("/frontend/manager")
 public class FrontManagerController {
@@ -29,14 +34,14 @@ public class FrontManagerController {
 
     @ApiOperation("获取基础用户消息")
     @GetMapping("/infoById")
-    public Result getAuthorInfo(@RequestParam Integer id) {
+    public Result getAuthorInfo(@NotNull @RequestParam Integer id) {
         ManagerEntity entity = managerService.getById(id);
         return getResult(entity);
     }
 
     @ApiOperation("获取基础用户消息")
     @GetMapping("/infoByNickname")
-    public Result getAuthorInfo(@RequestParam String nickname) {
+    public Result getAuthorInfo(@NotEmpty @RequestParam String nickname) {
         ManagerEntity entity = managerService.getOne(new QueryWrapper<ManagerEntity>().lambda().eq(ManagerEntity::getNickname, nickname));
         return getResult(entity);
     }

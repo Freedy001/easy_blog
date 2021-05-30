@@ -5,9 +5,9 @@ export default createStore({
         articleTitle:'',
         //文章markdown文本
         articleContent:'',
-        scrollCount:0,
         notifyReloadReadNum:0,
         notifyReloadNickNameAndHeadImg:0,
+        userInfo:{}
     },
     mutations: {
         setTitle(state,title){
@@ -16,14 +16,14 @@ export default createStore({
         changeArticleContent(state,text){
             state.articleContent=text;
         },
-        addScroll(state){
-            state.scrollCount++;
-        },
         notifyReloadReadNum(state){
             state.notifyReloadReadNum++;
         },
         notifyReloadNickNameAndHeadImg(state){
             state.notifyReloadNickNameAndHeadImg++;
+        },
+        setUserInfo(state,info){
+            state.userInfo=info
         }
     }
 })

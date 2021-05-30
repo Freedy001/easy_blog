@@ -100,7 +100,7 @@ onMounted(() => {
 	width: 800px;
 	font-size: 14px;
 	font-family: eafont, Hiragino Sans GB, Hiragino Sans GB W3, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif;
-	border: 1px solid #474747;
+	border: 1px solid #dedede;
 	border-radius: 10px;
 	padding: 15px 12px;
 	transition: all .3s;
@@ -177,7 +177,7 @@ onMounted(() => {
 }
 
 .root.dark {
-	border: 1px solid #3b3b3b;
+	border: 1px solid #2a2a2a;
 
 	.input-box.dark {
 		input {

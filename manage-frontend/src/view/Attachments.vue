@@ -1,20 +1,30 @@
 <template>
 	<div class="root">
 		<div class="btn-area">
-			<div>
-				<el-button type="primary" v-if="hasSelect" @click="showPicUri">显示选中图片的地址</el-button>
+			<div class="switch-btn">
+				<el-switch
+						style="display: block"
+						v-model="switchValue"
+						active-color="rgb(243 119 119)"
+						inactive-color="rgb(11 191 226)"
+						active-text="复制链接"
+						inactive-text="操作图片"
+				>
+				</el-switch>
 			</div>
-			<div>
-				<el-button type="primary" @click="showCard=true">上传</el-button>
-				<el-button type="danger" @click="del">删除</el-button>
-			</div>
+			<transition name="el-fade-in-linear">
+				<div class="ops-btn" v-if="!switchValue">
+					<el-button type="primary" @click="showCard=true">上传</el-button>
+					<el-button type="danger" @click="del">删除</el-button>
+				</div>
+			</transition>
 		</div>
 		<div class="img-area">
 			<div class="item" @click="handleClick(url,i)" v-for="(url,i) in resource" :key='url'>
 				<div class="checked">
 					<img :src="check" alt="">
 				</div>
-				<el-image class="pic-item" :key="url" :src="loadResource(url)" lazy></el-image>
+				<el-image :key="url" :src="loadResource(url)" lazy></el-image>
 			</div>
 		</div>
 		<transition name="el-fade-in-linear">
@@ -43,31 +53,36 @@ import LoadMore from '../components/LoadMore.vue'
 import check from '../assets/check.svg'
 import {ElMessage} from "element-plus";
 import FullScreen from "../components/FullScreen.vue";
-const {proxy}:any = getCurrentInstance();
+
+const {proxy}: any = getCurrentInstance();
 defineComponent({
 	LoadMore,
 	FullScreen
 })
-let interval:number;
+let interval: number;
 let pre = new Date().getTime()
 onMounted(() => {
+	const item = localStorage.getItem("switchValue");
+	if (item){
+		switchValue.value=item==='0';
+	}
 	getImageUrls().then(() => {
 		setTimeout(() => {
 			waterFall()
-			const content:any = document.querySelector("#content");
+			const content: any = document.querySelector("#content");
 			window.onresize = () => waterFall();
-			content.onscroll = (event:any) => {
+			content.onscroll = (event: any) => {
 				if (new Date().getTime() - pre > 50) {
 					doScroll(event)
 				}
 			};
 		}, 500)
-		interval = setInterval(()=>{
+		interval = setInterval(() => {
 			waterFall()
-		},1000);
+		}, 1000);
 	})
 })
-onUnmounted(()=>{
+onUnmounted(() => {
 	clearInterval(interval)
 })
 //滚动事件
@@ -91,37 +106,60 @@ async function success(response: any) {
 			message: `上传失败${response.msg}`,
 			type: 'error'
 		});
-	}else {
-		resource.length=0
-		page=1;
+	} else {
+		resource.length = 0
+		page = 1;
 		getImageUrls().then();
 	}
 }
-let SelectedList:any = [];
-let hasSelect=ref(false)
+
+let SelectedList: any = [];
+let hasSelect = ref(false)
+let switchValue = ref(false)
+onUnmounted(()=>{
+	localStorage.setItem("switchValue",switchValue.value?'0':'1');
+})
 //点击图片
 function handleClick(url: string, index: number) {
-	const ele: any = document.getElementsByClassName("item")[index];
-	const check: any = document.getElementsByClassName("checked")[index];
-	let picIndex;
-	if ((picIndex = SelectedList.indexOf(index)) == -1) {
-		SelectedList.push(index)
-		ele.classList.add('select')
-		check.style.display = 'block'
-		hasSelect.value=true;
-	} else {
-		SelectedList.splice(picIndex, 1);
-		ele.classList.remove('select')
-		check.style.display = 'none'
-		hasSelect.value=SelectedList.length>0
+	if (switchValue.value){
+		let oInput = document.createElement('input');
+		const split = resource[index].split("-", 5);
+		oInput.value = loadResource(split[0] + "-" + split[1] + "-" + split[2] + "-" + split[4]);
+		oInput.style.opacity = '0'
+		oInput.setAttribute("name", "secukey")
+		document.body.appendChild(oInput);
+		oInput.select(); // 选择对象
+		document.execCommand("Copy"); // 执行浏览器复制命令
+		oInput.id = 'oInput';
+		oInput.remove()
+		ElMessage.success({
+			message: '复制成功!',
+			type: 'success'
+		});
+	}else {
+		const ele: any = document.getElementsByClassName("item")[index];
+		const check: any = document.getElementsByClassName("checked")[index];
+		let picIndex;
+		if ((picIndex = SelectedList.indexOf(index)) == -1) {
+			SelectedList.push(index)
+			ele.classList.add('select')
+			check.style.display = 'block'
+			hasSelect.value = true;
+		} else {
+			SelectedList.splice(picIndex, 1);
+			ele.classList.remove('select')
+			check.style.display = 'none'
+			hasSelect.value = SelectedList.length > 0
+		}
 	}
 }
+
 //删除图片
 async function del() {
-	let urlList:any=[]
-	SelectedList.forEach((index:any)=>urlList.push(resource[index]))
-	const response = await post('/file/delPic',urlList);
-	if (response.code==200){
+	let urlList: any = []
+	SelectedList.forEach((index: any) => urlList.push(resource[index]))
+	const response = await post('/file/delPic', urlList);
+	if (response.code == 200) {
 		proxy.$notify({
 			title: '成功！',
 			message: "删除成功",
@@ -129,15 +167,15 @@ async function del() {
 		//取消选中
 		const ele: any = document.getElementsByClassName("item");
 		const check: any = document.getElementsByClassName("checked");
-		SelectedList.forEach((index:any)=>{
+		SelectedList.forEach((index: any) => {
 			ele[index].classList.remove('select')
 			check[index].style.display = 'none'
 		})
-		SelectedList=[];
-		resource.length=0
-		page=1;
+		SelectedList = [];
+		resource.length = 0
+		page = 1;
 		getImageUrls().then();
-	}else{
+	} else {
 		proxy.$notify.error({
 			title: '出差啦😢！',
 			message: response.msg,
@@ -146,23 +184,9 @@ async function del() {
 	}
 }
 
-function showPicUri() {
-//	/image/2021-05-29/5e8714af48344a39947e8cbe3a74ecb1-thumbnails-img.png
-	let message:string='';
-	SelectedList.forEach((index:any)=>{
-		const split = resource[index].split("-", 5);
-		message+=`<p style="margin: 15px;line-height: 25px">${loadResource(split[0]+"-"+split[1]+"-"+split[2]+"-"+split[4])}</p>`
-	})
-
-	ElMessage({
-		dangerouslyUseHTMLString: true,
-		message: `<div>${message}</div>`
-	});
-}
-
-
 let page = 1;
 let resource = reactive<Array<string>>([])
+
 //加载图片url
 async function getImageUrls() {
 	const response = await get(`/file/getImages?page=${page}&limit=30&sidx=id&order=desc`);
@@ -179,14 +203,15 @@ async function getImageUrls() {
 
 
 function waterFall() {
-	let items:any = document.getElementsByClassName('item');
-	let gap:any = 10
+	let items: any = document.getElementsByClassName('item');
+	if (items.length === 0) return;
+	let gap: any = 10
 	//首先确定列数 = 页面的宽度 / 图片的宽度
-	const content:any = document.querySelector("#content");
-	let pageWidth:any = content.clientWidth-50 ;
-	let itemWidth:any = items[0].offsetWidth;
-	let columns:any = parseInt(String(pageWidth / (itemWidth + gap)));
-	let arr:any = [];//定义一个数组，用来存储元素的高度
+	const content: any = document.querySelector("#content");
+	let pageWidth: any = content.clientWidth - 50;
+	let itemWidth: any = items[0].offsetWidth;
+	let columns: any = parseInt(String(pageWidth / (itemWidth + gap)));
+	let arr: any = [];//定义一个数组，用来存储元素的高度
 	for (let i = 0; i < items.length; i++) {
 		if (i < columns) {
 			//满足这个条件则说明在第一行，文章里面有提到
@@ -224,6 +249,22 @@ function waterFall() {
 		width: 100%;
 		display: flex;
 		justify-content: space-between;
+		height: 65px;
+
+		.switch-btn {
+			height: 100%;
+			display: flex;
+			align-items: center;
+
+			.el-switch {
+				margin-bottom: 10px;
+
+				:deep(span) {
+					font-size: 15px;
+				}
+
+			}
+		}
 
 		.el-button {
 			margin: 10px;
@@ -245,7 +286,8 @@ function waterFall() {
 				top: 3%;
 				left: 3%;
 				display: none;
-				z-index: 999999;
+				z-index: 999;
+
 				img {
 					width: 35px;
 					border: none;
@@ -253,10 +295,26 @@ function waterFall() {
 				}
 			}
 
-			.el-image{
+			.el-image {
 				width: 100%;
 				border-radius: 10px;
 				background-color: #0b9aff;
+			}
+
+			&:hover {
+				.copy-pic-link {
+					animation: top-out .3s ease both;
+					display: block;
+				}
+			}
+
+			@keyframes top-out {
+				0% {
+					transform: translateY(-100%);
+				}
+				100% {
+					transform: translateY(0);
+				}
 			}
 		}
 

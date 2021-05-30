@@ -52,6 +52,7 @@ easy:
       setting-smtp: SMTP设置
       setting-comment: 评论设置
       setting-attachment : 附件设置
+      setting-about : 关于页面
   jwt:
     header: Authorization
     base64-secret: sanbayan

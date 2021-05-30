@@ -67,9 +67,10 @@ import FullScreenLoading from "../components/FullScreenChanging.vue";
 import {ElMessage} from "element-plus";
 import {addDarkClass, copyProperties, isDarkMode} from "../utils/common";
 import {useStore} from "vuex";
+
 const route = useRoute();
 const router = useRouter();
-let commentId:any=route.query.id
+let commentId: any = route.query.id
 defineComponent({
 	Comment,
 	CommentList,
@@ -212,6 +213,7 @@ onBeforeRouteLeave((to, from, next) => {
  */
 async function loadArticle() {
 	let id = route.query.id;
+	let name = route.query.articleName;
 	if (id) {
 		const response = await get(`/article/get?id=${id}`);
 		if (response.code === 200) {
@@ -222,7 +224,18 @@ async function loadArticle() {
 				hljs.highlightAll()
 			}, 100)
 		}
+	}else if (name){
+		const response = await get(`/article/getByTitle?title=${name}`);
+		if (response.code === 200) {
+			const data: IArticle = response.data
+			copyProperties(data, article)
+			generateTOC();
+			setTimeout(() => {
+				hljs.highlightAll()
+			}, 100)
+		}
 	}
+
 }
 
 let hasMore = ref(true)
@@ -242,7 +255,7 @@ function generateTOC() {
 		//文章组件
 		const markdown: any = document.getElementById("markdown");
 		const childrenEle: any = markdown.children;
-		const tocContainer: any = document.createElement('ul');
+		const tocContainer: HTMLElement = document.createElement('ul');
 		let scrollTopObj: any = [];
 		for (let i = 0; i < childrenEle.length; i++) {
 			const currentEle: HTMLElement = childrenEle[i];
@@ -290,14 +303,16 @@ function generateTOC() {
 			if (now - prev > 1) {
 				//do sth...
 				try {
-					//调整位置
-					if (scroll.scrollTop > 280) {
-						showToc.value = true;
-					} else {
-						showToc.value = false;
-					}
-					if (article.articleComment == 0 && scroll.scrollTop > (comment[0].offsetTop - scroll.clientHeight) + 300) {
-						showToc.value = false;
+					if (tocContainer.children.length !== 0) {
+						//调整位置
+						if (scroll.scrollTop > 280) {
+							showToc.value = true;
+						} else {
+							showToc.value = false;
+						}
+						if (article.articleComment == 0 && scroll.scrollTop > (comment[0].offsetTop - scroll.clientHeight) + 300) {
+							showToc.value = false;
+						}
 					}
 					//滚动加载评论
 					if ((scroll.scrollTop + scroll.clientHeight > scroll.scrollHeight - 50) && hasMore.value) {

@@ -71,7 +71,7 @@
 			</el-select>
 			<el-divider></el-divider>
 			<h1>摘要</h1>
-			<el-input type="textarea" placeholder="请输入文章的摘要,不输入则自动截取!" v-model="form.desc"></el-input>
+			<el-input type="textarea" placeholder="请输入文章的摘要!" show-word-limit maxlength="300" v-model="form.desc"></el-input>
 			<el-divider></el-divider>
 			<h1>封面图</h1>
 			<div @click="innerDrawer++" class="poster">
@@ -127,6 +127,7 @@ import ImgDrawer from './ImgDrawer.vue'
 import CategoryOrTagCard from './CategoryOrTagCard.vue'
 import FullScreen from './FullScreen.vue'
 import {useStore} from "vuex";
+import {noPermission} from "../util/Common";
 defineProps(['id','status', 'isOpenDrawer'])
 defineEmit(['saveCallback', 'content'])
 defineComponent({
@@ -307,7 +308,6 @@ async function initDate() {
 			categoryArr[index] = {
 				id: value.id,
 				name: value.categoryName,
-				url: value.categoryImgUrl,
 				priority: value.priority
 			}
 		})
@@ -338,18 +338,22 @@ async function initDate() {
 	//当传入id时 进行数据回显
 	if (proxy.id) {
 		const data = await get(`/article/info/${proxy.id}`);
-		const info: formData = data.data;
-		form.title = info.title
-		form.publishTime = (new Date(info.publishTime))
-		form.isComment = info.isComment
-		form.isOverhead = info.isOverhead
-		form.category = info.articleCategoryId
-		form.desc = info.articleDesc
-		form.tagValue = info.existedTags
-		form.url = info.articlePoster
-		form.authorId = info.authorId
-		form.articleStatus=proxy.status;
-		proxy.$emit('content', info.content);
+		if (data.code==200){
+			const info: formData = data.data;
+			form.title = info.title
+			form.publishTime = (new Date(info.publishTime))
+			form.isComment = info.isComment
+			form.isOverhead = info.isOverhead
+			form.category = info.articleCategoryId
+			form.desc = info.articleDesc
+			form.tagValue = info.existedTags
+			form.url = info.articlePoster
+			form.authorId = info.authorId
+			form.articleStatus = proxy.status;
+			proxy.$emit('content', info.content);
+		}else {
+			noPermission()
+		}
 	}
 }
 

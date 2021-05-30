@@ -9,6 +9,7 @@ import com.freedy.backend.utils.Local;
 import com.freedy.backend.utils.MarkDown;
 import com.freedy.backend.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -26,7 +27,7 @@ public class ShorthandController {
 
     @RecordLog(type = RecordEnum.SHORTHAND)
     @PostMapping("/publish")
-    public Result publishShorthand(@RequestBody ShorthandEntity entity){
+    public Result publishShorthand(@Validated @RequestBody ShorthandEntity entity){
         if (MarkDown.countWords(entity.getContent())>300)
             throw new WordOutOfLimitException();
         entity.setManagerId(Local.MANAGER_LOCAL.get().getId());

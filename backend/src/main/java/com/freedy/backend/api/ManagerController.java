@@ -26,11 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.freedy.backend.entity.ManagerEntity;
 import com.freedy.backend.service.ManagerService;
 import com.freedy.backend.utils.PageUtils;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 /**
@@ -40,6 +44,7 @@ import com.freedy.backend.utils.PageUtils;
  * @email 985948228@qq.com
  * @date 2021-04-25 14:00:46
  */
+@Validated
 @RestController
 @RequestMapping("backend/manager")
 public class ManagerController {
@@ -62,7 +67,7 @@ public class ManagerController {
     @RecordLog(type = RecordEnum.USER)
     @ApiOperation("修改个人用户密码")
     @PostMapping("/updateUserPassword")
-    public Result updateUserPassword(@RequestBody UserPasswordVo passwordVo) {
+    public Result updateUserPassword(@Validated @RequestBody UserPasswordVo passwordVo) {
         ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
         if (passwordEncoder.matches(passwordVo.getOldPassword(), oldUserEntity.getPassword())) {
             //旧密码匹配成功 用户名需要下线
@@ -81,10 +86,9 @@ public class ManagerController {
     @RecordLog(type = RecordEnum.USER)
     @ApiOperation("修改用户个人信息")
     @PostMapping("/updateUserInfo")
-    public Result updateUserInfo(@RequestBody ManagerEntity manager) {
+    public Result updateUserInfo(@Validated @RequestBody ManagerEntity manager) {
         ManagerEntity oldUserEntity = Local.MANAGER_LOCAL.get();
         String originUsername = oldUserEntity.getUsername();
-        String originNickname = oldUserEntity.getNickname();
         manager.setId(oldUserEntity.getId());
         Result result;
         //表示修改了nickname 文章需要重新上架
@@ -133,7 +137,7 @@ public class ManagerController {
     @PreAuthorize("hasAnyAuthority('user-manager','root-admin')")
     @ApiOperation("回显用户的权限等账号信息")
     @GetMapping("/getUserImportantInfo")
-    public Result getUserImportantInfo(@RequestParam("id") Integer id) throws Exception {
+    public Result getUserImportantInfo(@NotNull @RequestParam("id") Integer id) throws Exception {
         NewUserVo userVo=managerService.getUserImportantInfo(id);
         return Result.ok().setData(userVo);
     }
@@ -142,7 +146,7 @@ public class ManagerController {
     @ApiOperation("创建或者更新新管理员")
     @PreAuthorize("hasAnyAuthority('user-manager','root-admin')")
     @PostMapping("/createOrUpdateManager")
-    public Result createOrUpdateUser(@RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
+    public Result createOrUpdateUser(@Validated @RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
         managerService.createOrUpdateManager(manager);
         if (AuthorityUtils.isUser(manager.getId())){
             return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
@@ -155,7 +159,7 @@ public class ManagerController {
     @ApiOperation("删除用户")
     @PreAuthorize("hasAnyAuthority('user-permission-manager','root-admin')")
     @GetMapping("/delete")
-    public Result deleteUser(@RequestParam Integer[] ids) {
+    public Result deleteUser(@NotNull @RequestParam Integer[] ids) {
         for (Integer id : ids) {
             if (AuthorityUtils.isUser(id)){
                 throw new NoPermissionsException();

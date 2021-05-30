@@ -5,10 +5,16 @@ import com.freedy.backend.enumerate.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.sql.SQLIntegrityConstraintViolationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
+
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 
 /**
  * @author Freedy
@@ -17,6 +23,39 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * 参数校验处理器
+     */
+    @ExceptionHandler(value = {BindException.class, ValidationException.class, MethodArgumentNotValidException.class})
+    public Result validHandler(Exception e) {
+        String msg = null;
+        /// BindException
+        if (e instanceof BindException) {
+            // getFieldError获取的是第一个不合法的参数(P.S.如果有多个参数不合法的话)
+            FieldError fieldError = ((BindException) e).getFieldError();
+            if (fieldError != null) {
+                msg = fieldError.getDefaultMessage();
+            }
+        } else if (e instanceof ConstraintViolationException) {
+            /*
+             * ConstraintViolationException的e.getMessage()形如
+             *     {方法名}.{参数名}: {message}
+             *  这里只需要取后面的message即可
+             */
+            msg = e.getMessage();
+            if (msg != null) {
+                int lastIndex = msg.lastIndexOf(':');
+                if (lastIndex >= 0) {
+                    msg = msg.substring(lastIndex + 1).trim();
+                }
+            }
+            /// ValidationException 的其它子类异常
+        } else {
+            msg = ResultCode.ARGUMENT_ERROR.getMessage();
+        }
+        return handlerWithReason("ARGUMENT_ERROR",msg);
+    }
 
     /**
      * 通用处理
@@ -57,6 +96,11 @@ public class GlobalExceptionHandler {
     private Result handler(String resultCodeName ,String reason){
         log.error(reason);
         return Result.error( ResultCode.valueOf(resultCodeName).getCode(), ResultCode.valueOf(resultCodeName).getMessage());
+    }
+
+    private Result handlerWithReason(@SuppressWarnings("SameParameterValue") String resultCodeName , String reason){
+        log.error(reason);
+        return Result.error( ResultCode.valueOf(resultCodeName).getCode(), reason);
     }
 
     private Result handler(String resultCodeName){

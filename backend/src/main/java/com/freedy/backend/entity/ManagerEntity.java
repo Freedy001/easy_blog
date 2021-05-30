@@ -16,6 +16,9 @@ import io.swagger.annotations.ApiModelProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
 /**
  * 管理员表
  * 
@@ -33,6 +36,7 @@ public class ManagerEntity implements Serializable {
 	private Integer id;
 	@ApiModelProperty("昵称")
 	private String nickname;
+	@NotEmpty
 	@ApiModelProperty("用户名")
 	private String username;
 	@ApiModelProperty("密码")

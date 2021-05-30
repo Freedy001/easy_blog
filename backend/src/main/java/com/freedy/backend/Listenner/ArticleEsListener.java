@@ -62,7 +62,10 @@ public class ArticleEsListener {
             //保存消息到es
             if (entity.getType() == EsType.SAVE) preparePublish(entity);
             if (entity.getType() == EsType.UPDATE) {
-                if (entity.getId() == 1) return;
+                if (entity.getId() == 1) {
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                    return;
+                }
                 log.debug("修改文章{}", entity.getId());
                 articleRepository.deleteById(entity.getId());
                 preparePublish(entity);
@@ -77,7 +80,7 @@ public class ArticleEsListener {
                         ResultCode.NOTIFY_ARTICLE_UPDATE.name(), 5, TimeUnit.SECONDS);
                 articleRepository.deleteById(entity.getId());
             }
-            if (entity.getType() == EsType.RELOAD){
+            if (entity.getType() == EsType.RELOAD) {
                 //重新上架文章
                 articleSynchronize.synchronizeArticleToEs();
             }
@@ -118,7 +121,7 @@ public class ArticleEsListener {
                     //设置发布状态
                     articleService.updateArticleStatus(entity.getId(), EntityConstant.ARTICLE_OVERHEAD);
                     esModel.setArticleStatus(EntityConstant.ARTICLE_OVERHEAD);
-                }else {
+                } else {
                     //设置发布状态
                     articleService.updateArticleStatus(entity.getId(), EntityConstant.ARTICLE_PUBLISHED);
                     esModel.setArticleStatus(EntityConstant.ARTICLE_PUBLISHED);
@@ -141,7 +144,6 @@ public class ArticleEsListener {
             e.printStackTrace();
         }
     }
-
 
 
 }

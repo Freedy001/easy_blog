@@ -125,5 +125,10 @@ public interface ArticleService extends IService<ArticleEntity> {
      */
     void updateComment(Map<String, String> map);
 
+    /**
+     * 创建第一篇文章与关于页面
+     */
+    void initArticle() throws Exception;
+
 }
 

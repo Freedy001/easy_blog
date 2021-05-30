@@ -53,33 +53,4 @@ public class RolePermissionController {
         model.put("isManager",AuthorityUtils.hasAnyAuthority("user-permission-manager","root-admin"));
         return Result.ok().setData(model);
     }
-
-    @ApiOperation("列出")
-    @GetMapping("/info/{id}")
-    public Result info(@PathVariable("id") Integer id){
-		RolePermissionEntity rolePermission = rolePermissionService.getById(id);
-        return Result.ok().put("rolePermission", rolePermission);
-    }
-
-    @ApiOperation("保存")
-    @PostMapping("/save")
-    public Result save(@RequestBody RolePermissionEntity rolePermission){
-		rolePermissionService.save(rolePermission);
-        return Result.ok();
-    }
-
-    @ApiOperation("修改")
-    @PostMapping("/update")
-    public Result update(@RequestBody RolePermissionEntity rolePermission){
-		rolePermissionService.updateById(rolePermission);
-        return Result.ok();
-    }
-
-    @ApiOperation("删除")
-    @GetMapping("/delete")
-    public Result delete(@RequestBody Integer[] ids){
-		rolePermissionService.removeByIds(Arrays.asList(ids));
-        return Result.ok();
-    }
-
 }

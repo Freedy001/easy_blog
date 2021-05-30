@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import java.io.Serializable;
 
 /**
@@ -15,6 +16,7 @@ import java.io.Serializable;
 public class SMTPSettingVo implements Serializable {
     @ApiModelProperty("smtp地址")
     private String emailHostName;
+    @Email
     @ApiModelProperty("发件人邮箱")
     private String emailFrom;
     @ApiModelProperty("邮箱密码或授权码")

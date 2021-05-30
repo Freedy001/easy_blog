@@ -5,9 +5,15 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
+
+import com.freedy.backend.valid.Update;
 import lombok.Data;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 /**
  * 文章标签
  * 
@@ -21,11 +27,12 @@ import io.swagger.annotations.ApiModelProperty;
 public class TagEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-
+	@NotNull(message = "id不能为空",groups = Update.class)
 	@ApiModelProperty("主键")
 	@TableId(type = IdType.AUTO)
 	private Integer id;
 
+	@NotEmpty
 	@ApiModelProperty("标签名称")
 	private String tagName;
 
@@ -35,6 +42,7 @@ public class TagEntity implements Serializable {
 	@ApiModelProperty("创建者")
 	private Integer creatorId;
 
+	@NotNull
 	@ApiModelProperty("越小优先级越高")
 	private Integer priority;
 

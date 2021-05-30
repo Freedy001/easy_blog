@@ -3,7 +3,9 @@ package com.freedy.backend.entity.vo.setting;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 
 /**
@@ -15,15 +17,21 @@ import java.io.Serializable;
 public class CommonSettingVo implements Serializable {
 
     private IndexArticle indexArticle;
+    @NotEmpty(message = "博客标题不能为空")
     @ApiModelProperty("博客标题")
     private String blogTitle;
+    @URL
+    @ApiModelProperty("博客域名")
+    private String webSiteDomainName;
+    @NotEmpty(message = "logo不能为空")
     @ApiModelProperty("logo")
     private String logo;
+    @NotEmpty(message = "首页图片不能为空")
     @ApiModelProperty("首页图片")
     private String poster;
+    @NotEmpty(message = "首页色系不能为空")
     @ApiModelProperty("首页色系")
     private String indexColor;
-    @ApiModelProperty("页角信息")
     private String footInfo;
 
     @Data

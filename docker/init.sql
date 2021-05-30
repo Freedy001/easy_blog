@@ -38,8 +38,8 @@ create table if not exists blog_article
         unique (id),
     constraint blog_article_blog_category_id_fk
         foreign key (article_category_id) references blog_category (id)
-)
-    comment '文章表';
+)AUTO_INCREMENT=1388865816372539446 comment '文章表';
+
 
 create index blog_article_author_id_index
     on blog_article (author_id);

@@ -41,12 +41,6 @@ public class VisitorController {
         return Result.ok().put("visitor", visitor);
     }
 
-    @ApiOperation("列出所有标签")
-    @PostMapping("/save")
-    public Result save(@RequestBody VisitorEntity visitor){
-		visitorService.save(visitor);
-        return Result.ok();
-    }
 
     @ApiOperation("列出所有标签")
     @PostMapping("/update")
