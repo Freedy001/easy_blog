@@ -1,6 +1,7 @@
 package com.freedy.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.freedy.backend.entity.vo.setting.OssSettingVo;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
@@ -35,5 +36,9 @@ public interface SettingService extends IService<SettingEntity> {
      */
     void saveComment(CommentSettingVo commentSettingVo);
 
+    /**
+     * 保存评论设置
+     */
+    void saveAttachment(OssSettingVo settingVo);
 }
 

@@ -1,10 +1,13 @@
 package com.freedy.backend.api;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.RabbitConstant;
 import com.freedy.backend.entity.dto.EsTypeDto;
@@ -22,10 +25,13 @@ import com.freedy.backend.entity.vo.manager.UserPasswordVo;
 import com.freedy.backend.enumerate.ResultCode;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,11 +63,22 @@ public class ManagerController {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private LoadSetting loadSetting;
+
     @ApiOperation("查询当前用户消息")
     @GetMapping("/getUserInfo")
     public Result info() throws ExecutionException, InterruptedException {
         UserInfoVo infoVo = managerService.getUserInfo();
-        return Result.ok().setData(infoVo);
+        Map<Object, Object> resultMap = Arrays.stream(BeanUtils.getPropertyDescriptors(infoVo.getClass())).filter(item -> !"class".equals(item.getName()))
+                .collect(HashMap::new, (map, item) -> {
+                    Object value = ReflectionUtils.invokeMethod(item.getReadMethod(), infoVo);
+                    if (value != null) {
+                        map.put(item.getName(), value);
+                    }
+                }, HashMap::putAll);
+        resultMap.put("uploadMode",loadSetting.getUploadMode());
+        return Result.ok().setData(resultMap);
     }
 
     @RecordLog(type = RecordEnum.USER)
@@ -92,8 +109,8 @@ public class ManagerController {
         manager.setId(oldUserEntity.getId());
         Result result;
         //表示修改了nickname 文章需要重新上架
-        boolean flag= manager.getNickname() != null && !originUsername.equals(manager.getNickname());
-        if (manager.getUsername()!=null&&!originUsername.equals(manager.getUsername())) {
+        boolean flag = manager.getNickname() != null && !originUsername.equals(manager.getNickname());
+        if (manager.getUsername() != null && !originUsername.equals(manager.getUsername())) {
             //用户修改了用户名需要下线
             redisTemplate.delete(RedisConstant.USER_TOKEN_HEADER + originUsername);
             managerService.updateById(manager);
@@ -122,7 +139,7 @@ public class ManagerController {
         EsTypeDto dto = new EsTypeDto();
         dto.setType(EsType.RELOAD);
         if (flag) rabbitTemplate.convertAndSend(RabbitConstant.ES_EXCHANGE_NAME
-                ,RabbitConstant.ES_QUEUE_NAME,dto);
+                , RabbitConstant.ES_QUEUE_NAME, dto);
         return result;
     }
 
@@ -138,7 +155,7 @@ public class ManagerController {
     @ApiOperation("回显用户的权限等账号信息")
     @GetMapping("/getUserImportantInfo")
     public Result getUserImportantInfo(@NotNull @RequestParam("id") Integer id) throws Exception {
-        NewUserVo userVo=managerService.getUserImportantInfo(id);
+        NewUserVo userVo = managerService.getUserImportantInfo(id);
         return Result.ok().setData(userVo);
     }
 
@@ -148,7 +165,7 @@ public class ManagerController {
     @PostMapping("/createOrUpdateManager")
     public Result createOrUpdateUser(@Validated @RequestBody NewUserVo manager) throws ExecutionException, InterruptedException {
         managerService.createOrUpdateManager(manager);
-        if (AuthorityUtils.isUser(manager.getId())){
+        if (AuthorityUtils.isUser(manager.getId())) {
             return Result.ok(ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getCode(),
                     ResultCode.USER_CERTIFICATE_HAS_BEEN_CHANGED.getMessage());
         }
@@ -161,7 +178,7 @@ public class ManagerController {
     @GetMapping("/delete")
     public Result deleteUser(@NotNull @RequestParam Integer[] ids) {
         for (Integer id : ids) {
-            if (AuthorityUtils.isUser(id)){
+            if (AuthorityUtils.isUser(id)) {
                 throw new NoPermissionsException();
             }
         }

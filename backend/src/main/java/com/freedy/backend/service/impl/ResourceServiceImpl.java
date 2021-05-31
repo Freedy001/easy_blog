@@ -3,12 +3,16 @@ package com.freedy.backend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.freedy.backend.SysSetting.LoadSetting;
+import com.freedy.backend.constant.EntityConstant;
 import com.freedy.backend.utils.PageUtils;
 import com.freedy.backend.utils.Query;
 import com.freedy.backend.constant.FileConstant;
 import com.freedy.backend.dao.ResourceDao;
 import com.freedy.backend.entity.ResourceEntity;
 import com.freedy.backend.service.ResourceService;
+import com.freedy.backend.utils.ResourceUrlUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,7 +22,10 @@ import java.util.Map;
  * @date 2021/5/7 13:01
  */
 @Service("resourceService")
-public class ResourceServiceImpl extends ServiceImpl<ResourceDao, ResourceEntity> implements ResourceService{
+public class ResourceServiceImpl extends ServiceImpl<ResourceDao, ResourceEntity> implements ResourceService {
+
+    @Autowired
+    private LoadSetting loadSetting;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -27,11 +34,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceDao, ResourceEntity
                 new QueryWrapper<>()
         );
         //返回压缩图片
-        for (ResourceEntity record : page.getRecords()) {
-            String[] split = record.getResourceUrl().split("-", 4);
-            String zipUrl = split[0]+"-"+split[1]+"-"+split[2] + "-" + FileConstant.ZIP_IMAGE_INFIX + "-" + split[3];
-            record.setResourceUrl(zipUrl);
-        }
+        page.getRecords().forEach(item-> item.setResourceUrl(ResourceUrlUtil.ConvertToSDUrl(item.getResourceUrl())));
         return new PageUtils(page);
     }
 

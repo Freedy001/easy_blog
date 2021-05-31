@@ -1,6 +1,7 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.aspect.OperationLog;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.entity.OperationLogEntity;
@@ -65,25 +66,12 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
             // 指定响应格式是json
             response.setContentType("text/json;charset=utf-8");
             response.getWriter().write(json);
-            logOutLog(username,false);
+            OperationLog.RecordLogManually("用户退出登录",true,username);
         } else {
-            logOutLog(username,true);
+            OperationLog.RecordLogManually("退出登录失败",true,username);
             throw new ParentResultException("LOGOUT_ERROR");
         }
     }
 
-    private void logOutLog(String username,boolean error){
-        OperationLogEntity logEntity = new OperationLogEntity();
-        logEntity.setCreatTime(System.currentTimeMillis());
-        logEntity.setOperator(username);
-        logEntity.setIsSuccess(error?1:0);
-        logEntity.setOperationName("用户退出登录");
-        logEntity.setOperationType(RecordEnum.LOGOUT.name());
-        logService.save(logEntity);
-        //删除缓存
-        Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");
-        if (cacheKeys!=null&&cacheKeys.size()>0)
-            redisTemplate.delete(Objects.requireNonNull(cacheKeys));
-    }
 
 }

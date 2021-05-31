@@ -1,5 +1,6 @@
 package com.freedy.backend.service.impl;
 
+import com.freedy.backend.entity.vo.setting.OssSettingVo;
 import com.freedy.backend.exception.ArgumentErrorException;
 import com.freedy.backend.utils.ResourceUrlUtil;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
@@ -62,6 +63,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> i
     @Override
     public void saveComment(CommentSettingVo commentSettingVo) {
         baseMapper.updateBath(getSettingEntities(commentSettingVo));
+    }
+
+    @Override
+    public void saveAttachment(OssSettingVo settingVo) {
+        baseMapper.updateBath(getSettingEntities(settingVo));
     }
 
 

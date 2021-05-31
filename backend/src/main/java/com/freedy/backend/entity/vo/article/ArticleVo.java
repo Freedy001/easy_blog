@@ -24,7 +24,6 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("标题")
     private String title;
 
-    @NotEmpty
     @ApiModelProperty("文章类容")
     private String content;
 

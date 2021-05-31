@@ -32,5 +32,8 @@ public class EntityConstant {
     public static final Integer COMMENT_EXAMINATION =0;
     public static final Integer COMMENT_PUBLISH=1;
 
+    //资源类型 0存储在本地 1存储在阿里云
+    public static final Integer  LOCAL_RESOURCE =0;
+    public static final Integer ALI_YUM_OSS_RESOURCE=1;
 
 }

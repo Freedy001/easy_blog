@@ -1,6 +1,7 @@
 package com.freedy.backend.config.security;
 
 import com.alibaba.fastjson.JSON;
+import com.freedy.backend.aspect.OperationLog;
 import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.entity.OperationLogEntity;
 import com.freedy.backend.enumerate.RecordEnum;
@@ -75,23 +76,11 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
                 .put("token", userToken);
         //将生成的authentication放入容器中，生成安全的上下文
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        loginLog(username);
+        //记录日志
+        OperationLog.RecordLogManually("用户登录成功",true,username);
         String json = JSON.toJSONString(token);
         response.setContentType("text/json;charset=utf-8");
         response.getWriter().write(json);
     }
 
-    private void loginLog(String username){
-        OperationLogEntity logEntity = new OperationLogEntity();
-        logEntity.setCreatTime(System.currentTimeMillis());
-        logEntity.setOperator(username);
-        logEntity.setIsSuccess(0);
-        logEntity.setOperationName("用户登录成功");
-        logEntity.setOperationType(RecordEnum.LOGOUT.name());
-        logService.save(logEntity);
-        //删除缓存
-        Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");
-        if (cacheKeys!=null&&cacheKeys.size()>0)
-            redisTemplate.delete(Objects.requireNonNull(cacheKeys));
-    }
 }

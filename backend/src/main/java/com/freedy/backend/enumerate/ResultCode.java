@@ -19,6 +19,7 @@ public enum ResultCode {
     COMMON_FAIL(999, "失败"),
     UNKNOWN_EXCEPTION(500, "发生异常！"),
     LOGOUT_ERROR(501, "退出登录失败！"),
+    METHOD_ERROR(502, "方法错误，不允许访问呢此方法！"),
 
     /* 参数错误：1000～1999 */
     PARAM_NOT_VALID(1001, "参数无效"),
@@ -48,7 +49,8 @@ public enum ResultCode {
     OUT_OF_LIMIT(3005, "字数超出限制"),
     VERIFY_ERROR(3006, "邮箱认证失败"),
     EMAIL_ALREADY_EXIST(3007, "邮箱已经存在"),
-    NO_SMTP_CONFIG(3008, "博主没有配置smtp服务，无法订阅！");
+    NO_SMTP_CONFIG(3008, "博主没有配置smtp服务，无法订阅！"),
+    LACK_VALUE(3009, "相关配置信息不全！");
 
     private final Integer code;
     private final String message;

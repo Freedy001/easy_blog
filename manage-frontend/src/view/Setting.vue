@@ -111,7 +111,43 @@
 					</el-button>
 				</div>
 			</el-tab-pane>
-			<el-tab-pane label="关于页面" v-if="aboutReg.test(store.state.userInfo.permissionStr)" name="4">
+			<el-tab-pane label="附件设置" v-if="attachReg.test(store.state.userInfo.permissionStr)" name="4">
+				<div class="attachment">
+					<div class="item">
+						<h1>附件存储方式</h1>
+						<el-switch active-color="rgb(243 119 119)"
+						           inactive-color="rgb(11 191 226)"
+						           active-text="本地存储"
+						           inactive-text="阿里云oss存储"
+						           v-model="attachSetting.uploadMode">
+						</el-switch>
+					</div>
+					<transition name="el-fade-in-linear">
+						<div v-if="!attachSetting.uploadMode">
+							<div class="item">
+								<h1>accessId</h1>
+								<el-input v-model="attachSetting.accessId" placeholder="请输入accessId"></el-input>
+							</div>
+							<div class="item">
+								<h1>accessKey</h1>
+								<el-input v-model="attachSetting.accessKey" placeholder="请输入accessKey"></el-input>
+							</div>
+							<div class="item">
+								<h1>endpoint</h1>
+								<el-input v-model="attachSetting.endpoint" placeholder="请输入endpoint"></el-input>
+							</div>
+							<div class="item">
+								<h1>bucket</h1>
+								<el-input v-model="attachSetting.bucket" placeholder="请输入bucket"></el-input>
+							</div>
+						</div>
+					</transition>
+					<el-button type="primary" @click="savaAttach"
+					           style="margin-top: 30px;transition: all 1s ease">保存
+					</el-button>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="关于页面" v-if="aboutReg.test(store.state.userInfo.permissionStr)" name="5">
 				<div class="other">
 					<div class="item">
 						<div class="about">
@@ -150,6 +186,7 @@ const store = useStore();
 let commonReg = /setting-common/
 let smtpReg = /setting-smtp/
 let commentReg = /setting-comment/
+let attachReg = /setting-attachment/
 let aboutReg = /setting-about/
 
 onMounted(() => {
@@ -174,6 +211,8 @@ watch(activeName, (tab) => {
 	} else if (tab == "3") {
 		initCommentValue();
 	} else if (tab == "4") {
+		initAttachment()
+	}else if (tab == "5") {
 		initAbout();
 	}
 })
@@ -393,7 +432,45 @@ async function savaComment() {
 		});
 	}
 }
+//********************************附件设置**************************************
+let attachSetting = reactive<any>({
+	uploadMode:false
+})
 
+async function savaAttach() {
+	const response = await post("setting/saveAttachment",attachSetting);
+	if (response.code==200){
+		proxy.$notify({
+			title: '成功',
+			message: '保存成功!',
+			type: 'success'
+		});
+		store.commit('notifyReloadNickNameAndHeadImg')
+	}else if (response.code == 3001) {
+		noPermission()
+	} else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
+	}
+}
+
+async function initAttachment() {
+	const response = await get("setting/getAttachmentSetting");
+	if (response.code==200){
+		copyProperties(response.data,attachSetting)
+	}else if (response.code == 3001) {
+		noPermission()
+	} else {
+		proxy.$notify({
+			title: '出差啦😢！',
+			message: response.msg,
+			type: 'error'
+		});
+	}
+}
 //********************************关于页面**************************************
 let article = reactive<any>({})
 
@@ -410,6 +487,7 @@ async function initAbout() {
 
 <style scoped lang="scss">
 .indexContainer {
+
 	.common-setting {
 
 		.el-select {
@@ -480,14 +558,6 @@ async function initAbout() {
 		}
 	}
 
-	.smtp {
-
-	}
-
-	.comment {
-
-	}
-
 	.item {
 		margin: 30px 0;
 
@@ -512,5 +582,12 @@ async function initAbout() {
 		margin: 0 auto;
 		padding: 50px 0 100px 0;
 	}
+
+	.attachment{
+		.el-switch{
+			margin-top: 10px;
+		}
+	}
+
 }
 </style>

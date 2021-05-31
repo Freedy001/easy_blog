@@ -27,22 +27,11 @@
 				<el-image :key="url" :src="loadResource(url)" lazy></el-image>
 			</div>
 		</div>
-		<transition name="el-fade-in-linear">
-			<FullScreen :opacity="0.5" :index="3000" v-if="showCard" @click="showCard=false">
-				<el-upload
-						@click.stop=""
-						class="upload-demo"
-						drag
-						:action="loadResource('/backend/file/upload')"
-						list-type="picture"
-						:headers="token"
-						:on-success="success"
-						multiple>
-					<i class="el-icon-upload"></i>
-					<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-				</el-upload>
-			</FullScreen>
-		</transition>
+		<teleport to="body">
+			<transition name="el-fade-in-linear">
+				<Upload v-if="showCard" @click="showCard=false" @successCB="success"></Upload>
+			</transition>
+		</teleport>
 	</div>
 </template>
 
@@ -50,21 +39,21 @@
 import {defineComponent, getCurrentInstance, h, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {get, loadResource, post} from "../http";
 import LoadMore from '../components/LoadMore.vue'
+import Upload from '../components/Upload.vue'
 import check from '../assets/check.svg'
 import {ElMessage} from "element-plus";
-import FullScreen from "../components/FullScreen.vue";
 
 const {proxy}: any = getCurrentInstance();
 defineComponent({
 	LoadMore,
-	FullScreen
+	Upload
 })
 let interval: number;
 let pre = new Date().getTime()
 onMounted(() => {
 	const item = localStorage.getItem("switchValue");
-	if (item){
-		switchValue.value=item==='0';
+	if (item) {
+		switchValue.value = item === '0';
 	}
 	getImageUrls().then(() => {
 		setTimeout(() => {
@@ -95,48 +84,50 @@ let doScroll: any = ({srcElement}: any) => {
 }
 
 let showCard = ref(false)
-let token = {Authorization: localStorage.getItem('Authorization')}
-
-
-//文件上传后的回调
-async function success(response: any) {
-	if (response.code != 200) {
-		ElMessage({
-			showClose: true,
-			message: `上传失败${response.msg}`,
-			type: 'error'
-		});
-	} else {
+watch(showCard,(val)=>{
+	if (!val){
 		resource.length = 0
 		page = 1;
 		getImageUrls().then();
 	}
+})
+// setInterval(()=>{
+// 	ElMessage("aaaa")
+// },500)
+//文件上传后的回调
+async function success() {
+
 }
 
 let SelectedList: any = [];
 let hasSelect = ref(false)
 let switchValue = ref(false)
-onUnmounted(()=>{
-	localStorage.setItem("switchValue",switchValue.value?'0':'1');
+onUnmounted(() => {
+	localStorage.setItem("switchValue", switchValue.value ? '0' : '1');
 })
+
 //点击图片
 function handleClick(url: string, index: number) {
-	if (switchValue.value){
-		let oInput = document.createElement('input');
-		const split = resource[index].split("-", 5);
-		oInput.value = loadResource(split[0] + "-" + split[1] + "-" + split[2] + "-" + split[4]);
-		oInput.style.opacity = '0'
-		oInput.setAttribute("name", "secukey")
-		document.body.appendChild(oInput);
-		oInput.select(); // 选择对象
-		document.execCommand("Copy"); // 执行浏览器复制命令
-		oInput.id = 'oInput';
-		oInput.remove()
-		ElMessage.success({
-			message: '复制成功!',
-			type: 'success'
-		});
-	}else {
+	if (switchValue.value) {
+		try {
+			let oInput = document.createElement('input');
+			oInput.value = loadResource(converter(resource[index]));
+			oInput.style.opacity = '0'
+			oInput.setAttribute("name", "secukey")
+			document.body.appendChild(oInput);
+			oInput.select(); // 选择对象
+			document.execCommand("Copy"); // 执行浏览器复制命令
+			oInput.id = 'oInput';
+			oInput.remove()
+			ElMessage.success({
+				message: '复制成功!',
+				type: 'success'
+			});
+		} catch (e) {
+			console.log(e)
+			ElMessage.error('url转换失败!');
+		}
+	} else {
 		const ele: any = document.getElementsByClassName("item")[index];
 		const check: any = document.getElementsByClassName("checked")[index];
 		let picIndex;
@@ -154,6 +145,17 @@ function handleClick(url: string, index: number) {
 	}
 }
 
+function converter(url: string) {
+	if (url.match(/\?x-oss-process/)) {
+		return url.split("\?x-oss-process")[0];
+	}
+	if (url.match(/\/image\//)) {
+		let split = url.split("-", 5);
+		return split[0] + "-" + split[1] + "-" + split[2] + "-" + split[4];
+	}
+	throw new Error('转换失败');
+}
+
 //删除图片
 async function del() {
 	let urlList: any = []
@@ -161,8 +163,7 @@ async function del() {
 	const response = await post('/file/delPic', urlList);
 	if (response.code == 200) {
 		proxy.$notify({
-			title: '成功！',
-			message: "删除成功",
+			message: response.data,
 		})
 		//取消选中
 		const ele: any = document.getElementsByClassName("item");
@@ -301,26 +302,11 @@ function waterFall() {
 				background-color: #0b9aff;
 			}
 
-			&:hover {
-				.copy-pic-link {
-					animation: top-out .3s ease both;
-					display: block;
-				}
-			}
-
-			@keyframes top-out {
-				0% {
-					transform: translateY(-100%);
-				}
-				100% {
-					transform: translateY(0);
-				}
-			}
 		}
 
 		.select {
 			.el-image {
-				border: 2px solid #0b9aff;
+				border: 1px solid #0b9aff;
 			}
 
 			transform: scale(1.03);

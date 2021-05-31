@@ -43,7 +43,7 @@ export async function logout() {
 
 export async function get(uri: string) {
     const authorization = localStorage.getItem("Authorization");
-    const {data} = await axios.get(baseURL + uri, {
+    const {data} = await axios.get(baseURL + convertUri(uri), {
         headers: {'Authorization': authorization}
     });
     if (data.code == 2001) {
@@ -55,7 +55,7 @@ export async function get(uri: string) {
 
 export async function post(uri: string, dataFiled: any) {
     const authorization = localStorage.getItem("Authorization");
-    const {data} = await axios.post(baseURL + uri, dataFiled, {
+    const {data} = await axios.post(baseURL + convertUri(uri), dataFiled, {
         headers: {'Authorization': authorization}
     });
     if (data.code == 2001) {
@@ -63,6 +63,16 @@ export async function post(uri: string, dataFiled: any) {
         await router.push('/login?reLogin=true')
     }
     return data
+}
+
+function convertUri(uri: string) {
+    let resultUri: string = "";
+    uri.split("/").forEach(uriBlock => {
+        if (uriBlock != "") {
+            resultUri += "/" + uriBlock
+        }
+    })
+    return resultUri;
 }
 
 export function loadResource(uri: any) {

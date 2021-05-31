@@ -47,11 +47,12 @@ public class RunSqlScript {
                 runner.setLogWriter(null);
                 // 执行SQL脚本
                 Class<? extends RunSqlScript> currentClazz = this.getClass();
-                URL fis = currentClazz.getClassLoader().getResource("init.sql");
+                InputStream fis = currentClazz.getClassLoader().getResourceAsStream("init.sql");
                 if (fis==null){
                     throw new FileNotFoundException("没有找到初始化sql文件");
                 }
-                runner.runScript(new FileReader(fis.getPath()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(fis));
+                runner.runScript(in);
                 // 关闭连接
                 conn.close();
                 // 若成功，打印提示信息

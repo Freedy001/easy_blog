@@ -33,20 +33,7 @@
 	</el-drawer>
 	<teleport to="body">
 		<transition name="el-fade-in-linear">
-			<FullScreen :opacity="0.5" :index="3000" v-if="showCard" @click="showCard=false">
-				<el-upload
-						@click.stop=""
-						class="upload-demo"
-						drag
-						:action="loadResource('/backend/file/upload')"
-						list-type="picture"
-						:headers="token"
-						:on-success="success"
-						multiple>
-					<i class="el-icon-upload"></i>
-					<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-				</el-upload>
-			</FullScreen>
+			<Upload v-if="showCard" @click="showCard=false"></Upload>
 		</transition>
 	</teleport>
 </template>
@@ -64,33 +51,38 @@ import {
 	ref,
 	watch
 } from "vue";
+import Upload from './Upload.vue'
 import FullScreen from './FullScreen.vue'
 import {ElMessage} from "element-plus";
 import {get, loadResource} from "../http";
-const {proxy}:any = getCurrentInstance();
+
+const {proxy}: any = getCurrentInstance();
 let input = ref('')
 let token = {Authorization: localStorage.getItem('Authorization')}
 let showCard = ref(false)
 let resource = reactive<Array<string>>([])
-let page=1
-let drawer=ref(false);
+let page = 1
+let drawer = ref(false);
 defineProps(['isDrawer'])
 defineEmit(['clickCallback'])
 defineComponent({
-	FullScreen
+	FullScreen,
+	Upload
 })
-watch(()=>proxy.isDrawer,(val)=>{
-	drawer.value=true;
+watch(() => proxy.isDrawer, (val) => {
+	drawer.value = true;
 })
-function handClick(url:string) {
-	proxy.$emit('clickCallback',url)
-	drawer.value=false;
+
+function handClick(url: string) {
+	proxy.$emit('clickCallback', url)
+	drawer.value = false;
 }
+
 //关闭上传后重新加载
-watch(showCard,(val)=>{
-	if (!val){
-		resource.length=0
-		page=1;
+watch(showCard, (val) => {
+	if (!val) {
+		resource.length = 0
+		page = 1;
 		getImageUrls().then();
 	}
 })
@@ -99,21 +91,13 @@ function addMore() {
 	page++;
 	getImageUrls().then();
 }
-//文件上传后的回调
-async function success(response: any) {
-	if (response.code != 200) {
-		ElMessage({
-			showClose: true,
-			message: `上传失败${response.msg}`,
-			type: 'error'
-		});
-	}
-}
+
+
 onMounted(async () => {
 	getImageUrls().then()
 })
 
-
+//初始化图片预览
 async function getImageUrls() {
 	const response = await get(`/file/getImages?page=${page}&limit=10&sidx=id&order=desc`);
 	if (response.code == 200) {
@@ -121,8 +105,6 @@ async function getImageUrls() {
 		list.forEach(value => resource.push(value.resourceUrl))
 	}
 }
-
-
 </script>
 
 <style scoped lang="scss">
@@ -131,6 +113,7 @@ async function getImageUrls() {
 
 	.pic-index-container {
 		height: 100%;
+
 		.search {
 			margin: 20px;
 			display: flex;
@@ -147,8 +130,9 @@ async function getImageUrls() {
 			.img-container {
 				cursor: pointer;
 				margin: 10px;
-				width: calc(100%/2 - 20px);
+				width: calc(100% / 2 - 20px);
 				max-height: 250px;
+
 				.el-image.image {
 					width: 100%;
 					height: 100%;
@@ -163,6 +147,7 @@ async function getImageUrls() {
 		bottom: 0;
 		width: 100%;
 		background: white;
+
 		.el-divider {
 			margin: 5px;
 		}
@@ -170,24 +155,5 @@ async function getImageUrls() {
 
 }
 
-.full-screen {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 9999;
-
-	.upload-demo {
-		position: absolute;
-		top: 15%;
-		left: 52%;
-		transform: translate(-50%);
-		width: 30%;
-
-	}
-
-	background-color: rgba(0, 0, 0, 0.8);
-}
 
 </style>

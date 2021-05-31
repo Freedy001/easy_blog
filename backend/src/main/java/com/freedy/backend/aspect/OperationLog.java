@@ -116,6 +116,7 @@ public class OperationLog{
         boolean info = methodName.toLowerCase(Locale.ROOT).contains("info");
         boolean common = methodName.toLowerCase(Locale.ROOT).contains("common");
         boolean smtp = methodName.toLowerCase(Locale.ROOT).contains("smtp");
+        boolean attachment = methodName.toLowerCase(Locale.ROOT).contains("attachment");
         //构建操作语句
         StringBuilder builder = new StringBuilder();
         //参数class
@@ -160,6 +161,7 @@ public class OperationLog{
             //从ioc中获取操作对象
             Object proxyService = applicationContext.getBean(service);
             //获取给出id下的所有实体类
+            @SuppressWarnings("unchecked")
             List<Object> entities = (List<Object>) service.getMethod("listByIds", Collection.class).invoke(proxyService, ids);
             for (Object entity : entities) {
                 //取出所有实体类中要删除的title或者name
@@ -210,21 +212,49 @@ public class OperationLog{
         if (info) builder.append("信息");
         if (common) builder.append("常规");
         if (smtp) builder.append("SMTP");
+        if (attachment) builder.append("附件");
         if (setting) builder.append("设置");
         log.debug("构建的日志字符串-->{}", builder);
         return builder.toString();
     }
 
+
+    /**
+     * 手动记录成功日志
+     */
+    public static void RecordSuccessLogManually(String log){
+        RecordLogManually(log,true,RecordEnum.MANUALLY,Local.MANAGER_LOCAL.get().getNickname());
+    }
+
+    /**
+     * 手动记录失败日志
+     */
+    public static void RecordErrorLogManually(String log){
+        RecordLogManually(log,false,RecordEnum.MANUALLY,Local.MANAGER_LOCAL.get().getNickname());
+    }
+
+
     /**
      * 手动记录日志
      */
     public static void RecordLogManually(String log, boolean status, String nickname){
+        RecordLogManually(log,status,RecordEnum.MANUALLY,nickname);
+    }
+
+    /**
+     * 手动记录日志
+     * @param log 日志信息
+     * @param status 成功还是失败
+     * @param type 日志类型
+     * @param nickname 操作者名称
+     */
+    public static void RecordLogManually(String log, boolean status, RecordEnum type, String nickname){
         OperationLogEntity logEntity = new OperationLogEntity();
         logEntity.setCreatTime(System.currentTimeMillis());
         logEntity.setOperator(nickname);
         logEntity.setIsSuccess(status?0:1);
         logEntity.setOperationName(log);
-        logEntity.setOperationType(RecordEnum.MANUALLY.name());
+        logEntity.setOperationType(type.name());
         logService.save(logEntity);
         //清空缓存
         Set<String> cacheKeys = redisTemplate.keys(CacheConstant.OPERATION_CACHE_NAME + "*");

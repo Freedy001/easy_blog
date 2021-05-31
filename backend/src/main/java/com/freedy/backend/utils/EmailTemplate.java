@@ -165,7 +165,7 @@ public class EmailTemplate {
                 "        <div class=\"neirong\">\n" +
                 "          <p style=\"height: 50px\"><b>请核对你的邮箱：</b><span class=\"font_darkblue\">"+email+"</span></p>\n" +
                 "          <p style=\"height: 50px\"><b>你的验证码为：</b><span id=\"userName\" class=\"font_darkblue\">"+code+"</span></p>\n" +
-                "          <p><a href=\"#\" style=\"text-decoration: none;color: #3a9ff5\">赶紧去看看吧</a></p>\n" +
+                "          <p>请在30分钟内完成验证！</p>\n" +
                 "          <div class=\"line\">如果你未申请订阅服务，请忽略该邮件。</div>\n" +
                 "        </div>\n" +
                 "      </div>\n" +

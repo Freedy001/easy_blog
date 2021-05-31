@@ -3,12 +3,14 @@ package com.freedy.backend.api;
 import com.freedy.backend.SysSetting.LoadSetting;
 import com.freedy.backend.aspect.annotation.RecordLog;
 import com.freedy.backend.constant.RedisConstant;
+import com.freedy.backend.entity.vo.setting.OssSettingVo;
 import com.freedy.backend.enumerate.RecordEnum;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.utils.Result;
 import com.freedy.backend.entity.vo.setting.CommentSettingVo;
 import com.freedy.backend.entity.vo.setting.CommonSettingVo;
 import com.freedy.backend.entity.vo.setting.SMTPSettingVo;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +113,25 @@ public class SettingController {
         loadSetting.refreshSetting();
         //通知前台页面
         redisTemplate.opsForValue().set(RedisConstant.NOTIFY_HEADER + UUID.randomUUID(), ResultCode.NOTIFY_INDEX_SETTING.name(), 5, TimeUnit.SECONDS);
+        return Result.ok();
+    }
+
+    @ApiOperation("获取附件设置")
+    @PreAuthorize("hasAuthority('setting-attachment')")
+    @GetMapping("/getAttachmentSetting")
+    public Result getAttachmentSetting(){
+        OssSettingVo settingVo = new OssSettingVo();
+        BeanUtils.copyProperties(loadSetting,settingVo);
+        return Result.ok().setData(settingVo);
+    }
+
+    @ApiOperation("保存附件设置")
+    @PreAuthorize("hasAuthority('setting-attachment')")
+    @RecordLog(type = RecordEnum.SETTING)
+    @PostMapping("/saveAttachment")
+    public Result saveAttachmentSetting(@Validated @RequestBody OssSettingVo settingVo){
+        settingService.saveAttachment(settingVo);
+        loadSetting.refreshSetting();
         return Result.ok();
     }
 

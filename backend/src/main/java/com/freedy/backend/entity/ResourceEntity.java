@@ -26,11 +26,14 @@ public class ResourceEntity {
     private String resourceUrl;
     @ApiModelProperty("上传者id")
     private Integer creatorId;
+    @ApiModelProperty("资源类型 0本地 1阿里云oss")
+    private Integer resourceType;
     @ApiModelProperty("创建时间")
     private Long createTime=System.currentTimeMillis();
 
-    public ResourceEntity(String resourceUrl,Integer creatorId) {
+    public ResourceEntity(String resourceUrl,Integer creatorId,Integer resourceType) {
         this.resourceUrl = resourceUrl;
         this.creatorId = creatorId;
+        this.resourceType = resourceType;
     }
 }

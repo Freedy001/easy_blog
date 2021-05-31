@@ -104,11 +104,12 @@ let commonReg = /setting-common/
 let smtpReg = /setting-smtp/
 let commentReg = /setting-comment/
 let aboutReg = /setting-about/
+let attachReg = /setting-attachment/
 
 //判断是否显示设置
 function checkPermission() {
 	let permissionStr = store.state.userInfo.permissionStr
-	showSetting.value = commonReg.test(permissionStr) || smtpReg.test(permissionStr) || commentReg.test(permissionStr) || aboutReg.test(permissionStr);
+	showSetting.value = commonReg.test(permissionStr) || smtpReg.test(permissionStr) || commentReg.test(permissionStr) || attachReg.test(permissionStr) || aboutReg.test(permissionStr);
 }
 
 
@@ -129,9 +130,10 @@ async function getUserInfo() {
 watch(() => store.state.notifyReloadReadNum, () => {
 	getNotReadNum()
 })
-let twinkle=ref(false)
+let twinkle = ref(false)
 let notReadNum = ref(0)
-watch(notReadNum,num=>twinkle.value=num>0);
+watch(notReadNum, num => twinkle.value = num > 0);
+
 //获取评论数
 async function getNotReadNum() {
 	const num = await get('/comment/getNotReadNum')
