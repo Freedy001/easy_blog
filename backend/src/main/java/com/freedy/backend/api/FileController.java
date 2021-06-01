@@ -151,20 +151,23 @@ public class FileController {
 
     @RecordLog(type = RecordEnum.UPLOAD, logMsg = "获取上传服务签名")
     @GetMapping("/getPolicy")
-    public Result getPolicy() {
+    public Result getPolicy(@RequestParam String fileName) {
         //条件不满足无法访问
         if (loadSetting.getUploadMode()) throw new MethodErrorException();
-        return Result.ok().setData(OssUtils.generatePolicy(loadSetting));
+        Map<String, String> generatePolicy = OssUtils.generatePolicy(loadSetting);
+        String name = generatePolicy.get("dir") + UUID.randomUUID() + fileName;
+        generatePolicy.put("fileName", name);
+        String fullPath="http://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + "/" + name;
+        generatePolicy.put("fullPath", fullPath);
+        ResourceEntity entity = new ResourceEntity(
+                fullPath,
+                Local.MANAGER_LOCAL.get().getId(),
+                EntityConstant.ALI_YUM_OSS_RESOURCE
+        );
+        resourceService.save(entity);
+        return Result.ok().setData(generatePolicy);
     }
 
-    @ApiOperation("oss上传成功回调")
-    @RecordLog(type = RecordEnum.UPLOAD, logMsg = "上传成功")
-    @PostMapping("/uploadSuccess")
-    public Result uploadSuccess(@RequestBody String[] filePath) {
-        List<ResourceEntity> urls = Arrays.stream(filePath).map(path -> new ResourceEntity("http://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + path,
-                Local.MANAGER_LOCAL.get().getId(), EntityConstant.ALI_YUM_OSS_RESOURCE)).collect(Collectors.toList());
-        resourceService.saveBatch(urls);
-        return Result.ok();
-    }
+
 
 }

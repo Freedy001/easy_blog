@@ -3,7 +3,7 @@
 
 <mapper namespace="com.freedy.backend.dao.SettingDao">
 
-    <update id="updateBath">
+    <update id="updateBatch">
         update blog_db.blog_setting
         set value =
         case item

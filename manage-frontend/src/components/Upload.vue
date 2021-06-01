@@ -10,6 +10,7 @@
 				list-type="picture"
 				:headers="token"
 				:on-success="success"
+				:on-error="error"
 				multiple>
 			<i class="el-icon-upload"></i>
 			<div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -36,21 +37,21 @@ const mode: boolean = store.state.userInfo.uploadMode
 
 let policyData = reactive<any>({});
 let actionUrl = ref<string>('/backend/file/upload')
-let filePath: string[] = [];
-let flag=0;
+
+//加锁
+let lockStatus: any = null;
+let policyStack: any = [];
+
 async function beforeUpload(file: any) {
 	if (!mode) {
 		token.Authorization = null;
-		const response = await get('file////////getPolicy');
+		const response = await get(`file/getPolicy?fileName=${file.name}`);
 		if (response.code == 200) {
 			const data = response.data;
-			let fileName = UUID() + file.name;
 			policyData.policy = data.policy
 			policyData.signature = data.signature
 			policyData.ossaccessKeyId = data.accessid
-			filePath.push("/" + data.dir + fileName)
-			flag=filePath.length;
-			policyData.key = data.dir + fileName
+			policyData.key = data.fileName
 			policyData.dir = data.dir
 			policyData.host = data.host
 			actionUrl.value = data.host
@@ -68,25 +69,13 @@ async function beforeUpload(file: any) {
 		return true;
 	}
 }
-
 //文件上传后的回调
-async function success() {
-	if (!mode) {
-		flag--;
-		if(flag>0){
-			return;
-		}
-		const response = await post(`file/uploadSuccess`,filePath);
-		if (response.code == 200) {
-			ElMessage("上传成功！")
-			filePath.length=0;
-		} else {
-			ElMessage.error(response.msg)
-		}
-	} else {
-		ElMessage("上传成功！")
-	}
+function success() {
+	ElMessage("上传成功！")
 	proxy.$emit('successCB')
+}
+function error() {
+	ElMessage("上传失败！")
 }
 
 </script>

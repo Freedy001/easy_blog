@@ -29,7 +29,7 @@ public class OssUtils {
             String accessId = loadSetting.getAccessId(); // 请填写您的AccessKeyId。
             String accessKey = loadSetting.getAccessKey(); // 请填写您的AccessKeySecret。
             String endpoint = loadSetting.getEndpoint(); // 请填写您的 endpoint。
-            String bucket = loadSetting.getBucket(); // 请填写您的 bucketname 。
+            String bucket = loadSetting.getBucket(); // 请填写您的 bucketname。
             String host = "http://" + bucket + "." + endpoint; // host的格式为 bucketname.endpoint
             Map<String, String> respMap = new LinkedHashMap<String, String>();
             String dir = DateUtils.formatDate(new Date()) + "/"; // 用户上传文件时指定的前缀。

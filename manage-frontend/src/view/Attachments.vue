@@ -150,7 +150,6 @@ function rightChange() {
 
 function changeBigPic(url: string) {
 	const ele: any = document.querySelector('.full-screen-image');
-	console.log(ele)
 	ele.style.opacity = "0"
 	ele.style.width = "0"
 	ele.style.height = "0"

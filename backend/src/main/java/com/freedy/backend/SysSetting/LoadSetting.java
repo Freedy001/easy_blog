@@ -118,6 +118,11 @@ public class LoadSetting implements DisposableBean {
                 //排除掉sl4j的log
                 if (!"log".equals(fieldName) && !fieldName.toLowerCase(Locale.ROOT).contains("service")) {
                     log.debug("没有发现系统设置{}", fieldName);
+                    try {
+                        field.set(this, null);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

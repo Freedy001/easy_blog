@@ -22,7 +22,6 @@ export function loadResource(uri: any) {
 }
 
 export function loadHdResource(uri: any) {
-    console.log(uri)
     return loadResource(converter(uri))
 }
 

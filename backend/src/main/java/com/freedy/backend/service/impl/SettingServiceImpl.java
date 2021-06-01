@@ -22,6 +22,7 @@ import com.freedy.backend.utils.Query;
 import com.freedy.backend.dao.SettingDao;
 import com.freedy.backend.entity.SettingEntity;
 import com.freedy.backend.service.SettingService;
+import org.springframework.util.StringUtils;
 
 
 /**
@@ -47,27 +48,31 @@ public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> i
         settingVo.setPoster(ResourceUrlUtil.ConvertToHDUrl(settingVo.getPoster()));
         List<SettingEntity> list = getSettingEntities(settingVo);
         //因为settingVo里面没有indexArticleIdAndTitle所以要自己构建
+        CommonSettingVo.IndexArticle article = settingVo.getIndexArticle();
         SettingEntity entity = new SettingEntity();
         entity.setItem("indexArticleIdAndTitle");
-        CommonSettingVo.IndexArticle article = settingVo.getIndexArticle();
-        entity.setValue(article.getId() + "," + article.getTitle());
+        if (StringUtils.hasText(article.getId()) && StringUtils.hasText(article.getTitle())) {
+            entity.setValue(article.getId() + "," + article.getTitle());
+        } else {
+            entity.setValue("");
+        }
         list.add(entity);
-        baseMapper.updateBath(list);
+        baseMapper.updateBatch(list);
     }
 
     @Override
     public void saveSMTP(SMTPSettingVo smtpSettingVo) {
-        baseMapper.updateBath(getSettingEntities(smtpSettingVo));
+        baseMapper.updateBatch(getSettingEntities(smtpSettingVo));
     }
 
     @Override
     public void saveComment(CommentSettingVo commentSettingVo) {
-        baseMapper.updateBath(getSettingEntities(commentSettingVo));
+        baseMapper.updateBatch(getSettingEntities(commentSettingVo));
     }
 
     @Override
     public void saveAttachment(OssSettingVo settingVo) {
-        baseMapper.updateBath(getSettingEntities(settingVo));
+        baseMapper.updateBatch(getSettingEntities(settingVo));
     }
 
 
@@ -81,7 +86,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingDao, SettingEntity> i
             field.setAccessible(true);
             try {
                 Object value = field.get(settingVo);
-                if (value==null) throw new ArgumentErrorException();
+                if (value == null) throw new ArgumentErrorException();
                 if (value instanceof Boolean) {
                     entity.setValue(value.toString());
                 } else {

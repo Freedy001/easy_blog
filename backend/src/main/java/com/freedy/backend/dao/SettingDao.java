@@ -20,5 +20,5 @@ public interface SettingDao extends BaseMapper<SettingEntity> {
     /**
      * 批量更新
      */
-    void updateBath(List<SettingEntity> entities);
+    void updateBatch(List<SettingEntity> entities);
 }
