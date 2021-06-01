@@ -79,7 +79,7 @@ public class LoadSetting implements DisposableBean {
             managerService.createRootUser();
             log.warn("创建成功！！！");
             log.warn("初始用户名:root");
-            log.warn("初始密码:123456");
+            log.warn("初始密码:12345678");
         }
         if (articleService.getById(1) == null) {
             log.warn("在数据库中没有发现关于页面,开始创建根关于页面.....");

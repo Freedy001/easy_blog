@@ -4,7 +4,7 @@
 		<teleport to="body">
 			<div class="title">
 				<div class="img">
-					<img :src="loadResource(article.articlePoster)" alt="nothing" class="kenburns-top-right">
+					<img :src="loadHdResource(article.articlePoster)" alt="nothing" class="kenburns-top-right">
 				</div>
 				<div class="content">
 					<span class="block">{{ article.title }}</span>
@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import {defineComponent, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
-import {get, loadResource} from "../http";
+import {get, loadHdResource, loadResource} from "../http";
 import hljs from 'highlight.js';
 import Comment from '../components/Comment.vue'
 import CommentList from '../components/CommentList.vue'

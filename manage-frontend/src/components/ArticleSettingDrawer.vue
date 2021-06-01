@@ -429,19 +429,11 @@ async function initDate() {
 }
 
 .full-screen {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 1000;
-
 	.boxs {
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-
 		height: 400px;
 
 		.card-row {
@@ -457,7 +449,8 @@ async function initDate() {
 	display: none;
 }
 
-:deep(.box-card) {
+
+:global(#box-card) {
 	width: 100%;
 }
 

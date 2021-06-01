@@ -20,7 +20,7 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("主键")
     private Long id;
 
-    @NotEmpty
+    @NotEmpty(message = "标题不能为空")
     @ApiModelProperty("标题")
     private String title;
 
@@ -44,7 +44,7 @@ public class ArticleVo implements Serializable {
     @ApiModelProperty("是否顶置")
     private Boolean isOverhead;//这里一定要使用包装类 不然传值时会发生数据错误
 
-    @NotNull
+    @NotNull(message = "分类不能为空")
     @ApiModelProperty("分类id")
     private Integer articleCategoryId;
 

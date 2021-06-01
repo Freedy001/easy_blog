@@ -149,6 +149,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, CommentEntity> i
                 vos = baseMapper.getOwnCommentList(utils, managerId);
             }
             List<String> list = vos.stream().map(CommentAdminVo::getId).collect(Collectors.toList());
+            vos.forEach(item->item.setCreateTime(DateUtils.formatTime(Long.parseLong(item.getCreateTime()))));
             if (list.size() > 0) {
                 baseMapper.readAll(list);
             }

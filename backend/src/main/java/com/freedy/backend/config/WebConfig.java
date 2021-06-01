@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String path = "file:"+System.getProperty("user.home")+"\\.easy\\image\\";
+        String path = "file:"+System.getProperty("user.home")+"/.easy/image/";
         String adminPath = "classpath:/admin/";
         String appPath = "classpath:/app/";
         String resource = "classpath:/front-resource/";

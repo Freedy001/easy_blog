@@ -1,6 +1,6 @@
 <template>
 	<div class="card-row">
-		<el-card class="box-card form-area">
+		<el-card id="box-card" class="box-card form-area">
 			<div>
 				<h1>{{ name }}</h1>
 				<br>

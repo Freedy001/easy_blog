@@ -166,18 +166,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         Integer authorId = Local.MANAGER_LOCAL.get().getId();
         ArticleEntity entity = new ArticleEntity();
         BeanUtils.copyProperties(article, entity);
+        entity.setArticlePoster(ResourceUrlUtil.ConvertToHDUrl(entity.getArticlePoster()));
         //设置发布状态
         entity.setArticleStatus(EntityConstant.ARTICLE_UNPUBLISHED);
         if (article.getId() == null) {
             //获取作者消息
             entity.setAuthorId(authorId);
-        }
-        entity.setArticleComment(article.getIsComment() ?
-                EntityConstant.ARTICLE_CAN_COMMENT : EntityConstant.ARTICLE_CAN_NOT_COMMENT);
-        if (article.getId() == null) {
             entity.setCreateTime(System.currentTimeMillis());
         }
         entity.setUpdateTime(System.currentTimeMillis());
+        entity.setArticleComment(article.getIsComment() ?
+                EntityConstant.ARTICLE_CAN_COMMENT : EntityConstant.ARTICLE_CAN_NOT_COMMENT);
         //设置文章字数
         if (entity.getContent() != null) entity.setWordNum(Long.valueOf(MarkDown.countWords(entity.getContent())));
         //保存文章
@@ -252,7 +251,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     /**
      * 验证权限
      */
-    private void checkAuthority(ArticleVo article){
+    private void checkAuthority(ArticleVo article) {
         if (article.getId() != null && article.getId() == 1) {
             if (AuthorityUtils.hasAuthority("about-setting")) {
                 //清除缓存
@@ -358,7 +357,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         }
         dashBoardVo.setArticlePopular(articlePopular);
         //这里减去关于文章
-        dashBoardVo.setArticleNum(articleList.size()-1);
+        dashBoardVo.setArticleNum(articleList.size() - 1);
 
         List<CategoryEntity> categoryList = f3.get();
         ArrayList<DashBoardVo.ArticleDistribution> articleDistributions = new ArrayList<>();

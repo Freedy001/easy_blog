@@ -22,6 +22,7 @@ public class ResourceUrlUtil {
      * https://freedy.oss-cn-shanghai.aliyuncs.com/2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg
      */
     public static String ConvertToHDUrl(String url) {
+        if (url==null) return null;
         if (url.startsWith("http")) {
             String[] split = url.split("/", 4);
             url = split[0] + "/" + split[1] + "/" + split[2] + HDConverter("/" + split[3]);
@@ -57,6 +58,7 @@ public class ResourceUrlUtil {
      * https://freedy.oss-cn-shanghai.aliyuncs.com/2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg?x-oss-process=image/resize,w_300
      */
     public static String ConvertToSDUrl(String url) {
+        if (url==null) return null;
         if (url.startsWith("http")) {
             String[] split = url.split("/", 4);
             url = split[0] + "/" + split[1] + "/" + split[2] + SDConverter("/" + split[3]);
@@ -92,7 +94,7 @@ public class ResourceUrlUtil {
         String[] split = hdUrl.split("/", 5);
         return split[3] + "/" + split[4];
     }
-//"/" + split[3] + "/" +
+
 //    public static void main(String[] args) {
 //        while (true) {
 //            try {

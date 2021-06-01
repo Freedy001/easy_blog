@@ -116,7 +116,7 @@ alter table blog_operation_log
 create table if not exists blog_resource
 (
     id            bigint auto_increment,
-    resource_url  varchar(100) null comment '图片url',
+    resource_url  varchar(300) null comment '图片url',
     creator_id    int          null,
     resource_type tinyint      not null comment '资源类型 0本地 1阿里云',
     create_time   bigint       null comment '创建时间',

@@ -280,7 +280,7 @@ public class ManagerServiceImpl extends ServiceImpl<ManagerDao, ManagerEntity> i
         entity.setUsername("root");
         entity.setNickname(UUID.randomUUID().toString().replaceAll("-","").substring(0,10));
         entity.setHeadImg("/resource/Boy-0"+(System.currentTimeMillis()%5+1)+".svg");
-        entity.setPassword(passwordEncoder.encode("123456"));
+        entity.setPassword(passwordEncoder.encode("12345678"));
         entity.setStatus(1);
         entity.setEmail("xxxxxx@xxx.com");
         entity.setCreateTime(System.currentTimeMillis());
