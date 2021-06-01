@@ -32,6 +32,26 @@
 				<Upload v-if="showCard" @click="showCard=false" @successCB="success"></Upload>
 			</transition>
 		</teleport>
+		<teleport to="body">
+			<transition name="el-fade-in-linear">
+				<FullScreen opacity="0.3" v-if="showBigPic" @click="showBigPic=false">
+					<!--					<div class="full-screen-image"></div>-->
+					<img class="full-screen-image" :src="picUrl" alt="">
+					<div class="loading"></div>
+					<div class="button-area">
+						<span class="el-image-viewer__btn el-image-viewer__close" @click="showBigPic=false">
+							<i class="el-icon-close"></i>
+						</span>
+						<span class="el-image-viewer__btn el-image-viewer__prev" @click="leftChange">
+							<i class="el-icon-arrow-left"></i>
+						</span>
+						<span class="el-image-viewer__btn el-image-viewer__next" @click="rightChange">
+							<i class="el-icon-arrow-right"></i>
+						</span>
+					</div>
+				</FullScreen>
+			</transition>
+		</teleport>
 	</div>
 </template>
 
@@ -42,11 +62,13 @@ import LoadMore from '../components/LoadMore.vue'
 import Upload from '../components/Upload.vue'
 import check from '../assets/check.svg'
 import {ElMessage} from "element-plus";
+import FullScreen from "../components/FullScreen.vue";
 
 const {proxy}: any = getCurrentInstance();
 defineComponent({
 	LoadMore,
-	Upload
+	Upload,
+	FullScreen
 })
 let interval: number;
 let pre = new Date().getTime()
@@ -84,19 +106,27 @@ let doScroll: any = ({srcElement}: any) => {
 }
 
 let showCard = ref(false)
-watch(showCard,(val)=>{
-	if (!val){
+
+let timeout: any;
+let flag: any;
+
+//文件上传后的回调
+async function success() {
+	//阻尼器
+	if (!flag) {
+		flag = 1;
+	} else {
+		return;
+	}
+	if (timeout) {
+		clearTimeout(timeout)
+	}
+	timeout = setTimeout(() => {
 		resource.length = 0
 		page = 1;
 		getImageUrls().then();
-	}
-})
-// setInterval(()=>{
-// 	ElMessage("aaaa")
-// },500)
-//文件上传后的回调
-async function success() {
-
+		flag = null;
+	}, 1000)
 }
 
 let SelectedList: any = [];
@@ -106,8 +136,60 @@ onUnmounted(() => {
 	localStorage.setItem("switchValue", switchValue.value ? '0' : '1');
 })
 
+//向左切换
+function leftChange() {
+	let url = loadResource(converter(resource[bigPicIndex - 1 <= 0 ? 0 : --bigPicIndex]));
+	changeBigPic(url)
+}
+
+//向右切换
+function rightChange() {
+	let url = loadResource(converter(resource[bigPicIndex + 1 >= resource.length - 1 ? resource.length - 1 : ++bigPicIndex]));
+	changeBigPic(url)
+}
+
+function changeBigPic(url: string) {
+	const ele: any = document.querySelector('.full-screen-image');
+	console.log(ele)
+	ele.style.opacity = "0"
+	ele.style.width = "0"
+	ele.style.height = "0"
+	setTimeout(() => {
+		let timer = setInterval(function () {
+			if (ele.complete) {
+				ele.style.opacity = "1"
+				ele.style.width = "85vw"
+				ele.style.height = "95vh"
+				clearInterval(timer)
+			}
+		}, 50)
+		picUrl.value = url
+	},500)
+}
+
+let data: any;
+let bigPicIndex: number;
+let showBigPic = ref(false)
+let picUrl = ref('')
+
 //点击图片
 function handleClick(url: string, index: number) {
+	if (!data) {
+		data = new Date().getTime()
+		setTimeout(() => {
+			data = null;
+		}, 300)
+	} else {
+		if (new Date().getTime() - data < 200) {
+			//双击
+			showBigPic.value = true;
+			setTimeout(()=>{
+				changeBigPic(loadResource(converter(resource[index])))
+			},300)
+			bigPicIndex = index;
+			data = null;
+		}
+	}
 	if (switchValue.value) {
 		try {
 			let oInput = document.createElement('input');
@@ -319,6 +401,60 @@ function waterFall() {
 		left: 52%;
 		transform: translate(-50%);
 		width: 30%;
+	}
+}
+
+.full-screen-image {
+	position: relative;
+	transition: all .5s ease;
+	width: 0;
+	height: 0;
+	opacity: 0;
+	z-index: 9999;
+	animation: boundOut .5s ease both;
+	object-fit: contain;
+}
+
+.loading {
+	position: absolute;
+	top: calc(50vh - 50px);
+	left: calc(50vw - 50px);
+	width: 100px;
+	height: 100px;
+	z-index: 1000;
+	background-color: rgb(57, 57, 57);
+	border-radius: 50%;
+	animation: bound-out 0.8s ease infinite both;
+}
+
+@keyframes bound-out {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(3);
+		opacity: 0;
+	}
+}
+
+@keyframes boundOut {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+.el-image-viewer__btn{
+	transition: all .3s ease;
+	&:hover{
+		background-color: rgba(255, 255, 255, 0.8);
+		i{
+			color: #636363;
+		}
 	}
 }
 </style>

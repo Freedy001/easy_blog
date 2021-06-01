@@ -68,7 +68,7 @@ public class LoadSetting implements DisposableBean {
     @Autowired
     private ArticleSynchronize synchronizeService;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate redisTemplateService;
 
 
     @PostConstruct
@@ -164,7 +164,7 @@ public class LoadSetting implements DisposableBean {
             log.info("清理缓存.......");
             synchronizeService.synchronizeArticleParameter();
             synchronizeService.synchronizeArticleToEs();
-            redisTemplate.delete(RedisConstant.PREFIX + "*");
+            redisTemplateService.delete(RedisConstant.PREFIX + "*");
         } catch (IOException e) {
             e.printStackTrace();
         }

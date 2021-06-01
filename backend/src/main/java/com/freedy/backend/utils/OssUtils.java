@@ -63,7 +63,7 @@ public class OssUtils {
         }
     }
 
-    public static List<String> deleteBatch(List<String> urls,LoadSetting loadSetting){
+    public static void deleteBatch(List<String> urls,LoadSetting loadSetting){
         String accessId = loadSetting.getAccessId(); // 请填写您的AccessKeyId。
         String accessKey = loadSetting.getAccessKey(); // 请填写您的AccessKeySecret。
         String endpoint = loadSetting.getEndpoint(); // 请填写您的 endpoint。
@@ -74,10 +74,20 @@ public class OssUtils {
         List<String> keys = urls.stream().map(ResourceUrlUtil::getOssKeyByUrl).collect(Collectors.toList());
         DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucket).withKeys(keys);
         deleteObjectsRequest.setQuiet(false);
-        DeleteObjectsResult deleteObjectsResult = ossClient.deleteObjects(deleteObjectsRequest);
-        List<String> deletedObjects = deleteObjectsResult.getDeletedObjects();
+        ossClient.deleteObjects(deleteObjectsRequest);
         // 关闭OSSClient。
         ossClient.shutdown();
-        return deletedObjects;
     }
+
+//    public static void main(String[] args) {
+//        LoadSetting setting = new LoadSetting();
+//        setting.setAccessId("LTAI5tPNz8Y79omHBifiLLsN");
+//        setting.setAccessKey("AmYGoUxjlxpzzoEKUvb9kZSKQsj0AP");
+//        setting.setEndpoint("oss-cn-shanghai.aliyuncs.com");
+//        setting.setBucket("freedy");
+//        Scanner scanner = new Scanner(System.in);
+//        while (true){
+//            System.out.println(deleteBatch(Collections.singletonList(scanner.nextLine()),setting));
+//        }
+//    }
 }

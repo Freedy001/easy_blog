@@ -85,12 +85,12 @@ public class ResourceUrlUtil {
     /**
      * 将下面一行转化为下下行
      * https://freedy.oss-cn-shanghai.aliyuncs.com/2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg
-     * -> /2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg
+     * -> 2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg
      */
     public static String getOssKeyByUrl(String url) {
         String hdUrl = ConvertToHDUrl(url);
         String[] split = hdUrl.split("/", 5);
-        return "/" +split[3] + "/" + split[4];
+        return split[3] + "/" + split[4];
     }
 //"/" + split[3] + "/" +
 //    public static void main(String[] args) {

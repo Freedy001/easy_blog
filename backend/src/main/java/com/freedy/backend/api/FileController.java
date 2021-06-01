@@ -12,6 +12,8 @@ import com.freedy.backend.constant.FileConstant;
 import com.freedy.backend.entity.ResourceEntity;
 import com.freedy.backend.enumerate.ResultCode;
 import com.freedy.backend.service.ResourceService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ public class FileController {
     @RecordLog(type = RecordEnum.UPLOAD)
     public Result UploadFile(MultipartFile file) throws Exception {
         //条件不满足无法访问
-        if (!loadSetting.getUploadMode())  throw new MethodErrorException();
+        if (!loadSetting.getUploadMode()) throw new MethodErrorException();
         if (file.isEmpty()) {
             log.info("上传失败,文件为空");
             return Result.error(ResultCode.FILE_IS_EMPTY.getCode(), ResultCode.FILE_IS_EMPTY.getMessage());
@@ -134,23 +136,10 @@ public class FileController {
             log.error("文件删除失败{}", e.getMessage());
         }
         if (ossUrl.size() > 0) {
-            List<String> deletedFailList = OssUtils.deleteBatch(ossUrl, loadSetting);
-            //去掉删除失败的
-            Iterator<String> iterator = ossUrl.iterator();
-            while (iterator.hasNext()) {
-                String url = iterator.next();
-                for (String delUrl : deletedFailList) {
-                    if (url.contains(delUrl)) {
-                        //此时url删除失败
-                        iterator.remove();
-                    }
-                }
-            }
-            if (ossUrl.size() > 0) {
-                //批量删除oss
-                resourceService.remove(new QueryWrapper<ResourceEntity>().lambda()
-                        .in(ResourceEntity::getResourceUrl, ossUrl));
-            }
+            OssUtils.deleteBatch(ossUrl, loadSetting);
+            //批量删除oss
+            resourceService.remove(new QueryWrapper<ResourceEntity>().lambda()
+                    .in(ResourceEntity::getResourceUrl, ossUrl.stream().map(ResourceUrlUtil::ConvertToHDUrl).collect(Collectors.toList())));
         }
         if (localUrl.size() > 0) {
             //批量删除本地
@@ -164,14 +153,17 @@ public class FileController {
     @GetMapping("/getPolicy")
     public Result getPolicy() {
         //条件不满足无法访问
-        if (loadSetting.getUploadMode())  throw new MethodErrorException();
+        if (loadSetting.getUploadMode()) throw new MethodErrorException();
         return Result.ok().setData(OssUtils.generatePolicy(loadSetting));
     }
 
-    @GetMapping("/uploadSuccess")
-    public Result uploadSuccess(@RequestParam String filePath) {
-        ResourceEntity entity = new ResourceEntity("http://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + filePath, Local.MANAGER_LOCAL.get().getId(), EntityConstant.ALI_YUM_OSS_RESOURCE);
-        resourceService.save(entity);
+    @ApiOperation("oss上传成功回调")
+    @RecordLog(type = RecordEnum.UPLOAD, logMsg = "上传成功")
+    @PostMapping("/uploadSuccess")
+    public Result uploadSuccess(@RequestBody String[] filePath) {
+        List<ResourceEntity> urls = Arrays.stream(filePath).map(path -> new ResourceEntity("http://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + path,
+                Local.MANAGER_LOCAL.get().getId(), EntityConstant.ALI_YUM_OSS_RESOURCE)).collect(Collectors.toList());
+        resourceService.saveBatch(urls);
         return Result.ok();
     }
 

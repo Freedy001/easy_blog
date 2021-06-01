@@ -14,5 +14,10 @@
   "senderName": "easy blog",
   "setupTime": "",
   "sslPort": "465",
-  "webSiteDomainName": "https://www.example.com"
+  "webSiteDomainName": "https://www.example.com",
+  "uploadMode": "true",
+  "accessId": "",
+  "accessKey": "",
+  "endpoint": "",
+  "bucket": ""
 }

@@ -8,7 +8,7 @@ create table if not exists blog_category
     constraint blog_category_id_uindex
         unique (id)
 )
-comment '分类表';
+    comment '分类表';
 
 alter table blog_category
     add primary key (id);
@@ -35,7 +35,7 @@ create table if not exists blog_article
         unique (id),
     constraint blog_article_blog_category_id_fk
         foreign key (article_category_id) references blog_category (id)
-) AUTO_INCREMENT=1388865816372539446 comment '文章表';
+) AUTO_INCREMENT = 1388865816372539446 comment '文章表';
 
 create index blog_article_author_id_index
     on blog_article (author_id);
@@ -115,11 +115,11 @@ alter table blog_operation_log
 
 create table if not exists blog_resource
 (
-    id           bigint auto_increment,
-    resource_url varchar(100) null comment '图片url
-',
-    creator_id   int          null,
-    create_time  bigint       null comment '创建时间',
+    id            bigint auto_increment,
+    resource_url  varchar(100) null comment '图片url',
+    creator_id    int          null,
+    resource_type tinyint      not null comment '资源类型 0本地 1阿里云',
+    create_time   bigint       null comment '创建时间',
     constraint blog_resource_id_uindex
         unique (id),
     constraint blog_resource_resource_url_uindex

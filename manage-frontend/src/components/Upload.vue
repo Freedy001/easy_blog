@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import {ElMessage} from "element-plus";
-import {get, loadResource} from "../http";
+import {get, loadResource, post} from "../http";
 import {defineComponent, defineEmit, getCurrentInstance, reactive, ref} from "vue";
 import FullScreen from "./FullScreen.vue";
 import {copyProperties, UUID} from "../util/Common";
@@ -36,25 +36,24 @@ const mode: boolean = store.state.userInfo.uploadMode
 
 let policyData = reactive<any>({});
 let actionUrl = ref<string>('/backend/file/upload')
-let filePath: string;
-
+let filePath: string[] = [];
+let flag=0;
 async function beforeUpload(file: any) {
 	if (!mode) {
 		token.Authorization = null;
 		const response = await get('file////////getPolicy');
 		if (response.code == 200) {
-			console.log(file)
 			const data = response.data;
 			let fileName = UUID() + file.name;
 			policyData.policy = data.policy
 			policyData.signature = data.signature
 			policyData.ossaccessKeyId = data.accessid
-			filePath = "/"+data.dir + fileName
+			filePath.push("/" + data.dir + fileName)
+			flag=filePath.length;
 			policyData.key = data.dir + fileName
 			policyData.dir = data.dir
 			policyData.host = data.host
 			actionUrl.value = data.host
-			console.log(policyData)
 			return true
 		} else {
 			ElMessage({
@@ -69,12 +68,18 @@ async function beforeUpload(file: any) {
 		return true;
 	}
 }
+
 //文件上传后的回调
 async function success() {
 	if (!mode) {
-		const response = await get(`file/uploadSuccess?filePath=${filePath}`);
+		flag--;
+		if(flag>0){
+			return;
+		}
+		const response = await post(`file/uploadSuccess`,filePath);
 		if (response.code == 200) {
 			ElMessage("上传成功！")
+			filePath.length=0;
 		} else {
 			ElMessage.error(response.msg)
 		}
