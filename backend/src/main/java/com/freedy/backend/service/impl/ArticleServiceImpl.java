@@ -90,6 +90,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
                 if (item.getPublishTime() != null) {
                     date.setTime(Long.parseLong(item.getPublishTime()));
                     item.setPublishTime(DateUtils.formatTime(date));
+                    item.setUpdateTime(DateUtils.formatTime(date));
                 }
             });
             page.setList(articleList);

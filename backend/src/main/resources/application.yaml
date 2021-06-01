@@ -2,9 +2,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource      #当前数据源操作类型
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://@rm-uf6g6g2246i5v159x1o.mysql.rds.aliyuncs.com:3306/blog_db?serverTimezone=UTC
-    username: freedy
-    password: Kz99596589
+    url: jdbc:mysql://192.168.169.2:3306/blog_db?serverTimezone=UTC
+    username: root
+    password: 123456
   redis:
     host: 192.168.169.2
   rabbitmq:

@@ -450,7 +450,7 @@ async function initDate() {
 }
 
 
-:global(#box-card) {
+:deep(#box-card) {
 	width: 100%;
 }
 

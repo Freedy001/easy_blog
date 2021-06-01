@@ -54,6 +54,70 @@ easy blog是一个基于后端基于springboot 前端基于vue3的前后端分�
 
 ## 安装
 
+### 使用docker一键部署
+
+1. 安装docker 可以去官方看教程https://docs.docker.com/engine/install/centos/
+
+2. 安装docker-compose
+
+   1. 下载docker-compose
+
+      ```shell
+      sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      ```
+
+   2. 设置权限
+
+      ```shell
+      sudo chmod +x /usr/local/bin/docker-compose
+      ```
+   4. 检测是否安装成功
+      ```shell
+       docker-compose --version
+      ```
+      
+      如果出现版本信息代表安装完毕
+   
+3. 下载我发行的docker-compose.zip
+
+```shell
+wget https://github.com/Freedy001/easy_blog/releases/download/v1.0/docker-compose.zip.zip
+```
+
+3. 解压
+
+```shell
+unzip docker-compose.zip.zip
+```
+
+4. 在当前目录下输入docker-compose一键启动
+
+```shell
+docker-compose up -d
+```
+
+
+
+### 手动部署
+
+1. 配置环境 见下面的本地开发
+2. 和上面一样下载docker-compose.zip。里面有一个easyBlog-1.jar的jar包，和一个application.yaml的文件。
+3. 修改application.yaml配置，将相关服务的地址配成你所安装的服务的地址
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/blog_db?serverTimezone=UTC  #需要在mysql中创建blog_db数据库
+    username: root #改为自己设置的用户名
+......
+......
+#下面的配置也要修改
+#修改为自己配置的地址与端口 
+```
+4. 启动
+```shell
+java -jar easyBlog-1.jar
+```
+
 
 
 ## 本地开发
@@ -154,7 +218,11 @@ npm install
 npm run dev
 ```
 
+### 说明
 
+> 程序会在启动的时候自动检相关表是否存在,当检测到没有相关表时会自动创建表.
+>
+> 原理就是先查询表是否存在不存在就执行sql脚本创建表.
 
 ## 模块分层
 
