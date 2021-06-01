@@ -78,16 +78,4 @@ public class OssUtils {
         // 关闭OSSClient。
         ossClient.shutdown();
     }
-
-//    public static void main(String[] args) {
-//        LoadSetting setting = new LoadSetting();
-//        setting.setAccessId("LTAI5tPNz8Y79omHBifiLLsN");
-//        setting.setAccessKey("AmYGoUxjlxpzzoEKUvb9kZSKQsj0AP");
-//        setting.setEndpoint("oss-cn-shanghai.aliyuncs.com");
-//        setting.setBucket("freedy");
-//        Scanner scanner = new Scanner(System.in);
-//        while (true){
-//            System.out.println(deleteBatch(Collections.singletonList(scanner.nextLine()),setting));
-//        }
-//    }
 }
