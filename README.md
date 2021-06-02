@@ -234,7 +234,7 @@ npm run dev
 ### 说明
 
 > 程序会在启动的时候自动检相关表是否存在,当检测到没有相关表时会自动创建表.
->
+> 
 > 原理就是先查询表是否存在不存在就执行sql脚本创建表.
 
 ## 模块分层
@@ -312,14 +312,14 @@ dbblog
 <br>
 都是一些统计信息，也可以发表速记（相当于qq的个性签名）。
 
-![image](E:\MyProjects\easy_blog\README.assets\3dd7bb4e-710e-4860-8f98-7438e7899bf5dsafa.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/3dd7bb4e-710e-4860-8f98-7438e7899bf5dsafa.png)
 
 ### 写文章
 <br>
 文章编辑器为markdown。它支持两种模式，一种是markdown一种所见即所得（右下角）
 
 如果一次没有写完可以保存到草稿。也可直接发布的哈，只要你不怕半成品被别人看到。
-![image](E:\MyProjects\easy_blog\README.assets\6d69da24-774f-48a5-9c70-babdd43013f1verSDVD.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/6d69da24-774f-48a5-9c70-babdd43013f1verSDVD.png)
 
 ### 文章列表
 在这可以管理文章，可以点击左边的箭头查看更加详细的信息。
@@ -327,13 +327,13 @@ dbblog
 > 这里的文章列表默认只能看到自己的文章，如有拥有能管理他人文章的权限，则可以在这看到他人的文章 。
 > 权限功能可以在用户->用户管理那里设置
 
-![image](E:\MyProjects\easy_blog\README.assets\c6e89795-bf85-4a74-8bad-0a983ed7d49cF23TE3.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/c6e89795-bf85-4a74-8bad-0a983ed7d49cF23TE3.png)
 
 ### 评论列表
 在这可以看到和管理自己发布文章下面的评论。也可以点左边的箭头看到详细信息。
 > 这里和上面的文章列表类似，默认只能看到自己的。
 
-![image](E:\MyProjects\easy_blog\README.assets\2c82526c-3926-4ec7-af04-87a60201593dK56J46.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/2c82526c-3926-4ec7-af04-87a60201593dK56J46.png)
 
 ### 附件
 
@@ -342,7 +342,7 @@ dbblog
 也可以删除图片。但默认只能删除自己上传的，唯一能删除他人的就只有默认管理员（也就是系统创建的账号）。
 
 如果你删除了被文章引用的图片，会导致文章中的图片失效。请谨慎删除
-![image](E:\MyProjects\easy_blog\README.assets\ae3ca9c3-2be1-424f-a2c4-716192bc07deG23.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/ae3ca9c3-2be1-424f-a2c4-716192bc07deG23.png)
 
 
 ### 用户
@@ -350,7 +350,7 @@ dbblog
 
 如果你写的文章比较多，建议不要更换昵称。因为更换后会导致在elasticSearch里面文章全部失效，然后重新上架，这样可能会导致服务器卡顿。
 
-![image](E:\MyProjects\easy_blog\README.assets\992b0491-2341-42db-b7c5-e06c7cf03dd81WASA.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/992b0491-2341-42db-b7c5-e06c7cf03dd81WASA.png)
 
 
 ### 设置
@@ -359,7 +359,7 @@ dbblog
 - 可以修改首页封面、首页文章、logo等等。
 - 可以配置smtp与oss
 - 关于页面的修改也集成到这了。
-![image](E:\MyProjects\easy_blog\README.assets\eb5aab0d-2015-4a6f-b8b9-2bd58b562fe7G43.png)
+![image](http://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-01/eb5aab0d-2015-4a6f-b8b9-2bd58b562fe7G43.png)
 
 ## 说明
 
@@ -367,7 +367,7 @@ dbblog
    ``` shell
     账号:root
     密码:12345678
-   ```
+    ```
 
 2. 如果发布文章的状态一直显示未发布,可能是第一次初始化的时候es的索引没有建立成功，重启一下项目就行了
 
