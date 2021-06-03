@@ -2,7 +2,7 @@
 
 ## 介绍
 
-easy blog是一个后端基于springboot 前端基于vue3的前后端分离博客系统。它可以实现多人在线编辑发表博客。具有写文章，写笔记，写速记，角色的权限管理等待功能。
+easy blog是一个后端基于springboot 前端基于vue3的前后端分离博客系统。它可以实现多人在线编辑发表博客，具有写文章，写笔记，写速记，角色的权限管理等待功能。
 
 提供前台页面，后台页面与后台服务的全套代码。
 
@@ -206,7 +206,7 @@ docker exec -it rabbitmq bash
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 ```
 
-最后和上面一样重启ok了。
+最后和上面一样,重启就ok了。
 
 ``` shell
 docker restart rabbitmq
@@ -235,7 +235,7 @@ npm run dev
 
 > 程序会在启动的时候自动检相关表是否存在,当检测到没有相关表时会自动创建表.
 > 
-> 原理就是先查询表是否存在不存在就执行sql脚本创建表.
+> 原理就是先查询表是否存在，不存在就执行sql脚本创建表.
 
 ## 模块分层
 
