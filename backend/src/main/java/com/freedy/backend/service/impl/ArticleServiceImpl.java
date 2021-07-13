@@ -64,11 +64,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     private final VisitorService visitorService;
     private final RestHighLevelClient highLevelClient;
     private final StringRedisTemplate redisTemplate;
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
-
-    public ArticleServiceImpl(RabbitTemplate rabbitTemplate, ArticleTagRelationService relationService, TagService tagService, CategoryService categoryService, ThreadPoolExecutor executor, VisitorService visitorService, RestHighLevelClient highLevelClient, StringRedisTemplate redisTemplate) {
+    public ArticleServiceImpl(RabbitTemplate rabbitTemplate,
+                              ArticleTagRelationService relationService,
+                              TagService tagService,
+                              CategoryService categoryService,
+                              ThreadPoolExecutor executor,
+                              VisitorService visitorService,
+                              RestHighLevelClient highLevelClient,
+                              StringRedisTemplate redisTemplate, CommentService commentService) {
         this.rabbitTemplate = rabbitTemplate;
         this.relationService = relationService;
         this.tagService = tagService;
@@ -77,6 +82,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
         this.visitorService = visitorService;
         this.highLevelClient = highLevelClient;
         this.redisTemplate = redisTemplate;
+        this.commentService = commentService;
     }
 
     private PageUtils queryPage(Map<String, Object> params) throws ExecutionException, InterruptedException {
@@ -154,7 +160,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
             if (StringUtils.hasText(redisLike)) {
                 vo.setLikeNum(vo.getLikeNum() + Integer.parseInt(redisLike));
             }
-            if (vo.getArticlePoster() == null) vo.setArticlePoster("/resource/pexels-johannes-plenio-3421812.jpg");
+            if (vo.getArticlePoster() == null) {
+                vo.setArticlePoster("/resource/pexels-johannes-plenio-3421812.jpg");
+            }else {
+                vo.setArticlePoster(ResourceUrlUtil.ConvertToSDUrl(vo.getArticlePoster(),680));
+            }
             infoVoList.add(vo);
         }
         return new PageUtils(infoVoList, Math.toIntExact(hits.getTotalHits().value), limit, page);

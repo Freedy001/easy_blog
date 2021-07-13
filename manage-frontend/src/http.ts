@@ -3,8 +3,8 @@ import {ElMessage} from "element-plus";
 import router from "./router";
 import {noPermission} from "./util/Common";
 
-const baseURL = import.meta.env.DEV ? "http://192.168.1.105:1000/backend" : "/backend"
-const ResourceURL = import.meta.env.DEV ? "http://192.168.1.105:1000" : ""
+const baseURL = import.meta.env.DEV ? "http://localhost:1000/backend" : "/backend"
+const ResourceURL = import.meta.env.DEV ? "http://localhost:1000" : ""
 
 export interface ILogin {
     username: string,

@@ -46,6 +46,7 @@ public class ResourceUrlUtil {
         return url;
     }
 
+
     /**
      * 转化高清图片到低清图片
      * 如果本来就是低清或者url不符合规定就直接返回原字符串
@@ -58,20 +59,28 @@ public class ResourceUrlUtil {
      * https://freedy.oss-cn-shanghai.aliyuncs.com/2021-05-31/413d8b75-287a-42a5-855e-62af07ae0c24nature-3824498.jpg?x-oss-process=image/resize,w_300
      */
     public static String ConvertToSDUrl(String url) {
+        return ConvertToSDUrl(url,300);
+    }
+
+    /**
+     * 如果时Oss类型则可以指定缩放的宽度
+     * 如果不是则第二个参数无效
+     */
+    public static String ConvertToSDUrl(String url,int picWidth) {
         if (url==null) return null;
         if (url.startsWith("http")) {
             String[] split = url.split("/", 4);
-            url = split[0] + "/" + split[1] + "/" + split[2] + SDConverter("/" + split[3]);
+            url = split[0] + "/" + split[1] + "/" + split[2] + SDConverter("/" + split[3],picWidth);
         } else {
-            url = SDConverter(url);
+            url = SDConverter(url,picWidth);
         }
         return url;
     }
 
-    private static String SDConverter(String url) {
+    private static String SDConverter(String url,int picWidth) {
         if (url.split("/")[1].matches("\\d{4}-\\d{2}-\\d{2}")) {
             if (!url.contains("?x-oss-process")) {
-                return url + "?x-oss-process=image/resize,w_300";
+                return url + "?x-oss-process=image/resize,w_"+picWidth;
             }
         }
         if (url.startsWith("/image/")) {
@@ -83,6 +92,7 @@ public class ResourceUrlUtil {
         }
         return url;
     }
+
 
     /**
      * 将下面一行转化为下下行

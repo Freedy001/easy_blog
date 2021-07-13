@@ -157,7 +157,7 @@ public class FileController {
         Map<String, String> generatePolicy = OssUtils.generatePolicy(loadSetting);
         String name = generatePolicy.get("dir") + UUID.randomUUID() + fileName;
         generatePolicy.put("fileName", name);
-        String fullPath="http://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + "/" + name;
+        String fullPath= "https://" + loadSetting.getBucket() + "." + loadSetting.getEndpoint() + "/" + name;
         generatePolicy.put("fullPath", fullPath);
         ResourceEntity entity = new ResourceEntity(
                 fullPath,
@@ -167,7 +167,4 @@ public class FileController {
         resourceService.save(entity);
         return Result.ok().setData(generatePolicy);
     }
-
-
-
 }

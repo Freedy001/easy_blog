@@ -1,11 +1,9 @@
 package com.freedy.backend.apiFront;
 
+import com.freedy.backend.constant.CacheConstant;
 import com.freedy.backend.constant.RedisConstant;
 import com.freedy.backend.entity.ArticleEntity;
-import com.freedy.backend.utils.DateUtils;
-import com.freedy.backend.utils.MarkDown;
-import com.freedy.backend.utils.PageUtils;
-import com.freedy.backend.utils.Result;
+import com.freedy.backend.utils.*;
 import com.freedy.backend.exception.NoArticleException;
 import com.freedy.backend.middleWare.es.dao.ArticleRepository;
 import com.freedy.backend.middleWare.es.model.ArticleEsModel;
@@ -15,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -91,7 +90,7 @@ public class FrontArticleController {
         //解析markdown
         String html = MarkDown.render(esModel.getContent());
         esModel.setContent(html);
-        //同步点赞数
+        //同步访客数
         String redisVisit = redisTemplate.opsForValue().get(RedisConstant.ARTICLE_VISIT_HEADER + esModel.getId());
         if (StringUtils.hasText(redisVisit)) {
             esModel.setVisitNum(esModel.getVisitNum() + Integer.parseInt(redisVisit));
@@ -101,6 +100,8 @@ public class FrontArticleController {
         if (StringUtils.hasText(redisLike)) {
             esModel.setLikeNum(esModel.getLikeNum() + Integer.parseInt(redisLike));
         }
+        //设置默认图片
+        if (esModel.getArticlePoster() == null) esModel.setArticlePoster("/resource/pexels-johannes-plenio-3421812.jpg");
         HashMap<Object, Object> model = Arrays.stream(BeanUtils.getPropertyDescriptors(esModel.getClass()))
                 .filter(itm -> !"class".equals(itm.getName()))
                 .collect(HashMap::new,
@@ -118,5 +119,9 @@ public class FrontArticleController {
         return Result.ok();
     }
 
-
+    @CacheEvict(cacheNames = CacheConstant.ARTICLE_CACHE_NAME,allEntries = true)
+    @GetMapping("/refreshTheArticleAndClearTheCache")
+    public Result refresh(){
+        return Result.ok();
+    }
 }
