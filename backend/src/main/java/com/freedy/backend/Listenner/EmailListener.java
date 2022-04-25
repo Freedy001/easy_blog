@@ -16,6 +16,7 @@ import com.freedy.backend.entity.CommentEntity;
 import com.freedy.backend.service.CommentService;
 import com.freedy.backend.utils.EmailTemplate;
 import com.rabbitmq.client.Channel;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @RabbitListener(queues = RabbitConstant.EMAIL_REPLAY_QUEUE_NAME)
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 public class EmailListener {
     @Autowired
     private EmailSender sender;
@@ -57,6 +59,7 @@ public class EmailListener {
 
     @Autowired
     private LoadSetting setting;
+
 
     @RabbitHandler
     public void commentEmailSender(CommentEntity commentEntity, Message message, Channel channel) throws IOException {
@@ -157,4 +160,6 @@ public class EmailListener {
             ));
         }
     }
+
+
 }

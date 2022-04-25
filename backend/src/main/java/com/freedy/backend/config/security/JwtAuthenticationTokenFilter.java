@@ -88,16 +88,16 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             UserTokenInfo tokenInfo = JSON.parseObject(userToken, UserTokenInfo.class);
             if (tokenInfo != null && jwtTokenUtil.validateToken(authToken, tokenInfo)) {
                 //如username不为空，并且能够在数据库中查到
-                /**
-                 * UsernamePasswordAuthenticationToken继承
-                 * AbstractAuthenticationToken实现Authentication
-                 * 所以当在页面中输入用户名和密码之后首先会进入到
-                 * UsernamePasswordAuthenticationToken验证(Authentication)，
-                 * 然后生成的Authentication会被交由AuthenticationManager来进行管理
-                 * 而AuthenticationManager管理一系列的AuthenticationProvider，
-                 * 而每一个Provider都会通UserDetailsService和UserDetail来返回一个
-                 * 以UsernamePasswordAuthenticationToken实现的带用户名和密码以及权限的
-                 * Authentication
+                /*
+                  UsernamePasswordAuthenticationToken继承
+                  AbstractAuthenticationToken实现Authentication
+                  所以当在页面中输入用户名和密码之后首先会进入到
+                  UsernamePasswordAuthenticationToken验证(Authentication)，
+                  然后生成的Authentication会被交由AuthenticationManager来进行管理
+                  而AuthenticationManager管理一系列的AuthenticationProvider，
+                  而每一个Provider都会通UserDetailsService和UserDetail来返回一个
+                  以UsernamePasswordAuthenticationToken实现的带用户名和密码以及权限的
+                  Authentication
                  */
                 ManagerEntity manager = tokenInfo.getManager();
                 String permission = tokenInfo.getPermission();

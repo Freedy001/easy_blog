@@ -18,7 +18,7 @@ public @interface RecordLog {
 
     /**
      * 当给出该值时，日志记录会关闭AutoGuess功能
-     * 并使用你给出的值作为操作日志的类容
+     * 并使用你给出的值作为操作日志的内容
      */
     String logMsg() default "";
 

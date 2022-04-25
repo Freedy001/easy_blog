@@ -1,18 +1,21 @@
 package com.freedy.backend.utils;
 
-import com.freedy.backend.SysSetting.LoadSetting;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.jdbc.ScriptRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
-import java.net.URL;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
 
 
 /**
@@ -22,7 +25,7 @@ import java.sql.*;
  */
 @Component
 @Slf4j
-public class RunSqlScript {
+public class RunSqlScript{
     @Value("${spring.datasource.url}")
     private String url;
     @Value("${spring.datasource.username}")

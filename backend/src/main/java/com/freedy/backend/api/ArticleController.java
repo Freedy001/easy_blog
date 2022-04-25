@@ -30,7 +30,6 @@ import javax.validation.constraints.NotNull;
 
 /**
  * 文章表
- *
  * @author Freedy
  * @email 985948228@qq.com
  * @date 2021-04-25 14:00:46

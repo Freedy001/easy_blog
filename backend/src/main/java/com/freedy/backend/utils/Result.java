@@ -18,11 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * 返回数据
- *
- * @author Mark sunlightcs@gmail.com
- */
+
 public class Result extends HashMap<String, Object> {
 	private static final long serialVersionUID = 1L;
 

@@ -1,13 +1,17 @@
 package com.freedy.backend;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.freedy.backend.api.ArticleController;
 import com.freedy.backend.dao.ArticleDao;
 import com.freedy.backend.dao.ManagerDao;
 import com.freedy.backend.dao.TagDao;
 import com.freedy.backend.entity.ManagerEntity;
+import com.freedy.backend.utils.Result;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Freedy
@@ -16,14 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class DaoTest {
     @Autowired
-    private TagDao tagDao;
-    @Autowired
-    private ArticleDao articleDao;
-    @Autowired
-    private ManagerDao managerDao;
+    private ArticleController articleController;
+
     @Test
-    public void test(){
-        ManagerEntity userEntity = managerDao.selectOne(new QueryWrapper<ManagerEntity>().eq("username", "username"));
-        System.out.println(userEntity);
+    public void test() throws ExecutionException, InterruptedException {
+        Result list = articleController.info(1L);
+        System.out.println(list);
     }
 }

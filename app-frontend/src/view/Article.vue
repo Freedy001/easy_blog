@@ -201,7 +201,7 @@ function clearStyle() {
     }
 }
 
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((to: any, from: any, next: any) => {
     setTimeout(() => {
         clearStyle()
     }, 300)

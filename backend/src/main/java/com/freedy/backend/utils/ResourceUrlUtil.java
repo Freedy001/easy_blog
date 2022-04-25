@@ -9,7 +9,6 @@ import java.util.Scanner;
  * @date 2021/5/17 11:03
  */
 public class ResourceUrlUtil {
-
     /**
      * 转化低清图片到高清图片
      * 如果本来就是高清或者url不符合规定就直接返回原字符串
@@ -105,15 +104,5 @@ public class ResourceUrlUtil {
         return split[3] + "/" + split[4];
     }
 
-//    public static void main(String[] args) {
-//        while (true) {
-//            try {
-//                Scanner scanner = new Scanner(System.in);
-//                System.out.println(ConvertToSDUrl(scanner.nextLine()));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
 }

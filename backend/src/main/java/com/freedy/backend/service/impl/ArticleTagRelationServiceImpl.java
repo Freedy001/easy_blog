@@ -22,9 +22,8 @@ public class ArticleTagRelationServiceImpl extends ServiceImpl<ArticleTagRelatio
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<ArticleTagRelationEntity> page = this.page(
                 new Query<ArticleTagRelationEntity>().getPage(params),
-                new QueryWrapper<ArticleTagRelationEntity>()
+                new QueryWrapper<>()
         );
-
         return new PageUtils(page);
     }
 

@@ -70,6 +70,7 @@ public class OssUtils {
         String bucket = loadSetting.getBucket(); // 请填写您的 bucketname 。
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessId, accessKey);
+        //https://freedy.oss-cn-shanghai.aliyuncs.com/2021-06-16/6dc2215d-6713-44d6-92df-9484baefcb13.png?x-oss-process=image/resize,w_680
         // 删除文件。key等同于ObjectName，表示删除OSS文件时需要指定包含文件后缀在内的完整路径，例如abc/efg/123.jpg。
         List<String> keys = urls.stream().map(ResourceUrlUtil::getOssKeyByUrl).collect(Collectors.toList());
         DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucket).withKeys(keys);

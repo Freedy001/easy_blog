@@ -31,9 +31,6 @@ import com.freedy.backend.service.RolePermissionService;
 @RequestMapping("backend/rolePermission")
 public class RolePermissionController {
     @Autowired
-    private RolePermissionService rolePermissionService;
-
-    @Autowired
     private PermissionItemProperties permissionItem;
 
     @ApiOperation("返回权限列表")
