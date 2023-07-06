@@ -23,10 +23,9 @@ jobs:
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-    - run: cd ./backend
     - name: 🔨 Build with Maven
-      run: mvn -B package --file pom.xml
-    - run: mkdir staging && cp target/*.jar staging
+      run: mvn -B package --file backend/pom.xml
+    - run: mkdir staging && cp backend/target/*.jar staging
     
     # 设置 jobs Maven pom 版本环境变量
     - name: Set Release version env variable
